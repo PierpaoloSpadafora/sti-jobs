@@ -69,7 +69,7 @@ export class LoginComponent implements OnInit {
     this.userService.createUser(userDTO).subscribe({
       next: (createdUser) => {
         localStorage.setItem('user-email', email);
-        this.router.navigate(['/scheduler']);
+        this.router.navigate(['/dashboard']);
         this.isLoading = false;
       },
       error: (error) => {
