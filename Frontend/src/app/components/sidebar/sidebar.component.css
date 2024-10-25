@@ -1,11 +1,14 @@
 /* sidebar.component.css */
 .sidebar-wrapper {
-    width: 220px; /* Riduci la larghezza della sidebar */
-    height: 100vh;
     position: fixed;
+    top: 60px; /* Altezza dell'header */
     left: 0;
-    background: #fff;
-    box-shadow: 0 0 15px rgba(0,0,0,.1);
+    width: 280px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    z-index: 1000;
+    padding: 1rem;
   }
   
   .sidebar-nav {

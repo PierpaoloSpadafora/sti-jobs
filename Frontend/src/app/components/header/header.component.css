@@ -10,6 +10,15 @@
     align-items: center;
   }
   
+  .it-header-slim-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1100; /* Maggiore dello z-index della sidebar */
+    height: 60px;
+  }
+
   .it-header-slim-wrapper-content {
     display: flex;
     justify-content: space-between;
