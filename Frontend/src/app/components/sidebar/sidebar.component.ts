@@ -17,7 +17,7 @@ export class SidebarComponent {
       route: '/dashboard'
     },
     {
-      title: 'Configurazione',
+      title: 'Configuration',
       icon: 'it-settings',
       route: '/configuration'
     }
