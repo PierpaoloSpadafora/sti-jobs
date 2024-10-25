@@ -2,11 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UserControllerService, UserDTO } from '../../generated-api'; 
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule,
+    HttpClientModule
+  ],
+  providers: [UserControllerService], 
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -15,9 +22,11 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   error = '';
 
+
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private userService: UserControllerService
   ) {}
 
   ngOnInit(): void {
@@ -31,17 +40,43 @@ export class LoginComponent implements OnInit {
       this.isLoading = true;
       this.error = '';
       
-      // Simula chiamata API
-      setTimeout(() => {
-        const email = this.loginForm.get('email')?.value;
-        if (email) {
+      const email = this.loginForm.get('email')?.value;
+      
+      this.userService.getUserByEmail(email).subscribe({
+        next: (user) => {
           localStorage.setItem('user-email', email);
           this.router.navigate(['/scheduler']);
-        } else {
-          this.error = 'Email non autorizzata';
+          this.isLoading = false;
+        },
+        error: (error) => {
+          if (error.status === 404) {
+            this.createUser(email);
+          } else {
+            this.error = 'Si è verificato un errore durante il login';
+            this.isLoading = false;
+            console.error('Errore durante il login:', error); 
+          }
         }
-        this.isLoading = false;
-      }, 1000);
+      });
     }
+  }
+
+  private createUser(email: string): void {
+    const userDTO: UserDTO = {
+      email: email
+    };
+
+    this.userService.createUser(userDTO).subscribe({
+      next: (createdUser) => {
+        localStorage.setItem('user-email', email);
+        this.router.navigate(['/dashboard']);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.error = 'Si è verificato un errore durante la creazione dell\'utente';
+        this.isLoading = false;
+        console.error('Error creating user:', error);
+      }
+    });
   }
 }
