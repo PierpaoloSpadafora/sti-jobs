@@ -1,0 +1,38 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo-container">
+      <img src="assets/sti-jobs-logo.png" alt="STI JOBS" class="logo">
+    </div>
+    
+    <h2 class="login-title">Accedi a STI JOBS</h2>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <label for="email" class="form-label">Email aziendale</label>
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-text">
+            <svg class="icon"><use href="/bootstrap-italia/dist/svg/sprites.svg#it-mail"></use></svg>
+          </span>
+          <input 
+            type="email" 
+            class="form-control"
+            id="email"
+            formControlName="email"
+            placeholder="nome@azienda.com"
+            [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
+        </div>
+        <div class="invalid-feedback" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          Inserisci un'email valida
+        </div>
+      </div>
+      
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="!loginForm.valid || isLoading">
+        <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+        {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
+      </button>
+    </form>
+  </div>
+</div>
