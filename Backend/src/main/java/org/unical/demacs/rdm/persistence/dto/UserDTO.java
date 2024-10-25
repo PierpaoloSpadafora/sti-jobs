@@ -9,7 +9,7 @@ import lombok.ToString;
 @Data
 @ToString
 public class UserDTO {
-    @NotBlank(message = "The ID cannot be empty")
+    //@NotBlank(message = "The ID cannot be empty")
     private String id;
 
     @NotBlank(message = "Email cannot be empty")
