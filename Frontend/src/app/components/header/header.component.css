@@ -1,0 +1,126 @@
+.it-header-wrapper {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #2bb5c9 100%);
+  }
+  
+  .it-header-slim-wrapper {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #2bb5c9 100%);
+    color: white;
+    height: 80px; 
+    display: flex;
+    align-items: center;
+  }
+  
+  .it-header-slim-wrapper-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 1.5rem;
+  }
+  
+  .navbar-brand-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .logo-img {
+    height: 90px; 
+    width: auto;
+  }
+  
+  .brand-text {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .it-header-slim-right-zone {
+    display: flex;
+    align-items: center;
+  }
+  
+  .user-email {
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    color: white;
+  }
+  
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+  }
+  
+  .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .dropdown-menu {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    min-width: 150px;
+  }
+  
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    color: var(--bs-primary);
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+  
+  .list-item:hover {
+    background-color: var(--bs-primary-subtle);
+    border-radius: 4px;
+  }
+  
+  .list-item-title {
+    display: flex;
+    align-items: center;
+  }
+  
+  .container-fluid {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+
+.slim-logo {
+  height: 50px; 
+  width: auto;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 1200;
+}
+
+.header-slim-right-zone .nav-link {
+  color: white;
+  font-size: 1.1rem; 
+}
+
+.dropdown-item {
+  font-size: 1rem;
+}
