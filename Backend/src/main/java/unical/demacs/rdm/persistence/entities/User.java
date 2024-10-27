@@ -9,7 +9,7 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "users") // Changed from "user" as it might be a reserved keyword in some databases
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
