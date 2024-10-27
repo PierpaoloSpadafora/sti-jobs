@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "Schedules")
+@Table(name = "schedules")
 @Data
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long scheduleId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
@@ -23,5 +23,6 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
+    @Column
     private LocalDateTime endTime;
 }

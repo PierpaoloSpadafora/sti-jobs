@@ -9,7 +9,9 @@ public interface IJobService {
     Job createJob(Job job);
     Optional<Job> getJobById(Long id);
     List<Job> getAllJobs();
-    List<Job> getJobsByAssignee(Long assigneeId);
+
+    List<Job> getJobsByAssignee(String assigneeId);
+
     List<Job> getJobsByMachine(Long machineId);
     Job updateJob(Job job);
     void deleteJob(Long id);

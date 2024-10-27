@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "JobCharacteristics")
+@Table(name = "job-characteristics")
 @Data
 public class JobCharacteristic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long characteristicId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "job_id")
@@ -18,5 +18,6 @@ public class JobCharacteristic {
     @Column(nullable = false)
     private String characteristicName;
 
+    @Column
     private String characteristicValue;
 }

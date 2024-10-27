@@ -49,7 +49,7 @@ public class JobController {
 
     @GetMapping("/assignee/{assigneeId}")
     @Operation(summary = "Get jobs by assignee")
-    public ResponseEntity<List<JobDTO>> getJobsByAssignee(@PathVariable Long assigneeId) {
+    public ResponseEntity<List<JobDTO>> getJobsByAssignee(@PathVariable String assigneeId) {
         List<JobDTO> jobs = jobService.getJobsByAssignee(assigneeId).stream()
                 .map(job -> modelMapper.map(job, JobDTO.class))
                 .collect(Collectors.toList());

@@ -15,7 +15,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class JobServiceImpl implements IJobService {
     private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
-    private final JobRepository jobRepository;
+    private  JobRepository jobRepository;
 
     @Override
     public Job createJob(Job job) {
@@ -36,7 +36,7 @@ public class JobServiceImpl implements IJobService {
     }
 
     @Override
-    public List<Job> getJobsByAssignee(Long assigneeId) {
+    public List<Job> getJobsByAssignee(String assigneeId) {
         logger.info("Fetching jobs for assignee: {}", assigneeId);
         return jobRepository.findByAssigneeId(assigneeId);
     }
@@ -49,7 +49,7 @@ public class JobServiceImpl implements IJobService {
 
     @Override
     public Job updateJob(Job job) {
-        logger.info("Updating job with id: {}", job.getJobId());
+        logger.info("Updating job with id: {}", job.getId());
         return jobRepository.save(job);
     }
 
