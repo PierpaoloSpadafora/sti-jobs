@@ -9,7 +9,7 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "users") // Changed from "user" as it might be a reserved keyword in some databases
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,8 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "L'e-mail non può essere vuota")
+    @Email(message = "L'e-mail deve essere valida")
     @Column(nullable = false, unique = true)
     private String email;
 
