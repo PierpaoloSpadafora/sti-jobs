@@ -1,8 +1,11 @@
 package unical.demacs.rdm.persistence.entities;
 
-import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.Data;
+import unical.demacs.rdm.persistence.enums.JobStatus;
+import unical.demacs.rdm.persistence.enums.ScheduleStatus;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "schedules")
@@ -20,9 +23,33 @@ public class Schedule {
     @JoinColumn(name = "machine_id", nullable = false)
     private Machine machine;
 
+    @Column
+    private LocalDateTime dueDate;
+
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ScheduleStatus status;
+
+    @PrePersist
+    protected void onCreate() {
+        status = ScheduleStatus.SCHEDULED;
+        createdAt = LocalDateTime.now();
+    }
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column
+    private LocalDateTime updatedAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }

@@ -67,17 +67,4 @@ public class ExceptionsHandler {
                 Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
     }
 
-
-    @ExceptionHandler(JobCharacteristicException.class)
-    private ResponseEntity<?> handleJobCharacteristicExceptionException(JobCharacteristicException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(JobCharacteristicNotFoundException.class)
-    private ResponseEntity<?> handleJobCharacteristicNotFoundExceptionException(JobCharacteristicNotFoundException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
-    }
-
 }

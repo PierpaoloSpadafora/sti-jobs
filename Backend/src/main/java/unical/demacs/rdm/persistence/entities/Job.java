@@ -2,10 +2,13 @@ package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.Duration;
 import lombok.Data;
+import unical.demacs.rdm.persistence.enums.JobPriority;
+import unical.demacs.rdm.persistence.enums.JobStatus;
 
 @Entity
-@Table(name = "Jobs")
+@Table(name = "jobs")
 @Data
 public class Job {
     @Id
@@ -18,26 +21,23 @@ public class Job {
     @Column
     private String description;
 
-    @Column
-    private String status;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private JobStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "assignee_id")
+    @JoinColumn(name = "user_id")
     private User assignee;
 
-    @Column
-    private String priority;
-
-    @Column
-    private LocalDateTime dueDate;
-
-    @ManyToOne
-    @JoinColumn(name = "machine_id")
-    private Machine machine;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private JobPriority priority;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Duration duration;
 
-    @Column
-    private LocalDateTime updatedAt;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "machine_type_id", nullable = false)
+    private MachineType requiredMachineType;
+
 }

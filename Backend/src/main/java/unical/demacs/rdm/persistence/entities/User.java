@@ -20,8 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "L'e-mail non può essere vuota")
+    @Email(message = "L'e-mail deve essere valida")
     @Column(nullable = false, unique = true)
     private String email;
 
