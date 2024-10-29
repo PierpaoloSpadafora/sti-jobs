@@ -1,0 +1,25 @@
+version: '3.8'
+name: sti-jobs
+
+services:
+  backend:
+    build:
+      context: ./Backend
+    container_name: backend
+    environment:
+      SERVER_PORT_HTTP: ${SERVER_PORT_HTTP}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "${SERVER_PORT_HTTP}:${SERVER_PORT_HTTP}"
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "${SERVER_PORT_FRONTEND}:${SERVER_PORT_FRONTEND}"
+
