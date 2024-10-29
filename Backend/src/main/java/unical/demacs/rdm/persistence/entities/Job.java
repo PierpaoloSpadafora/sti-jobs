@@ -3,12 +3,15 @@ package unical.demacs.rdm.persistence.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.Duration;
+
+import lombok.Builder;
 import lombok.Data;
 import unical.demacs.rdm.persistence.enums.JobPriority;
 import unical.demacs.rdm.persistence.enums.JobStatus;
 
 @Entity
 @Table(name = "jobs")
+@Builder(builderMethodName = "buildJob")
 @Data
 public class Job {
     @Id
