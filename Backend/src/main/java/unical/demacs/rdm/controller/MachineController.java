@@ -26,6 +26,36 @@ public class MachineController {
     private final MachineServiceImpl machineServiceImpl;
     private final ModelMapper modelMapper;
 
+    @Operation(summary = "Create a new machine", description = "Create a new machine with specified details.",
+            tags = {"machine-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Machine created successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PostMapping
+    public ResponseEntity<MachineDTO> createMachine(@RequestBody MachineDTO machineDTO) {
+        MachineDTO createdMachine = modelMapper.map(machineServiceImpl.createMachine(machineDTO), MachineDTO.class);
+        return ResponseEntity.status(201).body(createdMachine);
+    }
+
+    @Operation(summary = "Update a machine", description = "Update a machine's details by ID.",
+            tags = {"machine-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Machine updated successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Machine not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @RequestBody MachineDTO machineDTO) {
+        MachineDTO updatedMachine = modelMapper.map(machineServiceImpl.updateMachine(id, machineDTO), MachineDTO.class);
+        return ResponseEntity.ok(updatedMachine);
+    }
+
     @Operation(summary = "Get machine by ID", description = "Retrieve a machine using its ID.",
             tags = {"machine-controller"})
     @ApiResponses({
@@ -56,36 +86,6 @@ public class MachineController {
                 .map(machine -> modelMapper.map(machine, MachineDTO.class))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(machines);
-    }
-
-    @Operation(summary = "Create a new machine", description = "Create a new machine with specified details.",
-            tags = {"machine-controller"})
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Machine created successfully.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
-    })
-    @PostMapping
-    public ResponseEntity<MachineDTO> createMachine(@RequestBody MachineDTO machineDTO) {
-        MachineDTO createdMachine = modelMapper.map(machineServiceImpl.createMachine(machineDTO), MachineDTO.class);
-        return ResponseEntity.status(201).body(createdMachine);
-    }
-
-    @Operation(summary = "Update a machine", description = "Update a machine's details by ID.",
-            tags = {"machine-controller"})
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Machine updated successfully.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Machine not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
-    })
-    @PutMapping(path = "/{id}")
-    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @RequestBody MachineDTO machineDTO) {
-        MachineDTO updatedMachine = modelMapper.map(machineServiceImpl.updateMachine(id, machineDTO), MachineDTO.class);
-        return ResponseEntity.ok(updatedMachine);
     }
 
     @Operation(summary = "Delete a machine", description = "Delete a machine by ID.",

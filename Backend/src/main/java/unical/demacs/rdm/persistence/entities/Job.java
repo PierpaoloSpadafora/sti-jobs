@@ -1,18 +1,19 @@
 package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.time.Duration;
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.JobPriority;
 import unical.demacs.rdm.persistence.enums.JobStatus;
 
 @Entity
 @Table(name = "jobs")
-@Builder(builderMethodName = "buildJob")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(builderMethodName = "buildJob")
 public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +38,9 @@ public class Job {
     private JobPriority priority;
 
     @Column(nullable = false)
-    private Duration duration;
+    private long duration;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "machine_type_id", nullable = false)
     private MachineType requiredMachineType;
-
 }

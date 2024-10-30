@@ -38,7 +38,6 @@ public class MachineTypeController {
         return ResponseEntity.ok(machineTypeServiceImpl.createMachineType(machineTypeDTO));
     }
 
-
     @Operation(summary = "Get machine type by id", description = "Retrieve a machine type using its id.",
             tags = {"machine-type-controller"})
     @ApiResponses({
@@ -55,7 +54,6 @@ public class MachineTypeController {
                 .orElseThrow(() -> new MachineException("Machine type not found")));
     }
 
-
     @Operation(summary = "Get all machine types", description = "Retrieve all machine types.",
             tags = {"machine-type-controller"})
     @ApiResponses({
@@ -69,7 +67,6 @@ public class MachineTypeController {
         List<MachineTypeDTO> machineTypes = machineTypeServiceImpl.getAllMachineTypes();
         return ResponseEntity.ok(machineTypes);
     }
-
 
     @Operation(summary = "Delete machine type", description = "Delete a machine type using its id.",
             tags = {"machine-type-controller"})

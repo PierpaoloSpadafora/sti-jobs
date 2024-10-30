@@ -10,8 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(builderMethodName = "buildUser")

@@ -24,6 +24,36 @@ public class JobController {
     private final JobServiceImpl jobServiceImpl;
     private final ModelMapper modelMapper;
 
+    @Operation(summary = "Create a job", description = "Create a job using the provided job object.",
+            tags = {"job-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Job created successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = JobDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PostMapping(value = "/create-job", produces = "application/json")
+    public ResponseEntity<JobDTO> createJob(@RequestBody JobDTO jobDTO) {
+        Job job = modelMapper.map(jobDTO, Job.class);
+        Job createdJob = jobServiceImpl.createJob(job);
+        return ResponseEntity.ok(modelMapper.map(createdJob, JobDTO.class));
+    }
+
+    @Operation(summary = "Update a job", description = "Update a job using the provided job object.",
+            tags = {"job-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Job updated successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = JobDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PutMapping(value = "/update-job{id}", produces = "application/json")
+    public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @RequestBody JobDTO jobDTO) {
+        Job job = modelMapper.map(jobDTO, Job.class);
+        Job updatedJob = jobServiceImpl.updateJob(id, job);
+        return ResponseEntity.ok(modelMapper.map(updatedJob, JobDTO.class));
+    }
+
     @Operation(summary = "Get all job", description = "Return all the jobs in the database.",
             tags = {"job-controller"})
     @ApiResponses({
@@ -54,33 +84,6 @@ public class JobController {
         return ResponseEntity.ok(modelMapper.map(jobServiceImpl.getJobById(id), JobDTO.class));
     }
 
-
-    @Operation(summary = "Create a job", description = "Create a job using the provided job object.",
-            tags = {"job-controller"})
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Job created successfully.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = JobDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
-    })
-    @PostMapping(value = "/create-job", produces = "application/json")
-    public ResponseEntity<JobDTO> createJob(@RequestBody Job job) {
-        return ResponseEntity.ok(modelMapper.map(jobServiceImpl.createJob(job), JobDTO.class));
-    }
-
-    @Operation(summary = "Update a job", description = "Update a job using the provided job object.",
-            tags = {"job-controller"})
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Job updated successfully.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = JobDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
-    })
-    @PostMapping(value = "/update-job", produces = "application/json")
-    public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @RequestBody Job job) {
-        return ResponseEntity.ok(modelMapper.map(jobServiceImpl.updateJob(id, job), JobDTO.class));
-    }
-
     @Operation(summary = "Delete a job", description = "Delete a job using their id.",
             tags = {"job-controller"})
     @ApiResponses({
@@ -89,7 +92,7 @@ public class JobController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PostMapping(value = "/delete-job", produces = "application/json")
+    @DeleteMapping(value = "/delete-job{id}", produces = "application/json")
     public ResponseEntity<JobDTO> deleteJob(@PathVariable("id") Long id) {
         jobServiceImpl.deleteJob(id);
         return ResponseEntity.ok().build();

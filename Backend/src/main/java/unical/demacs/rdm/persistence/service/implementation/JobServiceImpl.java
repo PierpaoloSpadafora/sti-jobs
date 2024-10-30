@@ -5,27 +5,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import unical.demacs.rdm.config.exception.UserException;
-import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.entities.Job;
-import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class JobServiceImpl implements IJobService {
 
-
     public static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
     private JobRepository jobRepository;
 
     @Override
-    public Optional<Job> getAllJobs() {
-        return Optional.of((Job) jobRepository.findAll());
+    public List<Job> getAllJobs() {
+        return jobRepository.findAll();
     }
 
     @Override
@@ -65,21 +61,19 @@ public class JobServiceImpl implements IJobService {
     }
 
     @Override
-    public Optional<Job> updateJob(Long id, Job job) {
+    public Job updateJob(Long id, Job job) {
         return jobRepository.findById(id).map(existingJob -> {
             existingJob.setTitle(job.getTitle());
             existingJob.setDescription(job.getDescription());
             existingJob.setStatus(job.getStatus());
             existingJob.setPriority(job.getPriority());
             existingJob.setDuration(job.getDuration());
-            // Assignee and MachineType mapping can be done here as needed
             return jobRepository.save(existingJob);
-        });
+        }).orElseThrow(() -> new UserException("Job not found"));
     }
 
     @Override
     public void deleteJob(Long id) {
         jobRepository.deleteById(id);
     }
-
 }
