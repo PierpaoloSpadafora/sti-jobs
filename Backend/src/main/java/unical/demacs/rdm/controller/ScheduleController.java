@@ -1,6 +1,7 @@
 package unical.demacs.rdm.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +14,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping(value = "/api/v1/schedules", produces = "application/json")
+@CrossOrigin
+@AllArgsConstructor
+@Tag(name = "schedule-controller", description = "Operations related to schedule management, include schedule create, update and delete.")
 public class ScheduleController {
 
     private final IScheduleService scheduleService;
-
-    @Autowired
-    public ScheduleController(IScheduleService scheduleService) {
-        this.scheduleService = scheduleService;
-    }
 
     @PostMapping
     public ResponseEntity<ScheduleDTO> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {

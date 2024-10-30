@@ -37,13 +37,18 @@ public class ScheduleServiceImpl implements IScheduleService {
 
     @Override
     public ScheduleDTO createSchedule(ScheduleDTO scheduleDTO) {
-        validateScheduleTime(scheduleDTO);
+        try {
+            validateScheduleTime(scheduleDTO);
 
-        Schedule schedule = new Schedule();
-        updateScheduleFromDTO(schedule, scheduleDTO);
+            Schedule schedule = new Schedule();
+            updateScheduleFromDTO(schedule, scheduleDTO);
 
-        Schedule savedSchedule = scheduleRepository.save(schedule);
-        return convertToDTO(savedSchedule);
+            Schedule savedSchedule = scheduleRepository.save(schedule);
+            return convertToDTO(savedSchedule);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Validation error: " + e.getMessage());
+            throw e;
+        }
     }
 
     @Override
@@ -157,6 +162,9 @@ public class ScheduleServiceImpl implements IScheduleService {
     }
 
     private void updateScheduleFromDTO(Schedule schedule, ScheduleDTO dto) {
+        if (dto.getJobId() == null || dto.getJobId() <= 0) {
+            throw new IllegalArgumentException("Invalid Job ID: " + dto.getJobId());
+        }
         Job job = jobRepository.findById(dto.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found with id: " + dto.getJobId()));
         Machine machine = machineRepository.findById(dto.getMachineId())
