@@ -17,14 +17,15 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { UserDTO } from '../model/userDTO';
+import { Job } from '../model/job';
+import { JobDTO } from '../model/jobDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 
 
 @Injectable()
-export class UserControllerService {
+export class JobControllerService {
 
     protected basePath = 'http://localhost:7001/sti-jobs';
     public defaultHeaders = new HttpHeaders();
@@ -56,19 +57,19 @@ export class UserControllerService {
 
 
     /**
-     * Create user by email
-     * Create a user using their email address.
+     * Create a job
+     * Create a job using the provided job object.
      * @param body 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createUser(body: UserDTO, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public createUser(body: UserDTO, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public createUser(body: UserDTO, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public createUser(body: UserDTO, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public createJob(body: JobDTO, observe?: 'body', reportProgress?: boolean): Observable<JobDTO>;
+    public createJob(body: JobDTO, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<JobDTO>>;
+    public createJob(body: JobDTO, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<JobDTO>>;
+    public createJob(body: JobDTO, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling createUser.');
+            throw new Error('Required parameter body was null or undefined when calling createJob.');
         }
 
         let headers = this.defaultHeaders;
@@ -91,7 +92,7 @@ export class UserControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<UserDTO>('post',`${this.basePath}/api/v1/user`,
+        return this.httpClient.request<JobDTO>('post',`${this.basePath}/api/v1/job/create-job`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -103,19 +104,19 @@ export class UserControllerService {
     }
 
     /**
-     * Delete user by id
-     * Delete a user using their id.
+     * Delete a job
+     * Delete a job using their id.
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteUserById(id: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public deleteUserById(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public deleteUserById(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public deleteUserById(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public deleteJob(id: number, observe?: 'body', reportProgress?: boolean): Observable<JobDTO>;
+    public deleteJob(id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<JobDTO>>;
+    public deleteJob(id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<JobDTO>>;
+    public deleteJob(id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling deleteUserById.');
+            throw new Error('Required parameter id was null or undefined when calling deleteJob.');
         }
 
         let headers = this.defaultHeaders;
@@ -133,7 +134,7 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<any>('delete',`${this.basePath}/api/v1/user/by-id/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<JobDTO>('delete',`${this.basePath}/api/v1/job/delete-job${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -144,20 +145,15 @@ export class UserControllerService {
     }
 
     /**
-     * Get user by email
-     * Retrieve a user using their email address.
-     * @param email 
+     * Get all job
+     * Return all the jobs in the database.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUserByEmail(email: string, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public getUserByEmail(email: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public getUserByEmail(email: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public getUserByEmail(email: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (email === null || email === undefined) {
-            throw new Error('Required parameter email was null or undefined when calling getUserByEmail.');
-        }
+    public getAllJobs(observe?: 'body', reportProgress?: boolean): Observable<JobDTO>;
+    public getAllJobs(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<JobDTO>>;
+    public getAllJobs(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<JobDTO>>;
+    public getAllJobs(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
 
@@ -174,7 +170,7 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<UserDTO>('get',`${this.basePath}/api/v1/user/by-email/${encodeURIComponent(String(email))}`,
+        return this.httpClient.request<JobDTO>('get',`${this.basePath}/api/v1/job/get-all-jobs/`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -185,19 +181,19 @@ export class UserControllerService {
     }
 
     /**
-     * Get user by id
-     * Retrieve a user using their id.
+     * Get job by id
+     * Retrieve a job using their id.
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUserById(id: string, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public getUserById(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public getUserById(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public getUserById(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getJobById(id: number, observe?: 'body', reportProgress?: boolean): Observable<Job>;
+    public getJobById(id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Job>>;
+    public getJobById(id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Job>>;
+    public getJobById(id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling getUserById.');
+            throw new Error('Required parameter id was null or undefined when calling getJobById.');
         }
 
         let headers = this.defaultHeaders;
@@ -215,8 +211,60 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<UserDTO>('get',`${this.basePath}/api/v1/user/by-id/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<Job>('get',`${this.basePath}/api/v1/job/jobs-by-id/${encodeURIComponent(String(id))}`,
             {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Update a job
+     * Update a job using the provided job object.
+     * @param body 
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public updateJob(body: JobDTO, id: number, observe?: 'body', reportProgress?: boolean): Observable<JobDTO>;
+    public updateJob(body: JobDTO, id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<JobDTO>>;
+    public updateJob(body: JobDTO, id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<JobDTO>>;
+    public updateJob(body: JobDTO, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (body === null || body === undefined) {
+            throw new Error('Required parameter body was null or undefined when calling updateJob.');
+        }
+
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling updateJob.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.request<JobDTO>('put',`${this.basePath}/api/v1/job/update-job${encodeURIComponent(String(id))}`,
+            {
+                body: body,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,
