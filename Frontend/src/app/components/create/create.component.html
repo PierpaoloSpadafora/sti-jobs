@@ -1,1 +1,50 @@
-<p>create works!</p>
+
+<div style="margin-top: 200px; text-align: center" >
+  <h1> Machines </h1>
+  <div class="row">
+    <div class="card-container">
+      <app-page-card title="Machine Types"
+                     buttonText="Manage"
+                     icon="bi bi-list-ol"
+                     link="/machine-type"></app-page-card>
+      <app-page-card title="Machines"
+                     buttonText="Manage"
+                     icon="bi bi-gear"
+                     link="/job"></app-page-card>
+    </div>
+  </div>
+  <h1> Jobs </h1>
+  <div class="row">
+    <div class="card-container">
+      <app-page-card title="Import Jobs"
+                     buttonText="Import"
+                     icon="bi bi-cloud-arrow-up" iconSecond="bi bi-briefcase"
+                     link="/schedule"></app-page-card>
+      <app-page-card title="Jobs"
+                     buttonText="Manage"
+                     icon="bi bi-briefcase"
+                     link="/job"></app-page-card>
+      <app-page-card title="Export Jobs"
+                     buttonText="Export"
+                     icon="bi bi-cloud-arrow-down" iconSecond="bi bi-briefcase"
+                     link="/schedule"></app-page-card>
+      </div>
+  </div>
+  <h1> Projects </h1>
+  <div class="row">
+    <div class="card-container">
+      <app-page-card title="Import Projects"
+                     buttonText="Import"
+                     icon="bi bi-cloud-arrow-up" iconSecond="bi bi-diagram-3"
+                     link="/graphs"></app-page-card>
+      <app-page-card title="Projects"
+                     buttonText="Manage"
+                     icon="bi bi-diagram-3"
+                     link="/project"></app-page-card>
+      <app-page-card title="Export Projects"
+                     buttonText="Export"
+                     icon="bi bi-cloud-arrow-down" iconSecond="bi bi-diagram-3"
+                     link="/graphs"></app-page-card>
+    </div>
+  </div>
+</div>

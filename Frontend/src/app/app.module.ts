@@ -11,6 +11,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
+import { PageCardComponent } from './components/page-card/page-card.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { GraphsComponent } from './components/graphs/graphs.component';
     HeaderComponent,
     CreateComponent,
     ScheduleComponent,
-    GraphsComponent
+    GraphsComponent,
+    PageCardComponent
   ],
   imports: [
     BrowserModule,

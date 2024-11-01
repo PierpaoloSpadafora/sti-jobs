@@ -1,1 +1,17 @@
+
+
+/* CSS*/
 @import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+}
