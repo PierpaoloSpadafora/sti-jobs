@@ -1,0 +1,11 @@
+
+<div style="margin-top: 230px; text-align: center" >
+  <div class="card-container">
+    <div class="card">
+      <h2>{{ action + " " + type}}</h2>
+      <i [class]="getIcon()"></i>
+      <p>{{ action == 'Import' ? 'Importing data...' : 'Exporting data...' }}</p>
+      <button class="btn btn-primary">{{ action == 'Import' ? 'Start Import' : 'Start Export' }}</button>
+    </div>
+  </div>
+</div>

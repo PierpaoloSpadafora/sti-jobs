@@ -5,6 +5,6 @@
   </div>
   <div class="card-body">
     <h5 class="card-title">{{ title }}</h5>
-    <button class="btn" [routerLink]="link">{{buttonText}}</button>
+    <button class="btn" (click)="jsonActionHandler()">{{buttonText}}</button>
   </div>
 </div>

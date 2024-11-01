@@ -12,6 +12,7 @@ import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
 import { PageCardComponent } from './components/page-card/page-card.component';
+import { JsonHandlerComponent } from './components/json-handler/json-handler.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { PageCardComponent } from './components/page-card/page-card.component';
     CreateComponent,
     ScheduleComponent,
     GraphsComponent,
-    PageCardComponent
+    PageCardComponent,
+    JsonHandlerComponent,
   ],
   imports: [
     BrowserModule,
