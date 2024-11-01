@@ -1,23 +1,41 @@
-.it-header-slim-wrapper {
-  background: linear-gradient(to right, #2bb5c9, var(--bs-primary));
-  color: white;
-  height: 60px;
+ .it-header-slim-wrapper {
+   background: linear-gradient(to right, #0063bd, #347f8e);
+   color: white;
+   height: 80px;
+   display: flex;
+   align-items: center;
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   z-index: 1100;
+ }
+
+.it-header-slim-wrapper-content {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 0 1.5rem;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1100;
 }
 
-.user-email {
-  color: white;
-  cursor: pointer;
+.brand-container {
+  display: flex;
+  align-items: center;
 }
 
 .slim-logo {
   height: 50px;
   width: auto;
+}
+
+.header-slim-right-zone .nav-link {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.header-slim-right-zone .nav-link:hover {
+  text-decoration: underline;
 }

@@ -6,8 +6,11 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
-import { CreateComponent } from './components/create/create.component';
 import { HeaderComponent } from './components/header/header.component';
+import { NgOptimizedImage } from '@angular/common';
+import { CreateComponent } from './components/create/create.component';
+import { ScheduleComponent } from './components/schedule/schedule.component';
+import { GraphsComponent } from './components/graphs/graphs.component';
 
 @NgModule({
   declarations: [
@@ -15,12 +18,15 @@ import { HeaderComponent } from './components/header/header.component';
     LoginComponent,
     HomeComponent,
     NavbarComponent,
-    CreateComponent,
     HeaderComponent,
+    CreateComponent,
+    ScheduleComponent,
+    GraphsComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgOptimizedImage
   ],
   providers: [],
   bootstrap: [AppComponent]

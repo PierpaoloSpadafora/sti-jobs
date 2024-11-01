@@ -1,20 +1,10 @@
-<div class="it-header-slim-wrapper">
-  <div class="container">
-    <div class="it-header-slim-wrapper-content">
-      <div class="brand-container">
-        <img src="./assets/logo.png" alt="App Logo" class="slim-logo">
-      </div>
-
-      <div class="header-slim-right-zone">
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle user-email" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ userEmail }}
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" (click)="logout()">Logout</a></li>
-          </ul>
-        </div>
-      </div>
+<div class="it-header-slim-wrapper bg-primary text-white">
+  <div class="it-header-slim-wrapper-content container">
+    <div class="brand-container">
+      <img ngSrc="assets/sti-jobs-logo.png" alt="STI JOBS" class="img-fluid">
+    </div>
+    <div class="header-slim-right-zone">
+      <a href="#" class="nav-link text-white" (click)="logout()">{{ userEmail }}</a>
     </div>
   </div>
 </div>
