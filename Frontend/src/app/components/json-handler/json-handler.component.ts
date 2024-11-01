@@ -42,6 +42,21 @@ export class JsonHandlerComponent {
     return 'bi bi-bug';
   }
 
+  isImport(): boolean {
+    return this.action === 'Import';
+  }
+
+  isExport(): boolean {
+    return this.action === 'Export';
+  }
+
+  isJobs(): boolean {
+    return this.type === 'Jobs';
+  }
+
+  isProjects(): boolean {
+    return this.type === 'Projects';
+  }
 
 
 }

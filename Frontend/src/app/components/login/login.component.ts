@@ -9,13 +9,13 @@ import { LoginService } from '../../services/login.service';
 })
 export class LoginComponent {
 
-  constructor(private router: Router, private loginService: LoginService) { } // Inietta il servizio
+  constructor(private router: Router, private loginService: LoginService) { }
 
   ngOnInit(): void {
   }
 
   login(): void {
-    this.loginService.login('lalla sbarella'); // Usa il servizio per gestire il login
+    this.loginService.login('AccountTemporaneo - LogOut');
     this.router.navigate(['/home']);
   }
 }
