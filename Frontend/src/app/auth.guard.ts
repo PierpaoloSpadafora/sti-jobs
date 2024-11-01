@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { 
+import {
   CanActivateFn,
-  ActivatedRouteSnapshot, 
-  RouterStateSnapshot 
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot
 } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 
-export const authGuard: CanActivateFn = (
+export const AuthGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot
 ) => {

@@ -5,7 +5,17 @@
   "projects": {
     "Frontend": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "standalone": false
+        },
+        "@schematics/angular:directive": {
+          "standalone": false
+        },
+        "@schematics/angular:pipe": {
+          "standalone": false
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -21,34 +31,15 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/bootstrap-italia/dist/fonts",
-                "output": "./assets/fonts/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/bootstrap-italia/dist/svg",
-                "output": "./assets/svg/"
               }
             ],
             "styles": [
-              "node_modules/bootstrap-italia/dist/css/bootstrap-italia.min.css",
               "src/styles.css"
             ],
-            "scripts": [
-              "node_modules/bootstrap-italia/dist/js/bootstrap-italia.bundle.min.js"
-            ],
-            "server": "src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -104,12 +95,9 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap-italia/dist/css/bootstrap-italia.min.css",
               "src/styles.css"
             ],
-            "scripts": [
-              "node_modules/bootstrap-italia/dist/js/bootstrap-italia.bundle.min.js"
-            ]
+            "scripts": []
           }
         }
       }
