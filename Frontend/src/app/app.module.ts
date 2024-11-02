@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -30,7 +32,9 @@ import { JsonHandlerComponent } from './components/json-handler/json-handler.com
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    CommonModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

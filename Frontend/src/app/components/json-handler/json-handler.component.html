@@ -5,7 +5,13 @@
       <h2>{{ action + " " + type}}</h2>
       <i [class]="getIcon()"></i>
       <p>{{ action == 'Import' ? 'Importing data...' : 'Exporting data...' }}</p>
-      <button class="btn btn-primary">{{ action == 'Import' ? 'Start Import' : 'Start Export' }}</button>
+      <div class="popup-content">
+        <h3>Inserisci il testo</h3>
+        <textarea [(ngModel)]="textareaContent" placeholder="Scrivi qui..." rows="10" cols="30"></textarea>
+      </div>
+      <button class="btn btn-primary" (click)="onFileButtonClick()">Scegli un file JSON</button>
+      <input type="file" #fileInput hidden accept=".json" (change)="onFileSelected($event)" />
+      <button class="btn btn-primary" (click)="submitText()">{{ action == 'Import' ? 'Start Import' : 'Start Export' }}</button>
     </div>
   </div>
 </div>
