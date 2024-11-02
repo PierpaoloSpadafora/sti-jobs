@@ -1,11 +1,14 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.JsonException;
+import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JsonDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -19,7 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -34,7 +39,7 @@ public class JsonServiceImpl implements IJsonService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
-
+    private final ModelMapper modelMapper;
     @Override
     public JsonDTO parseJsonFile(MultipartFile multipartFile) throws JsonException {
         try {
@@ -44,6 +49,15 @@ public class JsonServiceImpl implements IJsonService {
         } catch (IOException e) {
             logger.error("Errore durante la lettura del file JSON", e);
             throw new JsonException("Errore durante il parsing del file JSON");
+        }
+    }
+
+    public byte[] convertToJson(JsonDTO jsonDTO) {
+        try {
+            return objectMapper.writeValueAsBytes(jsonDTO);
+        } catch (JsonProcessingException e) {
+            logger.error("Errore durante la creazione del file JSON", e);
+            throw new JsonException("Errore durante la conversione del file JSON");
         }
     }
 
@@ -143,4 +157,57 @@ public class JsonServiceImpl implements IJsonService {
             scheduleRepository.save(schedule);
         }
     }
+
+
+    @Transactional
+    public JsonDTO processExport(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException("User not found with email: " + email));
+
+        String userId = user.getId();
+        JsonDTO jsonDTO = new JsonDTO();
+
+        List<Job> jobs = jobRepository.findByAssignee_Id(userId);
+        jsonDTO.setJobs(jobs.stream()
+                .map(job -> modelMapper.map(job, JobDTO.class))
+                .collect(Collectors.toList()));
+
+        List<Schedule> schedules = new ArrayList<>();
+        for (Job job : jobs) {
+            List<Schedule> jobSchedules = scheduleRepository.findByJob_Id(job.getId());
+            schedules.addAll(jobSchedules);
+        }
+        jsonDTO.setSchedules(schedules.stream()
+                .map(schedule -> modelMapper.map(schedule, ScheduleDTO.class))
+                .collect(Collectors.toList()));
+
+        List<Long> machineIds = schedules.stream()
+                .map(schedule -> schedule.getMachine().getId())
+                .distinct()
+                .toList();
+
+        List<Machine> machines = new ArrayList<>();
+        for (Long machineId : machineIds) {
+            machineRepository.findById(machineId).ifPresent(machines::add);
+        }
+        jsonDTO.setMachines(machines.stream()
+                .map(machine -> modelMapper.map(machine, MachineDTO.class))
+                .collect(Collectors.toList()));
+
+        List<Long> machineTypeIds = new ArrayList<>(machines.stream()
+                .map(machine -> machine.getType().getId())
+                .distinct()
+                .toList());
+
+        List<MachineType> machineTypes = new ArrayList<>();
+        for (Long machineTypeId : machineTypeIds) {
+            machineTypeRepository.findById(machineTypeId).ifPresent(machineTypes::add);
+        }
+        jsonDTO.setMachineTypes(machineTypes.stream()
+                .map(machineType -> modelMapper.map(machineType, MachineTypeDTO.class))
+                .collect(Collectors.toList()));
+
+        return jsonDTO;
+    }
+
 }
