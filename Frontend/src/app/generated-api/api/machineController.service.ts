@@ -17,14 +17,14 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { UserDTO } from '../model/userDTO';
+import { MachineDTO } from '../model/machineDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
 
 
 @Injectable()
-export class UserControllerService {
+export class MachineControllerService {
 
     protected basePath = 'http://localhost:7001/sti-jobs';
     public defaultHeaders = new HttpHeaders();
@@ -56,19 +56,19 @@ export class UserControllerService {
 
 
     /**
-     * Create user by email
-     * Create a user using their email address.
+     * Create a new machine
+     * Create a new machine with specified details.
      * @param body 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createUser(body: UserDTO, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public createUser(body: UserDTO, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public createUser(body: UserDTO, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public createUser(body: UserDTO, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public createMachine(body: MachineDTO, observe?: 'body', reportProgress?: boolean): Observable<MachineDTO>;
+    public createMachine(body: MachineDTO, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<MachineDTO>>;
+    public createMachine(body: MachineDTO, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<MachineDTO>>;
+    public createMachine(body: MachineDTO, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling createUser.');
+            throw new Error('Required parameter body was null or undefined when calling createMachine.');
         }
 
         let headers = this.defaultHeaders;
@@ -91,7 +91,7 @@ export class UserControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<UserDTO>('post',`${this.basePath}/api/v1/user`,
+        return this.httpClient.request<MachineDTO>('post',`${this.basePath}/api/v1/machine`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -103,19 +103,19 @@ export class UserControllerService {
     }
 
     /**
-     * Delete user by id
-     * Delete a user using their id.
+     * Delete a machine
+     * Delete a machine by ID.
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public deleteUserById(id: string, observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public deleteUserById(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public deleteUserById(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public deleteUserById(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public deleteMachine(id: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public deleteMachine(id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public deleteMachine(id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public deleteMachine(id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling deleteUserById.');
+            throw new Error('Required parameter id was null or undefined when calling deleteMachine.');
         }
 
         let headers = this.defaultHeaders;
@@ -133,7 +133,7 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<any>('delete',`${this.basePath}/api/v1/user/by-id/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<any>('delete',`${this.basePath}/api/v1/machine/${encodeURIComponent(String(id))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -144,20 +144,15 @@ export class UserControllerService {
     }
 
     /**
-     * Get user by email
-     * Retrieve a user using their email address.
-     * @param email 
+     * Get all machines
+     * Retrieve all machines.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUserByEmail(email: string, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public getUserByEmail(email: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public getUserByEmail(email: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public getUserByEmail(email: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (email === null || email === undefined) {
-            throw new Error('Required parameter email was null or undefined when calling getUserByEmail.');
-        }
+    public getAllMachines(observe?: 'body', reportProgress?: boolean): Observable<MachineDTO>;
+    public getAllMachines(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<MachineDTO>>;
+    public getAllMachines(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<MachineDTO>>;
+    public getAllMachines(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
 
@@ -174,7 +169,7 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<UserDTO>('get',`${this.basePath}/api/v1/user/by-email/${encodeURIComponent(String(email))}`,
+        return this.httpClient.request<MachineDTO>('get',`${this.basePath}/api/v1/machine`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -185,19 +180,19 @@ export class UserControllerService {
     }
 
     /**
-     * Get user by id
-     * Retrieve a user using their id.
+     * Get machine by ID
+     * Retrieve a machine using its ID.
      * @param id 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getUserById(id: string, observe?: 'body', reportProgress?: boolean): Observable<UserDTO>;
-    public getUserById(id: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<UserDTO>>;
-    public getUserById(id: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<UserDTO>>;
-    public getUserById(id: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getMachineById(id: number, observe?: 'body', reportProgress?: boolean): Observable<MachineDTO>;
+    public getMachineById(id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<MachineDTO>>;
+    public getMachineById(id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<MachineDTO>>;
+    public getMachineById(id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (id === null || id === undefined) {
-            throw new Error('Required parameter id was null or undefined when calling getUserById.');
+            throw new Error('Required parameter id was null or undefined when calling getMachineById.');
         }
 
         let headers = this.defaultHeaders;
@@ -215,8 +210,60 @@ export class UserControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<UserDTO>('get',`${this.basePath}/api/v1/user/by-id/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<MachineDTO>('get',`${this.basePath}/api/v1/machine/${encodeURIComponent(String(id))}`,
             {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Update a machine
+     * Update a machine&#x27;s details by ID.
+     * @param body 
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public updateMachine(body: MachineDTO, id: number, observe?: 'body', reportProgress?: boolean): Observable<MachineDTO>;
+    public updateMachine(body: MachineDTO, id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<MachineDTO>>;
+    public updateMachine(body: MachineDTO, id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<MachineDTO>>;
+    public updateMachine(body: MachineDTO, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (body === null || body === undefined) {
+            throw new Error('Required parameter body was null or undefined when calling updateMachine.');
+        }
+
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling updateMachine.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set('Content-Type', httpContentTypeSelected);
+        }
+
+        return this.httpClient.request<MachineDTO>('put',`${this.basePath}/api/v1/machine/${encodeURIComponent(String(id))}`,
+            {
+                body: body,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,
