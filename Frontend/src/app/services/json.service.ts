@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +13,9 @@ export class JsonService {
     exportProjects: false
   };
 
-  constructor() { }
+  private baseUrl = 'http://localhost:7001/api/v1'; // URL del backend
+
+  constructor(private http: HttpClient) { }
 
   public isImport(): boolean {
     return this.state.importJobs || this.state.importProjects;
@@ -40,5 +44,9 @@ export class JsonService {
 
   public getActionStatus() {
     return { ...this.state };
+  }
+
+  callJsonEndpoint(data: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/json/import`, data);
   }
 }

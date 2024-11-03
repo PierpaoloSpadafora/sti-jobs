@@ -86,6 +86,14 @@ export class JsonHandlerComponent {
   submitText() {
     console.log('Testo inviato:', this.textareaContent);
     // mandare la chiamata al backend
+    this.jsonService.callJsonEndpoint(this.textareaContent).subscribe({
+      next: (response) => {
+        console.log('Risposta dal backend:', response);
+      },
+      error: (error) => {
+        console.error('Errore chiamando il backend:', error);
+      }
+    });
   }
 
 }

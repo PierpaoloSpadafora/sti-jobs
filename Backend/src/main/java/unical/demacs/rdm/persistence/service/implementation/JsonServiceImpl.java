@@ -65,7 +65,7 @@ public class JsonServiceImpl implements IJsonService {
     @Transactional
     public void processImport(JsonDTO jsonDTO) {
         logger.info("++++++START IMPORT PROCESS++++++");
-
+        System.out.println("++++++SERVICE WORKS++++++");
         try {
             if (jsonDTO.getMachineTypes() != null) {
                 importMachineTypes(jsonDTO.getMachineTypes());
