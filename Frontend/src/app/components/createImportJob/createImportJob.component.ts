@@ -4,11 +4,11 @@ import { JobDTO } from '../../generated-api';
 import { MachineTypeDTO } from '../../generated-api';
 
 @Component({
-  selector: 'app-job-project-handler',
-  templateUrl: './job-project-handler.component.html',
-  styleUrls: ['./job-project-handler.component.css'],
+  selector: 'app-create-import-job',
+  templateUrl: './createImportJob.component.html',
+  styleUrls: ['./createImportJob.component.css']
 })
-export class JobProjectHandlerComponent implements OnInit {
+export class CreateImportJobComponent implements OnInit {
   showJsonInput: boolean = false;
 
   job: JobDTO = {

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { JobProjectHandlerComponent } from './job-project-handler.component';
+import { Create_import_jobComponent } from './create_import_job.component';
 
 describe('JsonHandlerComponent', () => {
-  let component: JobProjectHandlerComponent;
-  let fixture: ComponentFixture<JobProjectHandlerComponent>;
+  let component: Create_import_jobComponent;
+  let fixture: ComponentFixture<Create_import_jobComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [JobProjectHandlerComponent]
+      declarations: [Create_import_jobComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(JobProjectHandlerComponent);
+    fixture = TestBed.createComponent(Create_import_jobComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
