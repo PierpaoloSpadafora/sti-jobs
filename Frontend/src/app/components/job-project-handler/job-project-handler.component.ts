@@ -1,118 +1,111 @@
-import { Component, Input,  ViewChild, ElementRef} from '@angular/core';
-import {JsonService} from "../../services/json.service";
-import {VariablesService} from "../../services/variables.service";
+import { Component, OnInit } from '@angular/core';
+import { JsonService } from '../../services/json.service';
+import { JobDTO } from '../../generated-api';
+import { MachineTypeDTO } from '../../generated-api';
 
 @Component({
-  selector: 'app-json-handler',
+  selector: 'app-job-project-handler',
   templateUrl: './job-project-handler.component.html',
   styleUrls: ['./job-project-handler.component.css']
 })
-export class JobProjectHandlerComponent {
-  @ViewChild('fileInput') fileInput!: ElementRef;
-  textareaContent: string = '';
-  type = '';
-  action = '';
+export class JobProjectHandlerComponent implements OnInit {
+  showJsonInput: boolean = false;
 
-  constructor(private variablesService: VariablesService, private jsonService: JsonService) {
+  job: JobDTO = {
+    title: '',
+    description: '',
+    status: undefined,
+    assignee: undefined,
+    priority: undefined,
+    duration: undefined,
+    requiredMachineType: undefined
+  };
+
+  get requiredMachineTypeName(): string {
+    return this.job.requiredMachineType?.name ?? '';
   }
+
+  set requiredMachineTypeName(name: string) {
+    if (!this.job.requiredMachineType) {
+      this.job.requiredMachineType = {} as MachineTypeDTO;
+    }
+    this.job.requiredMachineType.name = name;
+  }
+
+  statuses = ['PENDING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+  priorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+
+  jsonInputContent: string = '';
+
+  constructor(private jsonService: JsonService) { }
 
   ngOnInit(): void {
-    this.action = this.getAction();
-    this.type = this.getType();
-  }
-
-  getAction(): string {
-    if(this.variablesService.isImport()){
-      return 'Import';
-    }
-    return 'Export';
-  }
-
-  getType(): string {
-    if(this.variablesService.isJobs()){
-      return 'Jobs';
-    }
-    return 'Projects';
-  }
-
-  getIcon(): string {
-    if(this.variablesService.isImport()){
-      return 'bi bi-cloud-arrow-up';
-    }
-    if(!this.variablesService.isImport()){
-      return 'bi bi-cloud-arrow-down';
-    }
-    return 'bi bi-bug';
-  }
-
-  isImport(): boolean {
-    return this.action === 'Import';
-  }
-
-  isExport(): boolean {
-    return this.action === 'Export';
-  }
-
-  isJobs(): boolean {
-    return this.type === 'Jobs';
-  }
-
-  isProjects(): boolean {
-    return this.type === 'Projects';
-  }
-
-  onFileButtonClick() {
-    this.fileInput.nativeElement.click();
-  }
-
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      console.log('File selezionato:', file);
-      console.log(file.text)
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const jsonContent = JSON.parse(reader.result as string);
-          this.textareaContent = JSON.stringify(jsonContent, null, 2);
-        } catch (error) {
-          console.error('Errore nel parsing del JSON:', error);
+    this.jsonInputContent =
+      `[
+        {
+          "id": 0,
+          "title": "string",
+          "description": "string",
+          "status": "PENDING",
+          "assignee": {
+            "id": "string",
+            "email": "string"
+          },
+          "priority": "LOW",
+          "duration": 0,
+          "requiredMachineType": {
+            "id": 0,
+            "name": "string",
+            "description": "string"
+          }
         }
-      };
-      reader.readAsText(file);
-    }
+      ]`;
   }
 
-  submitText() {
-    console.log('Testo inviato:', this.textareaContent);
+  toggleJsonInput() {
+    this.showJsonInput = !this.showJsonInput;
+  }
 
-    let jsonObject;
-    try {
-      jsonObject = JSON.parse(this.textareaContent);
-    } catch (error) {
-      console.error('Errore nel parsing del JSON:', error);
-      alert('Il contenuto inserito non è un JSON valido. Per favore, controlla e riprova.');
-      return;
+  submitJob() {
+    let jobsToSubmit: JobDTO[];
+
+    if (this.showJsonInput) {
+      try {
+        jobsToSubmit = JSON.parse(this.jsonInputContent);
+
+        if (!Array.isArray(jobsToSubmit)) {
+          alert('Il JSON inserito deve essere un array di Job.');
+          return;
+        }
+      } catch (error) {
+        alert('Il JSON inserito non è valido.');
+        return;
+      }
+    } else {
+      jobsToSubmit = [this.job];
     }
 
-    let jsonDTO = {};
-    if (this.isJobs()) {
-      jsonDTO = { jobs: [jsonObject] };
-    } else if (this.isProjects()) {
-      jsonDTO = { projects: [jsonObject] };
-    }
-
-    this.jsonService.callJsonEndpoint(jsonDTO).subscribe({
+    this.jsonService.importJob(jobsToSubmit).subscribe({
       next: (response: string) => {
-        console.log('Risposta dal backend:', response);
-        alert(response);
+        alert('Job importati con successo.');
+        this.resetForm();
       },
       error: (error) => {
-        console.error('Errore chiamando il backend:', error);
-        alert('Errore durante l\'importazione: ' + error.message);
+        console.error('Errore durante l\'importazione dei Job:', error);
+        alert('Errore durante l\'importazione dei Job: ' + error.message);
       }
     });
+  }
 
+  resetForm() {
+    this.job = {
+      title: '',
+      description: '',
+      status: undefined,
+      assignee: undefined,
+      priority: undefined,
+      duration: undefined,
+      requiredMachineType: undefined
+    };
   }
 }

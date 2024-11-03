@@ -1,17 +1,62 @@
+<!-- job-project-handler.component.html -->
 
-<div style="margin-top: 230px; text-align: center" >
-  <div class="card-container">
-    <div class="card">
-      <h2>{{ action + " " + type}}</h2>
-      <i [class]="getIcon()"></i>
-      <p>{{ action == 'Import' ? 'Importing data...' : 'Exporting data...' }}</p>
-      <div class="popup-content">
-        <h3>Inserisci il testo</h3>
-        <textarea [(ngModel)]="textareaContent" placeholder="Scrivi qui..." rows="10" cols="30"></textarea>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Importa Job</h2>
+  <div class="card">
+    <div class="card-body">
+      <button class="btn btn-secondary mb-3" (click)="toggleJsonInput()">
+        {{ showJsonInput ? 'Compila Form' : 'Inserisci JSON' }}
+      </button>
+
+      <!-- Form per l'inserimento dei dati -->
+      <form *ngIf="!showJsonInput" (ngSubmit)="submitJob()">
+        <div class="mb-3">
+          <label for="title" class="form-label">Titolo</label>
+          <input id="title" class="form-control" [(ngModel)]="job.title" name="title" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Descrizione</label>
+          <textarea id="description" class="form-control" [(ngModel)]="job.description" name="description"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="status" class="form-label">Stato</label>
+          <select id="status" class="form-select" [(ngModel)]="job.status" name="status">
+            <option [ngValue]="undefined">Seleziona Stato</option>
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="priority" class="form-label">Priorità</label>
+          <select id="priority" class="form-select" [(ngModel)]="job.priority" name="priority">
+            <option [ngValue]="undefined">Seleziona Priorità</option>
+            <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="duration" class="form-label">Durata (secondi)</label>
+          <input id="duration" type="number" class="form-control" [(ngModel)]="job.duration" name="duration" />
+        </div>
+
+        <div class="mb-3">
+          <label for="machineType" class="form-label">Tipo Macchina Richiesto</label>
+          <input id="machineType" class="form-control" [(ngModel)]="requiredMachineTypeName" name="machineType" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Invia</button>
+      </form>
+
+      <!-- Textarea per l'inserimento manuale del JSON -->
+      <div *ngIf="showJsonInput">
+        <label for="jsonInput" class="form-label">Inserisci il JSON dei Job</label>
+        <textarea id="jsonInput" class="form-control mb-3" [(ngModel)]="jsonInputContent" rows="15" name="jsonInput"></textarea>
+        <small class="text-muted">Esempio di JSON atteso:</small>
+        <pre class="bg-light p-2">{{ jsonInputContent }}</pre>
+        <button (click)="submitJob()" class="btn btn-primary w-100">Invia JSON</button>
       </div>
-      <button class="btn btn-primary" (click)="onFileButtonClick()">Scegli un file JSON</button>
-      <input type="file" #fileInput hidden accept=".json" (change)="onFileSelected($event)" />
-      <button class="btn btn-primary" (click)="submitText()">{{ action == 'Import' ? 'Start Import' : 'Start Export' }}</button>
     </div>
   </div>
 </div>

@@ -14,8 +14,8 @@ public class MachineDTO {
     private String name;
     private String description;
     private MachineStatus status;
-    private Long typeId; // ID per riferire il MachineType
-    private String typeName; // Nome per riferire il MachineType (opzionale)
+    private Long typeId;
+    private String typeName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
