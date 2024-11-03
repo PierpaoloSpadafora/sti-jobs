@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineDTO } from '../../generated-api';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-create-import-machine',
@@ -35,8 +36,8 @@ export class CreateImportMachineComponent implements OnInit {
           "status": "AVAILABLE",
           "typeId": 0,
           "typeName": "string",
-          "createdAt": "2023-10-04T12:00:00Z",
-          "updatedAt": "2023-10-04T12:00:00Z"
+          "createdAt": "2024-11-03T18:54:56.216Z",
+          "updatedAt": "2024-11-03T18:54:56.216Z"
         }
       ]`;
     this.jsonInputContent = this.jsonExample;
@@ -47,6 +48,7 @@ export class CreateImportMachineComponent implements OnInit {
   }
 
   submitMachine() {
+    console.log('submitMachine called');
     let machinesToSubmit: MachineDTO[];
 
     if (this.showJsonInput) {
@@ -65,14 +67,22 @@ export class CreateImportMachineComponent implements OnInit {
       machinesToSubmit = [this.machine];
     }
 
+    console.log('machinesToSubmit:', machinesToSubmit);
+
     this.jsonService.importMachine(machinesToSubmit).subscribe({
       next: (response: string) => {
-        alert('Machines importate con successo.');
+        console.log('Response:', response);
+        Swal.fire({
+          icon: 'success',
+          title: 'Elemento importato con successo',
+          showConfirmButton: false,
+          timer: 1000
+        });
         this.resetForm();
       },
       error: (error) => {
         console.error("Errore durante l'importazione delle Machines:", error);
-        alert("Errore durante l'importazione delle Machines: " + error.message);
+        alert("Errore durante l'importazione delle Machines: " + JSON.stringify(error));
       },
     });
   }
@@ -85,6 +95,5 @@ export class CreateImportMachineComponent implements OnInit {
       typeId: undefined,
       typeName: '',
     };
-    this.jsonInputContent = '';
-  }
+  };
 }

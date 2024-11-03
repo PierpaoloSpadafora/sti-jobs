@@ -1,6 +1,8 @@
+// create-import-machine-type.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineTypeDTO } from '../../generated-api';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-create-import-machine-type',
@@ -37,6 +39,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
   }
 
   submitMachineType() {
+    console.log('submitMachineType called');
     let machineTypesToSubmit: MachineTypeDTO[];
 
     if (this.showJsonInput) {
@@ -55,14 +58,22 @@ export class CreateImportMachineTypeComponent implements OnInit {
       machineTypesToSubmit = [this.machineType];
     }
 
+    console.log('machineTypesToSubmit:', machineTypesToSubmit);
+
     this.jsonService.importMachineType(machineTypesToSubmit).subscribe({
       next: (response: string) => {
-        alert('Machine Types importati con successo.');
+        console.log('Response:', response);
+        Swal.fire({
+          icon: 'success',
+          title: 'Elemento importato con successo',
+          showConfirmButton: false,
+          timer: 1000
+        });
         this.resetForm();
       },
       error: (error) => {
         console.error("Errore durante l'importazione dei Machine Types:", error);
-        alert("Errore durante l'importazione dei Machine Types: " + error.message);
+        alert("Errore durante l'importazione dei Machine Types: " + JSON.stringify(error));
       },
     });
   }
@@ -72,6 +83,5 @@ export class CreateImportMachineTypeComponent implements OnInit {
       name: '',
       description: ''
     };
-    this.jsonInputContent = '';
   }
 }
