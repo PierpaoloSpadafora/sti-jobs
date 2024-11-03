@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class JobController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PostMapping(value = "/create-job", produces = "application/json")
-    public ResponseEntity<JobDTO> createJob(@RequestBody JobDTO jobDTO) {
+    public ResponseEntity<JobDTO> createJob(@Valid @RequestBody JobDTO jobDTO) {
         JobDTO createdJob = jobServiceImpl.createJob(jobDTO);
         return ResponseEntity.ok(createdJob);
     }
@@ -47,7 +48,7 @@ public class JobController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PutMapping(value = "/update-job{id}", produces = "application/json")
-    public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @RequestBody JobDTO jobDTO) {
+    public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @Valid @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobServiceImpl.updateJob(id, jobDTO);
         return ResponseEntity.ok(updatedJob);
     }

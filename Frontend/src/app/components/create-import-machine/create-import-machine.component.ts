@@ -39,17 +39,14 @@ export class CreateImportMachineComponent implements OnInit {
     this.jsonExample =
       `[
         {
-          "id": 0,
-          "name": "string",
-          "description": "string",
+          "name": "Machine 1",
+          "description": "First machine",
           "status": "AVAILABLE",
-          "typeId": 0,
-          "typeName": "string",
-          "createdAt": "2024-11-03T18:54:56.216Z",
-          "updatedAt": "2024-11-03T18:54:56.216Z"
+          "typeId": 1
         }
       ]`;
-    this.jsonInputContent = '';
+    this.jsonInputContent = this.jsonExample;
+
 
     this.machineTypeService.getAllMachineTypes().subscribe({
       next: (data: MachineTypeDTO[]) => {
@@ -155,7 +152,6 @@ export class CreateImportMachineComponent implements OnInit {
       typeId: undefined,
       typeName: '',
     };
-    this.jsonInputContent = '';
     this.jsonError = '';
   }
 }

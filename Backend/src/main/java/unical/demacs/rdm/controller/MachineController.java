@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class MachineController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PostMapping
-    public ResponseEntity<MachineDTO> createMachine(@RequestBody MachineDTO machineDTO) {
+    public ResponseEntity<MachineDTO> createMachine(@Valid @RequestBody MachineDTO machineDTO) {
         MachineDTO createdMachine = modelMapper.map(machineServiceImpl.createMachine(machineDTO), MachineDTO.class);
         return ResponseEntity.status(201).body(createdMachine);
     }
@@ -51,7 +52,7 @@ public class MachineController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PutMapping(path = "/{id}")
-    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @RequestBody MachineDTO machineDTO) {
+    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @Valid@RequestBody MachineDTO machineDTO) {
         MachineDTO updatedMachine = modelMapper.map(machineServiceImpl.updateMachine(id, machineDTO), MachineDTO.class);
         return ResponseEntity.ok(updatedMachine);
     }

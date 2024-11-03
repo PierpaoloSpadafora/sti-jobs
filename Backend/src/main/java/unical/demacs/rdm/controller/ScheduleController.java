@@ -1,6 +1,7 @@
 package unical.demacs.rdm.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class ScheduleController {
     private final IScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<ScheduleDTO> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
+    public ResponseEntity<ScheduleDTO> createSchedule(@Valid @RequestBody ScheduleDTO scheduleDTO) {
         try {
             ScheduleDTO createdSchedule = scheduleService.createSchedule(scheduleDTO);
             return new ResponseEntity<>(createdSchedule, HttpStatus.CREATED);
@@ -50,7 +51,7 @@ public class ScheduleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ScheduleDTO> updateSchedule(@PathVariable Long id, @RequestBody ScheduleDTO scheduleDTO) {
+    public ResponseEntity<ScheduleDTO> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDTO scheduleDTO) {
         try {
             ScheduleDTO updatedSchedule = scheduleService.updateSchedule(id, scheduleDTO);
             return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);

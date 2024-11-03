@@ -46,24 +46,25 @@ export class CreateImportJobComponent implements OnInit {
     this.jsonExample =
       `[
         {
-          "id": 0,
-          "title": "string",
-          "description": "string",
+          "id": 1,
+          "title": "Job 1",
+          "description": "First job",
           "status": "PENDING",
           "assignee": {
-            "id": "string",
-            "email": "string"
+            "id": "1",
+            "email": "prova@gmail.com"
           },
           "priority": "LOW",
-          "duration": 0,
+          "duration": 3600,
           "requiredMachineType": {
-            "id": 0,
-            "name": "string",
-            "description": "string"
+            "id": 1,
+            "name": "Type 1",
+            "description": "Description of Type 1"
           }
         }
       ]`;
-    this.jsonInputContent = '';
+    this.jsonInputContent = this.jsonExample;
+
 
     this.machineTypeService.getAllMachineTypes().subscribe({
       next: (data: MachineTypeDTO[]) => {
@@ -189,7 +190,6 @@ export class CreateImportJobComponent implements OnInit {
     this.durationHours = 0;
     this.durationMinutes = 0;
     this.durationSeconds = 0;
-    this.jsonInputContent = '';
     this.jsonError = '';
   }
 }
