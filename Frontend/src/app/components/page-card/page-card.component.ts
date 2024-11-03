@@ -1,7 +1,7 @@
+// page-card.component.ts
 import { Component, Input } from '@angular/core';
-import { JsonService } from "../../services/json.service";
-import { Router } from "@angular/router";
-import {VariablesService} from "../../services/variables.service";
+import { Router } from '@angular/router';
+import { VariablesService } from '../../services/variables.service';
 
 @Component({
   selector: 'app-page-card',
@@ -10,7 +10,6 @@ import {VariablesService} from "../../services/variables.service";
 })
 export class PageCardComponent {
   @Input() title: string = '';
-  @Input() buttonText: string = '';
   @Input() icon: string = '';
   @Input() iconSecond: string = '';
   @Input() link: string = '';
@@ -21,22 +20,21 @@ export class PageCardComponent {
   constructor(private variablesService: VariablesService, private router: Router) {
     this.actionMap = {
       importJobs: () => this.variablesService.setAction('import', 'Jobs'),
-      importProjects: () => this.variablesService.setAction('import', 'Jobs'),
-      exportJobs: () => this.variablesService.setAction('export', 'Projects'),
+      importProjects: () => this.variablesService.setAction('import', 'Projects'),
+      exportJobs: () => this.variablesService.setAction('export', 'Jobs'),
       exportProjects: () => this.variablesService.setAction('export', 'Projects'),
     };
   }
 
   jsonActionHandler(): void {
-    console.log(this.jsonAction);
-    const action = this.actionMap[this.jsonAction];
-    if (action) {
-      action();
-    } else {
-      console.warn(`Azione non supportata: ${this.jsonAction}`);
+    if (this.jsonAction) {
+      const action = this.actionMap[this.jsonAction];
+      if (action) {
+        action();
+      } else {
+        console.warn(`Unsupported action: ${this.jsonAction}`);
+      }
     }
-    console.log(this.variablesService.isImport());
-    console.log(this.variablesService.isJobs());
     this.router.navigate([this.link]);
   }
 }

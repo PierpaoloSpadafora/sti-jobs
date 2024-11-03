@@ -1,8 +1,22 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.section-title {
+  font-size: 2em;
+  font-weight: 600;
+  color: #333;
+  margin: 60px 0 20px;
+  text-align: center;
+}
+
 .card-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 @media (max-width: 768px) {

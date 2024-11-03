@@ -1,5 +1,3 @@
-<!-- job-project-handler.component.html -->
-
 <div class="container mt-5">
   <h2 class="text-center mb-4">Importa Job</h2>
   <div class="card">
@@ -8,7 +6,6 @@
         {{ showJsonInput ? 'Compila Form' : 'Inserisci JSON' }}
       </button>
 
-      <!-- Form per l'inserimento dei dati -->
       <form *ngIf="!showJsonInput" (ngSubmit)="submitJob()">
         <div class="mb-3">
           <label for="title" class="form-label">Titolo</label>
@@ -49,7 +46,6 @@
         <button type="submit" class="btn btn-primary w-100">Invia</button>
       </form>
 
-      <!-- Textarea per l'inserimento manuale del JSON -->
       <div *ngIf="showJsonInput">
         <label for="jsonInput" class="form-label">Inserisci il JSON dei Job</label>
         <textarea id="jsonInput" class="form-control mb-3" [(ngModel)]="jsonInputContent" rows="15" name="jsonInput"></textarea>
