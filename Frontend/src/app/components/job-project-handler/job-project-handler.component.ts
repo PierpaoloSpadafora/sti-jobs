@@ -1,5 +1,6 @@
 import { Component, Input,  ViewChild, ElementRef} from '@angular/core';
 import {JsonService} from "../../services/json.service";
+import {VariablesService} from "../../services/variables.service";
 
 @Component({
   selector: 'app-json-handler',
@@ -12,7 +13,7 @@ export class JobProjectHandlerComponent {
   type = '';
   action = '';
 
-  constructor(private jsonService: JsonService) {
+  constructor(private variablesService: VariablesService, private jsonService: JsonService) {
   }
 
   ngOnInit(): void {
@@ -21,24 +22,24 @@ export class JobProjectHandlerComponent {
   }
 
   getAction(): string {
-    if(this.jsonService.isImport()){
+    if(this.variablesService.isImport()){
       return 'Import';
     }
     return 'Export';
   }
 
   getType(): string {
-    if(this.jsonService.isJobs()){
+    if(this.variablesService.isJobs()){
       return 'Jobs';
     }
     return 'Projects';
   }
 
   getIcon(): string {
-    if(this.jsonService.isImport()){
+    if(this.variablesService.isImport()){
       return 'bi bi-cloud-arrow-up';
     }
-    if(!this.jsonService.isImport()){
+    if(!this.variablesService.isImport()){
       return 'bi bi-cloud-arrow-down';
     }
     return 'bi bi-bug';
