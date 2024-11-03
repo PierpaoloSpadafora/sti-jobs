@@ -15,7 +15,7 @@ import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
 import { PageCardComponent } from './components/page-card/page-card.component';
-import { JsonHandlerComponent } from './components/json-handler/json-handler.component';
+import { JobProjectHandlerComponent } from './components/job-project-handler/job-project-handler.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +28,7 @@ import { JsonHandlerComponent } from './components/json-handler/json-handler.com
     ScheduleComponent,
     GraphsComponent,
     PageCardComponent,
-    JsonHandlerComponent,
+    JobProjectHandlerComponent,
   ],
   imports: [
     BrowserModule,

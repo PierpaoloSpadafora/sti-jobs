@@ -7,7 +7,7 @@ import { LoginComponent } from './components/login/login.component';
 import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
-import {JsonHandlerComponent} from "./components/json-handler/json-handler.component";
+import {JobProjectHandlerComponent} from "./components/job-project-handler/job-project-handler.component";
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,7 +16,7 @@ const routes: Routes = [
   { path: 'create', component: CreateComponent, canActivate: [AuthGuard] },
   { path: 'schedule', component: ScheduleComponent, canActivate: [AuthGuard] },
   { path: 'graphs', component: GraphsComponent, canActivate: [AuthGuard] },
-  { path: 'json', component: JsonHandlerComponent, canActivate: [AuthGuard] },
+  { path: 'json', component: JobProjectHandlerComponent, canActivate: [AuthGuard] },
   { path : '**', component : LoginComponent}
 ];
 

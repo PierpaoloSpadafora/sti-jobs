@@ -3,10 +3,10 @@ import {JsonService} from "../../services/json.service";
 
 @Component({
   selector: 'app-json-handler',
-  templateUrl: './json-handler.component.html',
-  styleUrls: ['./json-handler.component.css']
+  templateUrl: './job-project-handler.component.html',
+  styleUrls: ['./job-project-handler.component.css']
 })
-export class JsonHandlerComponent {
+export class JobProjectHandlerComponent {
   @ViewChild('fileInput') fileInput!: ElementRef;
   textareaContent: string = '';
   type = '';
