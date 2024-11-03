@@ -5,8 +5,8 @@ import { MachineTypeDTO } from '../../generated-api';
 
 @Component({
   selector: 'app-create-import-job',
-  templateUrl: './createImportJob.component.html',
-  styleUrls: ['./createImportJob.component.css']
+  templateUrl: './create-import-job.component.html',
+  styleUrls: ['./create-import-job.component.css']
 })
 export class CreateImportJobComponent implements OnInit {
   showJsonInput: boolean = false;

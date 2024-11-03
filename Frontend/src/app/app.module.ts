@@ -15,7 +15,12 @@ import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
 import { PageCardComponent } from './components/page-card/page-card.component';
-import {CreateImportJobComponent} from "./components/createImportJob/createImportJob.component";
+import { CreateImportJobComponent } from "./components/create-import-job/create-import-job.component";
+import { CreateImportMachineComponent } from './components/create-import-machine/create-import-machine.component';
+import { CreateImportMachineTypeComponent } from './components/create-import-machine-type/create-import-machine-type.component';
+import { ViewExportDeleteJobsComponent } from './components/view-export-delete-jobs/view-export-delete-jobs.component';
+import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
+import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +34,11 @@ import {CreateImportJobComponent} from "./components/createImportJob/createImpor
     GraphsComponent,
     PageCardComponent,
     CreateImportJobComponent,
+    CreateImportMachineComponent,
+    CreateImportMachineTypeComponent,
+    ViewExportDeleteJobsComponent,
+    ViewExportDeleteMachinesComponent,
+    ViewExportDeleteMachineTypesComponent,
   ],
   imports: [
     BrowserModule,
