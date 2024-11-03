@@ -48,7 +48,7 @@ export class JsonService {
 
   callJsonEndpoint(data: any): Observable<any> {
     const headers = { 'Content-Type': 'application/json' };
-    return this.http.post<any>(`${this.baseUrl}/import`, data, { headers });
+    return this.http.post(`${this.baseUrl}/import`, data, { headers, responseType: 'text' });
   }
 
 }

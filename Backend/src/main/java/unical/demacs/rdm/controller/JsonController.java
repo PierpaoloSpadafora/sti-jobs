@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,10 @@ import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JsonDTO;
 import unical.demacs.rdm.persistence.service.implementation.JsonServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/v1/json", produces = "application/json")
@@ -28,6 +33,8 @@ import unical.demacs.rdm.persistence.service.implementation.JsonServiceImpl;
 public class JsonController {
 
     private final JsonServiceImpl jsonServiceImpl;
+    @Autowired
+    private IJsonService jsonService;
 
     @Operation(summary = "Import data from JSON", description = "Import data into the system from JSON content.",
             tags = {"json-controller"})
@@ -39,13 +46,18 @@ public class JsonController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PostMapping(value = "/import", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> importJsonFile(@RequestBody JsonDTO jsonDTO) {
+    @PostMapping("/import")
+    public ResponseEntity<Map<String, String>> importJson(@RequestBody JsonDTO jsonDTO) {
         try {
-            jsonServiceImpl.processImport(jsonDTO);
-            return ResponseEntity.ok("Data imported successfully!");
+            System.out.println(jsonDTO);
+            jsonService.processImport(jsonDTO);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Importazione completata con successo");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            throw new MachineException("Failed to import data: " + e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Errore durante l'importazione: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 

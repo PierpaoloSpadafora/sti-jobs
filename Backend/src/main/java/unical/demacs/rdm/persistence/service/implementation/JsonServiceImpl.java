@@ -9,11 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.JsonException;
 import unical.demacs.rdm.config.exception.UserException;
-import unical.demacs.rdm.persistence.dto.JsonDTO;
-import unical.demacs.rdm.persistence.dto.MachineDTO;
-import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.dto.JobDTO;
-import unical.demacs.rdm.persistence.dto.ScheduleDTO;
+import unical.demacs.rdm.persistence.dto.*;
 import unical.demacs.rdm.persistence.entities.*;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.*;
@@ -53,22 +49,27 @@ public class JsonServiceImpl implements IJsonService {
     @Override
     @Transactional
     public void processImport(JsonDTO jsonDTO) {
-        logger.info("++++++START IMPORT PROCESS++++++");
-        System.out.println("++++++SERVICE WORKS++++++");
+        logger.info("++++++ START IMPORT PROCESS ++++++");
+        logger.info(String.valueOf(jsonDTO));
+        logger.debug("Received JsonDTO: {}", jsonDTO);
         try {
             if (jsonDTO.getMachineTypes() != null) {
+                logger.debug("Importing MachineTypes: {}", jsonDTO.getMachineTypes());
                 importMachineTypes(jsonDTO.getMachineTypes());
             }
 
             if (jsonDTO.getMachines() != null) {
+                logger.debug("Importing Machines: {}", jsonDTO.getMachines());
                 importMachines(jsonDTO.getMachines());
             }
 
             if (jsonDTO.getJobs() != null) {
+                logger.debug("Importing Jobs: {}", jsonDTO.getJobs());
                 importJobs(jsonDTO.getJobs());
             }
 
             if (jsonDTO.getSchedules() != null) {
+                logger.debug("Importing Schedules: {}", jsonDTO.getSchedules());
                 importSchedules(jsonDTO.getSchedules());
             }
 
@@ -77,20 +78,23 @@ public class JsonServiceImpl implements IJsonService {
             throw new JsonException("Errore durante l'importazione dei dati: " + e.getMessage());
         }
 
-        logger.info("++++++END IMPORT PROCESS++++++");
+        logger.info("++++++ END IMPORT PROCESS ++++++");
     }
 
     private void importMachineTypes(List<MachineTypeDTO> machineTypeDTOs) {
         for (MachineTypeDTO dto : machineTypeDTOs) {
+            logger.debug("Processing MachineTypeDTO: {}", dto);
             MachineType machineType = new MachineType();
             machineType.setName(dto.getName());
             machineType.setDescription(dto.getDescription());
             machineTypeRepository.save(machineType);
+            logger.debug("MachineType saved: {}", machineType);
         }
     }
 
     private void importMachines(List<MachineDTO> machineDTOs) {
         for (MachineDTO dto : machineDTOs) {
+            logger.debug("Processing MachineDTO: {}", dto);
             MachineType machineType = machineTypeRepository.findById(dto.getTypeId())
                     .orElseThrow(() -> new JsonException("Tipo di macchina non trovato per ID: " + dto.getTypeId()));
 
@@ -102,11 +106,14 @@ public class JsonServiceImpl implements IJsonService {
             machine.setCreatedAt(dto.getCreatedAt());
             machine.setUpdatedAt(dto.getUpdatedAt());
             machineRepository.save(machine);
+            logger.debug("Machine saved: {}", machine);
         }
     }
 
     private void importJobs(List<JobDTO> jobDTOs) {
         for (JobDTO dto : jobDTOs) {
+            logger.debug("Processing JobDTO: {}", dto);
+
             Job job = new Job();
             job.setTitle(dto.getTitle());
             job.setDescription(dto.getDescription());
@@ -114,20 +121,37 @@ public class JsonServiceImpl implements IJsonService {
             job.setPriority(dto.getPriority());
             job.setDuration(dto.getDuration());
 
-            User assignee = userRepository.findById(dto.getAssignee().getId())
-                    .orElseThrow(() -> new JsonException("Utente non trovato per ID: " + dto.getAssignee().getId()));
+            UserDTO assigneeDTO = dto.getAssignee();
+            User assignee = userRepository.findById(assigneeDTO.getId())
+                    .orElseGet(() -> {
+                        logger.debug("Assignee not found, creating new User: {}", assigneeDTO);
+                        User newUser = new User();
+                        newUser.setId(assigneeDTO.getId());
+                        newUser.setEmail(assigneeDTO.getEmail());
+                        return userRepository.save(newUser);
+                    });
             job.setAssignee(assignee);
 
-            MachineType machineType = machineTypeRepository.findById(dto.getRequiredMachineType().getId())
-                    .orElseThrow(() -> new JsonException("Tipo di macchina non trovato per ID: " + dto.getRequiredMachineType().getId()));
+            MachineTypeDTO machineTypeDTO = dto.getRequiredMachineType();
+            MachineType machineType = machineTypeRepository.findById(machineTypeDTO.getId())
+                    .orElseGet(() -> {
+                        logger.debug("MachineType not found, creating new MachineType: {}", machineTypeDTO);
+                        MachineType newMachineType = new MachineType();
+                        newMachineType.setId(machineTypeDTO.getId());
+                        newMachineType.setName(machineTypeDTO.getName());
+                        newMachineType.setDescription(machineTypeDTO.getDescription());
+                        return machineTypeRepository.save(newMachineType);
+                    });
             job.setRequiredMachineType(machineType);
 
             jobRepository.save(job);
+            logger.debug("Job saved: {}", job);
         }
     }
 
     private void importSchedules(List<ScheduleDTO> scheduleDTOs) {
         for (ScheduleDTO dto : scheduleDTOs) {
+            logger.debug("Processing ScheduleDTO: {}", dto);
             Schedule schedule = new Schedule();
 
             schedule.setJob(jobRepository.findById(dto.getJobId())
@@ -144,9 +168,9 @@ public class JsonServiceImpl implements IJsonService {
             schedule.setUpdatedAt(dto.getUpdatedAt());
 
             scheduleRepository.save(schedule);
+            logger.debug("Schedule saved: {}", schedule);
         }
     }
-
 
     @Transactional
     public JsonDTO processExport(String email) {
@@ -198,5 +222,4 @@ public class JsonServiceImpl implements IJsonService {
 
         return jsonDTO;
     }
-
 }

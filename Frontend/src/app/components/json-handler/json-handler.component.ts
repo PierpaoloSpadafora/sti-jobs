@@ -95,15 +95,23 @@ export class JsonHandlerComponent {
       return;
     }
 
-    this.jsonService.callJsonEndpoint(jsonObject).subscribe({
-      next: (response) => {
+    let jsonDTO = {};
+    if (this.isJobs()) {
+      jsonDTO = { jobs: [jsonObject] };
+    } else if (this.isProjects()) {
+      jsonDTO = { projects: [jsonObject] };
+    }
+
+    this.jsonService.callJsonEndpoint(jsonDTO).subscribe({
+      next: (response: string) => {
         console.log('Risposta dal backend:', response);
+        alert(response);
       },
       error: (error) => {
         console.error('Errore chiamando il backend:', error);
+        alert('Errore durante l\'importazione: ' + error.message);
       }
     });
+
   }
-
-
 }
