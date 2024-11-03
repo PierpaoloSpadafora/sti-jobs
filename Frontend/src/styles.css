@@ -1,7 +1,6 @@
-
-
-/* CSS*/
+/* CSS */
 @import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+@import '../node_modules/sweetalert2/dist/sweetalert2.min.css';
 
 /* Font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');

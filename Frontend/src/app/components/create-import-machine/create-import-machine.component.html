@@ -63,12 +63,21 @@
 
         <div class="mb-3">
           <label for="typeName" class="form-label">Tipo Macchina</label>
-          <input
+          <select
             id="typeName"
-            class="form-control"
-            [(ngModel)]="machine.typeName"
+            class="form-select"
+            [(ngModel)]="machine.typeId"
             name="typeName"
-          />
+            required
+          >
+            <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
+            <option
+              *ngFor="let machineType of machineTypes"
+              [value]="machineType.id"
+            >
+              {{ machineType.name }}
+            </option>
+          </select>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Invia</button>
@@ -82,12 +91,21 @@
           id="jsonInput"
           class="form-control mb-3"
           [(ngModel)]="jsonInputContent"
+          (input)="validateJsonInput()"
+          [ngClass]="{'is-invalid': jsonError}"
           rows="15"
           name="jsonInput"
         ></textarea>
+        <div *ngIf="jsonError" class="text-danger mb-3">
+          {{ jsonError }}
+        </div>
         <small class="text-muted">Esempio di JSON atteso:</small>
         <pre class="bg-light p-2">{{ jsonExample }}</pre>
-        <button (click)="submitMachine()" class="btn btn-primary w-100">
+        <button
+          (click)="submitMachine()"
+          class="btn btn-primary w-100"
+          [disabled]="jsonError"
+        >
           Invia JSON
         </button>
       </div>

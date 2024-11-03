@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
+import { MachineTypeDTO } from '../../generated-api';
+import { MachineTypeControllerService } from '../../generated-api';
 
 @Component({
   selector: 'app-create-import-machine',
@@ -24,7 +26,14 @@ export class CreateImportMachineComponent implements OnInit {
   jsonInputContent: string = '';
   jsonExample: string = '';
 
-  constructor(private jsonService: JsonService) {}
+  machineTypes: MachineTypeDTO[] = [];
+
+  jsonError: string = '';
+
+  constructor(
+    private jsonService: JsonService,
+    private machineTypeService: MachineTypeControllerService
+  ) {}
 
   ngOnInit(): void {
     this.jsonExample =
@@ -40,15 +49,38 @@ export class CreateImportMachineComponent implements OnInit {
           "updatedAt": "2024-11-03T18:54:56.216Z"
         }
       ]`;
-    this.jsonInputContent = this.jsonExample;
+    this.jsonInputContent = '';
+
+    this.machineTypeService.getAllMachineTypes().subscribe({
+      next: (data: MachineTypeDTO[]) => {
+        this.machineTypes = data;
+      },
+      error: (error) => {
+        console.error('Errore durante il recupero dei Machine Types:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Non è stato possibile recuperare i Machine Types.',
+        });
+      }
+    });
   }
 
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
+    this.jsonError = '';
+  }
+
+  validateJsonInput() {
+    try {
+      JSON.parse(this.jsonInputContent);
+      this.jsonError = '';
+    } catch (e) {
+      this.jsonError = 'Il JSON inserito non è valido.';
+    }
   }
 
   submitMachine() {
-    console.log('submitMachine called');
     let machinesToSubmit: MachineDTO[];
 
     if (this.showJsonInput) {
@@ -56,22 +88,46 @@ export class CreateImportMachineComponent implements OnInit {
         machinesToSubmit = JSON.parse(this.jsonInputContent);
 
         if (!Array.isArray(machinesToSubmit)) {
-          alert('Il JSON inserito deve essere un array di Machines.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Errore',
+            text: 'Il JSON inserito deve essere un array di Machines.',
+          });
           return;
         }
       } catch (error) {
-        alert('Il JSON inserito non è valido.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Il JSON inserito non è valido.',
+        });
         return;
       }
     } else {
+      // Validazione dei campi
+      if (!this.machine.name) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Il campo Nome è obbligatorio.',
+        });
+        return;
+      }
+
+      if (!this.machine.typeId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Seleziona un Tipo Macchina.',
+        });
+        return;
+      }
+
       machinesToSubmit = [this.machine];
     }
 
-    console.log('machinesToSubmit:', machinesToSubmit);
-
     this.jsonService.importMachine(machinesToSubmit).subscribe({
       next: (response: string) => {
-        console.log('Response:', response);
         Swal.fire({
           icon: 'success',
           title: 'Elemento importato con successo',
@@ -82,7 +138,11 @@ export class CreateImportMachineComponent implements OnInit {
       },
       error: (error) => {
         console.error("Errore durante l'importazione delle Machines:", error);
-        alert("Errore durante l'importazione delle Machines: " + JSON.stringify(error));
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: "Errore durante l'importazione delle Machines: " + JSON.stringify(error),
+        });
       },
     });
   }
@@ -95,5 +155,7 @@ export class CreateImportMachineComponent implements OnInit {
       typeId: undefined,
       typeName: '',
     };
-  };
+    this.jsonInputContent = '';
+    this.jsonError = '';
+  }
 }

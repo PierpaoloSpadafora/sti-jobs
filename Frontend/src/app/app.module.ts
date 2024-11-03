@@ -21,6 +21,7 @@ import { CreateImportMachineTypeComponent } from './components/create-import-mac
 import { ViewExportDeleteJobsComponent } from './components/view-export-delete-jobs/view-export-delete-jobs.component';
 import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
+import {MachineTypeControllerService} from "./generated-api";
 
 @NgModule({
   declarations: [
@@ -48,7 +49,7 @@ import { ViewExportDeleteMachineTypesComponent } from './components/view-export-
     CommonModule,
     FormsModule
   ],
-  providers: [],
+  providers: [MachineTypeControllerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,7 +1,12 @@
+/* Rimane lo stesso del tuo codice originale */
 .container {
   max-width: 850px;
   margin-top: 20px;
   padding: 40px 20px;
+}
+
+.is-invalid {
+  border-color: #dc3545;
 }
 
 .section-title {
@@ -10,4 +15,38 @@
   color: #333;
   margin: 20px 0 20px;
   text-align: center;
+}
+
+.card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.d-flex .btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.d-flex .btn-warning:hover {
+  background-color: #e0a800;
+  border-color: #d39e00;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+}
+
+.btn-secondary i {
+  margin-right: 5px;
+}
+
+.btn-warning i {
+  margin-right: 5px;
+}
+
+pre {
+  max-height: 200px;
+  overflow: auto;
+  font-size: 0.9rem;
 }

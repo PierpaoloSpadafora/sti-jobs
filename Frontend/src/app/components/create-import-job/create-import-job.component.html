@@ -77,26 +77,56 @@
         </div>
 
         <div class="mb-3">
-          <label for="duration" class="form-label">Durata (secondi)</label>
-          <input
-            id="duration"
-            type="number"
-            class="form-control"
-            [(ngModel)]="job.duration"
-            name="duration"
-          />
+          <label class="form-label">Durata</label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationHours"
+              name="durationHours"
+              min="0"
+              placeholder="Ore"
+            />
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationMinutes"
+              name="durationMinutes"
+              min="0"
+              max="59"
+              placeholder="Minuti"
+            />
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationSeconds"
+              name="durationSeconds"
+              min="0"
+              max="59"
+              placeholder="Secondi"
+            />
+          </div>
         </div>
 
         <div class="mb-3">
           <label for="machineType" class="form-label"
           >Tipo Macchina Richiesto</label
           >
-          <input
+          <select
             id="machineType"
-            class="form-control"
-            [(ngModel)]="requiredMachineTypeName"
+            class="form-select"
+            [(ngModel)]="job.requiredMachineType"
             name="machineType"
-          />
+            required
+          >
+            <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
+            <option
+              *ngFor="let machineType of machineTypes"
+              [ngValue]="machineType"
+            >
+              {{ machineType.name }}
+            </option>
+          </select>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Invia</button>
@@ -110,12 +140,21 @@
           id="jsonInput"
           class="form-control mb-3"
           [(ngModel)]="jsonInputContent"
+          (input)="validateJsonInput()"
+          [ngClass]="{'is-invalid': jsonError}"
           rows="15"
           name="jsonInput"
         ></textarea>
+        <div *ngIf="jsonError" class="text-danger mb-3">
+          {{ jsonError }}
+        </div>
         <small class="text-muted">Esempio di JSON atteso:</small>
         <pre class="bg-light p-2">{{ jsonExample }}</pre>
-        <button (click)="submitJob()" class="btn btn-primary w-100">
+        <button
+          (click)="submitJob()"
+          class="btn btn-primary w-100"
+          [disabled]="jsonError"
+        >
           Invia JSON
         </button>
       </div>

@@ -8,10 +8,8 @@ import { CreateComponent } from './components/create/create.component';
 import { ScheduleComponent } from './components/schedule/schedule.component';
 import { GraphsComponent } from './components/graphs/graphs.component';
 import { CreateImportJobComponent } from './components/create-import-job/create-import-job.component';
-import {CreateImportMachineComponent} from "./components/create-import-machine/create-import-machine.component";
-import {
-  CreateImportMachineTypeComponent
-} from "./components/create-import-machine-type/create-import-machine-type.component";
+import { CreateImportMachineComponent } from "./components/create-import-machine/create-import-machine.component";
+import { CreateImportMachineTypeComponent } from "./components/create-import-machine-type/create-import-machine-type.component";
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },

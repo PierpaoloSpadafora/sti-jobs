@@ -4,6 +4,14 @@
   padding: 40px 20px;
 }
 
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.input-group > .form-control {
+  width: 33%;
+}
+
 .section-title {
   font-size: 2em;
   font-weight: 600;
