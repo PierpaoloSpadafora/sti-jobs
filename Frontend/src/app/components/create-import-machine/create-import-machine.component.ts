@@ -1,3 +1,4 @@
+// create-import-machine.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineDTO } from '../../generated-api';
@@ -14,6 +15,7 @@ export class CreateImportMachineComponent implements OnInit {
   showJsonInput: boolean = false;
 
   machine: MachineDTO = {
+    id: 0,  // Includi 'id' nell'oggetto
     name: '',
     description: '',
     status: undefined,
@@ -39,6 +41,7 @@ export class CreateImportMachineComponent implements OnInit {
     this.jsonExample =
       `[
         {
+          "id": 0,
           "name": "Machine 1",
           "description": "First machine",
           "status": "AVAILABLE",
@@ -46,7 +49,6 @@ export class CreateImportMachineComponent implements OnInit {
         }
       ]`;
     this.jsonInputContent = this.jsonExample;
-
 
     this.machineTypeService.getAllMachineTypes().subscribe({
       next: (data: MachineTypeDTO[]) => {
@@ -120,6 +122,7 @@ export class CreateImportMachineComponent implements OnInit {
         return;
       }
 
+      // Assicurati che 'id' sia incluso
       machinesToSubmit = [this.machine];
     }
 
@@ -146,6 +149,7 @@ export class CreateImportMachineComponent implements OnInit {
 
   resetForm() {
     this.machine = {
+      id: 0,  // Reimposta 'id' al valore predefinito
       name: '',
       description: '',
       status: undefined,

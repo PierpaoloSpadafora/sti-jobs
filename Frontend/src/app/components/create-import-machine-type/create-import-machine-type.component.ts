@@ -12,7 +12,9 @@ import Swal from 'sweetalert2';
 export class CreateImportMachineTypeComponent implements OnInit {
   showJsonInput: boolean = false;
 
+  // Includi 'id' nell'oggetto machineType iniziale
   machineType: MachineTypeDTO = {
+    id: 0,  // Valore predefinito per id
     name: '',
     description: ''
   };
@@ -55,6 +57,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
         return;
       }
     } else {
+      // Assicurati che 'id' sia incluso nell'oggetto
       machineTypesToSubmit = [this.machineType];
     }
 
@@ -80,6 +83,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   resetForm() {
     this.machineType = {
+      id: 0,  // Reimposta id al valore predefinito
       name: '',
       description: ''
     };
