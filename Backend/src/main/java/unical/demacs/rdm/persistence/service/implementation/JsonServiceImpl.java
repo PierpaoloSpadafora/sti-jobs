@@ -40,17 +40,6 @@ public class JsonServiceImpl implements IJsonService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final ModelMapper modelMapper;
-    @Override
-    public JsonDTO parseJsonFile(MultipartFile multipartFile) throws JsonException {
-        try {
-            File file = File.createTempFile("temp", ".json");
-            multipartFile.transferTo(file);
-            return objectMapper.readValue(file, JsonDTO.class);
-        } catch (IOException e) {
-            logger.error("Errore durante la lettura del file JSON", e);
-            throw new JsonException("Errore durante il parsing del file JSON");
-        }
-    }
 
     public byte[] convertToJson(JsonDTO jsonDTO) {
         try {

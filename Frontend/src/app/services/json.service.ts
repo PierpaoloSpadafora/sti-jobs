@@ -13,7 +13,7 @@ export class JsonService {
     exportProjects: false
   };
 
-  private baseUrl = 'http://localhost:7001/api/v1'; // URL del backend
+  private baseUrl = 'http://localhost:7001/sti-jobs/api/v1/json';
 
   constructor(private http: HttpClient) { }
 
@@ -47,6 +47,8 @@ export class JsonService {
   }
 
   callJsonEndpoint(data: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/json/import`, data);
+    const headers = { 'Content-Type': 'application/json' };
+    return this.http.post<any>(`${this.baseUrl}/import`, data, { headers });
   }
+
 }

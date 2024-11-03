@@ -29,20 +29,19 @@ public class JsonController {
 
     private final JsonServiceImpl jsonServiceImpl;
 
-    @Operation(summary = "Import data from JSON file", description = "Upload a JSON file to import data into the system.",
+    @Operation(summary = "Import data from JSON", description = "Import data into the system from JSON content.",
             tags = {"json-controller"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data imported successfully.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid file format or content.",
+            @ApiResponse(responseCode = "400", description = "Invalid JSON format or content.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PostMapping("/import")
-    public ResponseEntity<String> importJsonFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/import", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> importJsonFile(@RequestBody JsonDTO jsonDTO) {
         try {
-            JsonDTO jsonDTO = jsonServiceImpl.parseJsonFile(file);
             jsonServiceImpl.processImport(jsonDTO);
             return ResponseEntity.ok("Data imported successfully!");
         } catch (Exception e) {
