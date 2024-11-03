@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -21,7 +22,7 @@ import { CreateImportMachineTypeComponent } from './components/create-import-mac
 import { ViewExportDeleteJobsComponent } from './components/view-export-delete-jobs/view-export-delete-jobs.component';
 import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
-import {MachineTypeControllerService} from "./generated-api";
+import { MachineTypeControllerService, UserControllerService } from "./generated-api";
 
 @NgModule({
   declarations: [
@@ -47,9 +48,10 @@ import {MachineTypeControllerService} from "./generated-api";
     AppRoutingModule,
     NgOptimizedImage,
     CommonModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ],
-  providers: [MachineTypeControllerService],
+  providers: [MachineTypeControllerService, UserControllerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
