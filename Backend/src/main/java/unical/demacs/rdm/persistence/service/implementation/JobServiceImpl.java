@@ -1,18 +1,13 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +40,7 @@ public class JobServiceImpl implements IJobService {
     @Override
     public JobDTO updateJob(Long id, JobDTO jobDTO) {
         Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new UserException("Job not found", null));
+                .orElseThrow(() -> new UserException("Job not found"));
         job.setTitle(jobDTO.getTitle());
         job.setDescription(jobDTO.getDescription());
         // Aggiorna altri campi necessari
@@ -56,26 +51,6 @@ public class JobServiceImpl implements IJobService {
     @Override
     public void deleteJob(Long id) {
         jobRepository.deleteById(id);
-    }
-
-    @Override
-    public List<JobDTO> parseJobsFromJson(MultipartFile file) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Salva i Job nel database
-        return objectMapper.readValue(file.getInputStream(), new TypeReference<>() {
-        });
-    }
-
-    @Override
-    public ByteArrayResource exportJobs() {
-        List<JobDTO> jobDTOs = getAllJobs();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            byte[] data = objectMapper.writeValueAsBytes(jobDTOs);
-            return new ByteArrayResource(data);
-        } catch (IOException e) {
-            throw new UserException("Error exporting jobs to JSON", e);
-        }
     }
 
     @Override

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @AllArgsConstructor
 public class JsonServiceImpl implements IJsonService {
@@ -173,7 +172,7 @@ public class JsonServiceImpl implements IJsonService {
     @Transactional
     public JsonDTO processExport(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException("User not found with email: " + email, e));
+                .orElseThrow(() -> new UserException("User not found with email: " + email));
 
         String userId = user.getId();
         JsonDTO jsonDTO = new JsonDTO();

@@ -5,13 +5,9 @@ package unical.demacs.rdm.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -35,10 +31,9 @@ public class JsonController {
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})
-    @PostMapping(value = "/importJob", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> importJob(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/importJob", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs) {
         try {
-            List<JobDTO> jobs = jobService.parseJobsFromJson(file);
             jobs.forEach(job -> {
                 Optional<JobDTO> existingJob = jobService.findById(job.getId());
                 if (existingJob.isEmpty()) {
@@ -51,23 +46,19 @@ public class JsonController {
         }
     }
 
-    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON file.",
+    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
-    @GetMapping(value = "/exportJob", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> exportJob() {
-        ByteArrayResource resource = jobService.exportJobs();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=jobs.json")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+    @GetMapping(value = "/exportJob", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<JobDTO>> exportJob() {
+        List<JobDTO> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(jobs);
     }
 
     @Operation(summary = "Import MachineType data from JSON", description = "Import MachineType data into the system from JSON content.",
             tags = {"json-controller"})
-    @PostMapping(value = "/importMachineType", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> importMachineType(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
         try {
-            List<MachineTypeDTO> machineTypes = machineTypeService.parseMachineTypesFromJson(file);
             machineTypes.forEach(machineType -> {
                 Optional<MachineTypeDTO> existingType = machineTypeService.getMachineTypeById(machineType.getId());
                 if (existingType.isEmpty()) {
@@ -80,23 +71,19 @@ public class JsonController {
         }
     }
 
-    @Operation(summary = "Export MachineType data to JSON", description = "Export all MachineType data to JSON file.",
+    @Operation(summary = "Export MachineType data to JSON", description = "Export all MachineType data to JSON.",
             tags = {"json-controller"})
-    @GetMapping(value = "/exportMachineType", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> exportMachineType() {
-        ByteArrayResource resource = machineTypeService.exportMachineTypes();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=machine_types.json")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+    @GetMapping(value = "/exportMachineType", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MachineTypeDTO>> exportMachineType() {
+        List<MachineTypeDTO> machineTypes = machineTypeService.getAllMachineTypes();
+        return ResponseEntity.ok(machineTypes);
     }
 
     @Operation(summary = "Import Machine data from JSON", description = "Import Machine data into the system from JSON content.",
             tags = {"json-controller"})
-    @PostMapping(value = "/importMachine", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> importMachine(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/importMachine", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> importMachine(@RequestBody List<MachineDTO> machines) {
         try {
-            List<MachineDTO> machines = machineService.parseMachinesFromJson(file);
             machines.forEach(machine -> {
                 Optional<MachineDTO> existingMachine = machineService.findByIdOrName(machine.getId(), machine.getName());
                 if (existingMachine.isEmpty()) {
@@ -109,14 +96,11 @@ public class JsonController {
         }
     }
 
-    @Operation(summary = "Export Machine data to JSON", description = "Export all Machine data to JSON file.",
+    @Operation(summary = "Export Machine data to JSON", description = "Export all Machine data to JSON.",
             tags = {"json-controller"})
-    @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> exportMachine() {
-        ByteArrayResource resource = machineService.exportMachines();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=machines.json")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
+    @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<MachineDTO>> exportMachine() {
+        List<MachineDTO> machines = machineService.getAllMachines();
+        return ResponseEntity.ok(machines);
     }
 }

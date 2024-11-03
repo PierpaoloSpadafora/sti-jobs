@@ -1,12 +1,6 @@
-// MachineServiceImpl.java
-
 package unical.demacs.rdm.persistence.service.implementation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
@@ -14,7 +8,6 @@ import unical.demacs.rdm.persistence.enums.MachineStatus;
 import unical.demacs.rdm.persistence.repository.MachineRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -78,25 +71,6 @@ public class MachineServiceImpl implements IMachineService {
         return machineRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<MachineDTO> parseMachinesFromJson(MultipartFile file) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(file.getInputStream(), new TypeReference<>() {
-        });
-    }
-
-    @Override
-    public ByteArrayResource exportMachines() {
-        List<MachineDTO> machineDTOs = getAllMachines();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            byte[] data = objectMapper.writeValueAsBytes(machineDTOs);
-            return new ByteArrayResource(data);
-        } catch (IOException e) {
-            throw new RuntimeException("Error exporting machines to JSON", e);
-        }
     }
 
     @Override
