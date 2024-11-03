@@ -1,1 +1,71 @@
-<p>create-import-machine-type works!</p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Importa Machine Type</h2>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-3 align-items-center">
+        <button class="btn btn-secondary" routerLink="/create">
+          <i class="bi bi-arrow-left"></i> Indietro
+        </button>
+
+        <button
+          *ngIf="!showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-code-slash"></i> Compila in JSON
+        </button>
+
+        <button
+          *ngIf="showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-ui-checks-grid"></i> Compila Form
+        </button>
+      </div>
+
+      <form *ngIf="!showJsonInput" (ngSubmit)="submitMachineType()">
+        <div class="mb-3">
+          <label for="name" class="form-label">Nome</label>
+          <input
+            id="name"
+            class="form-control"
+            [(ngModel)]="machineType.name"
+            name="name"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Descrizione</label>
+          <textarea
+            id="description"
+            class="form-control"
+            [(ngModel)]="machineType.description"
+            name="description"
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Invia</button>
+      </form>
+
+      <div *ngIf="showJsonInput">
+        <label for="jsonInput" class="form-label"
+        >Inserisci il JSON dei Machine Types</label
+        >
+        <textarea
+          id="jsonInput"
+          class="form-control mb-3"
+          [(ngModel)]="jsonInputContent"
+          rows="15"
+          name="jsonInput"
+        ></textarea>
+        <small class="text-muted">Esempio di JSON atteso:</small>
+        <pre class="bg-light p-2">{{ jsonExample }}</pre>
+        <button (click)="submitMachineType()" class="btn btn-primary w-100">
+          Invia JSON
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

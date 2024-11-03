@@ -1,1 +1,96 @@
-<p>create-import-machine works!</p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Importa Machine</h2>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-3 align-items-center">
+        <button class="btn btn-secondary" routerLink="/create">
+          <i class="bi bi-arrow-left"></i> Indietro
+        </button>
+
+        <button
+          *ngIf="!showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-code-slash"></i> Compila in JSON
+        </button>
+
+        <button
+          *ngIf="showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-ui-checks-grid"></i> Compila Form
+        </button>
+      </div>
+
+      <form *ngIf="!showJsonInput" (ngSubmit)="submitMachine()">
+        <div class="mb-3">
+          <label for="name" class="form-label">Nome</label>
+          <input
+            id="name"
+            class="form-control"
+            [(ngModel)]="machine.name"
+            name="name"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Descrizione</label>
+          <textarea
+            id="description"
+            class="form-control"
+            [(ngModel)]="machine.description"
+            name="description"
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="status" class="form-label">Stato</label>
+          <select
+            id="status"
+            class="form-select"
+            [(ngModel)]="machine.status"
+            name="status"
+          >
+            <option [ngValue]="undefined">Seleziona Stato</option>
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="typeName" class="form-label">Tipo Macchina</label>
+          <input
+            id="typeName"
+            class="form-control"
+            [(ngModel)]="machine.typeName"
+            name="typeName"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Invia</button>
+      </form>
+
+      <div *ngIf="showJsonInput">
+        <label for="jsonInput" class="form-label"
+        >Inserisci il JSON delle Machines</label
+        >
+        <textarea
+          id="jsonInput"
+          class="form-control mb-3"
+          [(ngModel)]="jsonInputContent"
+          rows="15"
+          name="jsonInput"
+        ></textarea>
+        <small class="text-muted">Esempio di JSON atteso:</small>
+        <pre class="bg-light p-2">{{ jsonExample }}</pre>
+        <button (click)="submitMachine()" class="btn btn-primary w-100">
+          Invia JSON
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
