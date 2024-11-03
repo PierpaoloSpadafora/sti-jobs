@@ -34,9 +34,8 @@ public class JobController {
     })
     @PostMapping(value = "/create-job", produces = "application/json")
     public ResponseEntity<JobDTO> createJob(@RequestBody JobDTO jobDTO) {
-        Job job = modelMapper.map(jobDTO, Job.class);
-        Job createdJob = jobServiceImpl.createJob(job);
-        return ResponseEntity.ok(modelMapper.map(createdJob, JobDTO.class));
+        JobDTO createdJob = jobServiceImpl.createJob(jobDTO);
+        return ResponseEntity.ok(createdJob);
     }
 
     @Operation(summary = "Update a job", description = "Update a job using the provided job object.",
@@ -49,9 +48,8 @@ public class JobController {
     })
     @PutMapping(value = "/update-job{id}", produces = "application/json")
     public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @RequestBody JobDTO jobDTO) {
-        Job job = modelMapper.map(jobDTO, Job.class);
-        Job updatedJob = jobServiceImpl.updateJob(id, job);
-        return ResponseEntity.ok(modelMapper.map(updatedJob, JobDTO.class));
+        JobDTO updatedJob = jobServiceImpl.updateJob(id, jobDTO);
+        return ResponseEntity.ok(updatedJob);
     }
 
     @Operation(summary = "Get all job", description = "Return all the jobs in the database.",

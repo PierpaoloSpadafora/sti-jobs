@@ -42,7 +42,7 @@ public class UserServiceImpl implements IUserService {
             }
         } catch (Exception e) {
             logger.error("Error creating user with email: {}", email, e);
-            throw new UserException("Error creating user");
+            throw new UserException("Error creating user", e);
         } finally {
             logger.info("++++++END REQUEST++++++");
         }

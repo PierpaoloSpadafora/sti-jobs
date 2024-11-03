@@ -6,7 +6,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.JsonException;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.*;
@@ -16,8 +15,7 @@ import unical.demacs.rdm.persistence.repository.*;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -175,7 +173,7 @@ public class JsonServiceImpl implements IJsonService {
     @Transactional
     public JsonDTO processExport(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException("User not found with email: " + email));
+                .orElseThrow(() -> new UserException("User not found with email: " + email, e));
 
         String userId = user.getId();
         JsonDTO jsonDTO = new JsonDTO();

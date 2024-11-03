@@ -1,79 +1,108 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.UserException;
+import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class JobServiceImpl implements IJobService {
 
-    public static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
-    private JobRepository jobRepository;
+    private final JobRepository jobRepository;
 
     @Override
-    public List<Job> getAllJobs() {
-        return jobRepository.findAll();
+    public List<JobDTO> getAllJobs() {
+        return jobRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Job> getJobById(Long id) {
-        return jobRepository.findById(id);
+    public Optional<JobDTO> getJobById(Long id) {
+        return jobRepository.findById(id).map(this::convertToDTO);
     }
 
     @Override
-    public Job createJob(Job job) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Attempting to create job with title: {}", job.getTitle());
-        try {
-            Job new_job = jobRepository.findByTitle(job.getTitle()).orElse(null);
-            if (new_job != null) {
-                logger.info("Job with title {} already exists", job.getTitle());
-                return job;
-            } else {
-                new_job = Job.buildJob()
-                        .title(job.getTitle())
-                        .description(job.getDescription())
-                        .status(job.getStatus())
-                        .priority(job.getPriority())
-                        .duration(job.getDuration())
-                        .assignee(job.getAssignee())
-                        .requiredMachineType(job.getRequiredMachineType())
-                        .build();
-                jobRepository.save(job);
-                logger.info("Job with title {} created successfully", job.getTitle());
-                return new_job;
-            }
-        } catch (Exception e) {
-            logger.error("Error creating job with title: {}", job.getTitle(), e);
-            throw new UserException("Error creating job");
-        } finally {
-            logger.info("++++++END REQUEST++++++");
-        }
+    public JobDTO createJob(JobDTO jobDTO) {
+        Job job = convertToEntity(jobDTO);
+        Job savedJob = jobRepository.save(job);
+        return convertToDTO(savedJob);
     }
 
     @Override
-    public Job updateJob(Long id, Job job) {
-        return jobRepository.findById(id).map(existingJob -> {
-            existingJob.setTitle(job.getTitle());
-            existingJob.setDescription(job.getDescription());
-            existingJob.setStatus(job.getStatus());
-            existingJob.setPriority(job.getPriority());
-            existingJob.setDuration(job.getDuration());
-            return jobRepository.save(existingJob);
-        }).orElseThrow(() -> new UserException("Job not found"));
+    public JobDTO updateJob(Long id, JobDTO jobDTO) {
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new UserException("Job not found", null));
+        job.setTitle(jobDTO.getTitle());
+        job.setDescription(jobDTO.getDescription());
+        // Aggiorna altri campi necessari
+        Job updatedJob = jobRepository.save(job);
+        return convertToDTO(updatedJob);
     }
 
     @Override
     public void deleteJob(Long id) {
         jobRepository.deleteById(id);
+    }
+
+    @Override
+    public List<JobDTO> parseJobsFromJson(MultipartFile file) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        // Salva i Job nel database
+        return objectMapper.readValue(file.getInputStream(), new TypeReference<>() {
+        });
+    }
+
+    @Override
+    public ByteArrayResource exportJobs() {
+        List<JobDTO> jobDTOs = getAllJobs();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            byte[] data = objectMapper.writeValueAsBytes(jobDTOs);
+            return new ByteArrayResource(data);
+        } catch (IOException e) {
+            throw new UserException("Error exporting jobs to JSON", e);
+        }
+    }
+
+    @Override
+    public Optional<JobDTO> findById(Long id) {
+        return getJobById(id);
+    }
+
+    @Override
+    public JobDTO saveJob(JobDTO jobDTO) {
+        return createJob(jobDTO);
+    }
+
+    private JobDTO convertToDTO(Job job) {
+        JobDTO jobDTO = new JobDTO();
+        jobDTO.setId(job.getId());
+        jobDTO.setTitle(job.getTitle());
+        jobDTO.setDescription(job.getDescription());
+        // Imposta altri campi necessari
+        return jobDTO;
+    }
+
+    private Job convertToEntity(JobDTO jobDTO) {
+        Job job = new Job();
+        job.setId(jobDTO.getId());
+        job.setTitle(jobDTO.getTitle());
+        job.setDescription(jobDTO.getDescription());
+        // Imposta altri campi necessari
+        return job;
     }
 }

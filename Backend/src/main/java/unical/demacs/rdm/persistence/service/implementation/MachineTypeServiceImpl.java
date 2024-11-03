@@ -1,15 +1,20 @@
+// MachineTypeServiceImpl.java
+
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,80 +23,59 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class MachineTypeServiceImpl implements IMachineTypeService {
 
-    public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    private MachineTypeRepository machineTypeRepository;
+    private final MachineTypeRepository machineTypeRepository;
 
     @Override
     public MachineTypeDTO createMachineType(MachineTypeDTO machineTypeDTO) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Attempting to create machine type with name: {}", machineTypeDTO.getName());
-        try {
-            MachineType existingMachineType = machineTypeRepository.findByName(machineTypeDTO.getName()).orElse(null);
-            if (existingMachineType != null) {
-                logger.info("Machine type with name {} already exists", machineTypeDTO.getName());
-                return convertToDTO(existingMachineType);
-            }
-
-            MachineType machineType = new MachineType();
-            machineType.setName(machineTypeDTO.getName());
-            machineType.setDescription(machineTypeDTO.getDescription());
-            machineType = machineTypeRepository.save(machineType);
-            logger.info("Machine type with name {} created successfully", machineTypeDTO.getName());
-            return convertToDTO(machineType);
-        } catch (Exception e) {
-            logger.error("Error creating machine type with name: {}", machineTypeDTO.getName(), e);
-            throw new MachineException("Error creating machine type");
-        } finally {
-            logger.info("++++++END REQUEST++++++");
+        MachineType existingMachineType = machineTypeRepository.findByName(machineTypeDTO.getName()).orElse(null);
+        if (existingMachineType != null) {
+            return convertToDTO(existingMachineType);
         }
+
+        MachineType machineType = new MachineType();
+        machineType.setName(machineTypeDTO.getName());
+        machineType.setDescription(machineTypeDTO.getDescription());
+        machineType = machineTypeRepository.save(machineType);
+        return convertToDTO(machineType);
     }
 
     @Override
     public Optional<MachineTypeDTO> getMachineTypeById(Long id) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Attempting to get machine type by id: {}", id);
-        try {
-            return Optional.ofNullable(machineTypeRepository.findById(id)
-                    .map(this::convertToDTO)
-                    .orElseThrow(() -> {
-                        logger.warn("Machine type not found for id: {}", id);
-                        return new MachineException("No machine type found");
-                    }));
-        } finally {
-            logger.info("++++++END REQUEST++++++");
-        }
+        return machineTypeRepository.findById(id).map(this::convertToDTO);
     }
 
     @Override
     public List<MachineTypeDTO> getAllMachineTypes() {
-        logger.info("++++++START REQUEST++++++");
-        try {
-            return machineTypeRepository.findAll()
-                    .stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } finally {
-            logger.info("++++++END REQUEST++++++");
-        }
+        return machineTypeRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteMachineType(Long id) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Attempting to delete machine type by id: {}", id);
+        if (!machineTypeRepository.existsById(id)) {
+            throw new MachineException("No machine type found");
+        }
+        machineTypeRepository.deleteById(id);
+    }
+
+    @Override
+    public List<MachineTypeDTO> parseMachineTypesFromJson(MultipartFile file) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<MachineTypeDTO> machineTypeDTOList = objectMapper.readValue(file.getInputStream(), new TypeReference<List<MachineTypeDTO>>() {});
+        return machineTypeDTOList;
+    }
+
+    @Override
+    public ByteArrayResource exportMachineTypes() {
+        List<MachineTypeDTO> machineTypeDTOs = getAllMachineTypes();
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            if (!machineTypeRepository.existsById(id)) {
-                logger.warn("Machine type not found for id: {}", id);
-                throw new MachineException("No machine type found");
-            }
-            machineTypeRepository.deleteById(id);
-            logger.info("Machine type with id {} deleted successfully", id);
-        } catch (Exception e) {
-            logger.error("Error deleting machine type with id: {}", id, e);
-            throw new MachineException("Error deleting machine type");
-        } finally {
-            logger.info("++++++END REQUEST++++++");
+            byte[] data = objectMapper.writeValueAsBytes(machineTypeDTOs);
+            return new ByteArrayResource(data);
+        } catch (IOException e) {
+            throw new RuntimeException("Error exporting machine types to JSON", e);
         }
     }
 

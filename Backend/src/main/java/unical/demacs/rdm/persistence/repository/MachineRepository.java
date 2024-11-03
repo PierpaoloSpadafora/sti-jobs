@@ -11,4 +11,5 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
     List<Machine> findByStatus(MachineStatus status);
     List<Machine> findByTypeId(Long typeId);
     Optional<Machine> findById(Long id);
+    Optional<Machine> findByIdOrName(Long id, String name);
 }
