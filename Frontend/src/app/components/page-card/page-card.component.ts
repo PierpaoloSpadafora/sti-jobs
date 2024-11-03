@@ -1,4 +1,3 @@
-// page-card.component.ts
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { VariablesService } from '../../services/variables.service';

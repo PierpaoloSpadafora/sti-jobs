@@ -6,7 +6,7 @@ import { MachineTypeDTO } from '../../generated-api';
 @Component({
   selector: 'app-job-project-handler',
   templateUrl: './job-project-handler.component.html',
-  styleUrls: ['./job-project-handler.component.css']
+  styleUrls: ['./job-project-handler.component.css'],
 })
 export class JobProjectHandlerComponent implements OnInit {
   showJsonInput: boolean = false;
@@ -18,7 +18,7 @@ export class JobProjectHandlerComponent implements OnInit {
     assignee: undefined,
     priority: undefined,
     duration: undefined,
-    requiredMachineType: undefined
+    requiredMachineType: undefined,
   };
 
   get requiredMachineTypeName(): string {
@@ -36,11 +36,12 @@ export class JobProjectHandlerComponent implements OnInit {
   priorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
   jsonInputContent: string = '';
+  jsonExample: string = '';
 
-  constructor(private jsonService: JsonService) { }
+  constructor(private jsonService: JsonService) {}
 
   ngOnInit(): void {
-    this.jsonInputContent =
+    this.jsonExample =
       `[
         {
           "id": 0,
@@ -60,6 +61,7 @@ export class JobProjectHandlerComponent implements OnInit {
           }
         }
       ]`;
+    this.jsonInputContent = this.jsonExample;
   }
 
   toggleJsonInput() {
@@ -91,9 +93,9 @@ export class JobProjectHandlerComponent implements OnInit {
         this.resetForm();
       },
       error: (error) => {
-        console.error('Errore durante l\'importazione dei Job:', error);
-        alert('Errore durante l\'importazione dei Job: ' + error.message);
-      }
+        console.error("Errore durante l'importazione dei Job:", error);
+        alert("Errore durante l'importazione dei Job: " + error.message);
+      },
     });
   }
 
@@ -105,7 +107,8 @@ export class JobProjectHandlerComponent implements OnInit {
       assignee: undefined,
       priority: undefined,
       duration: undefined,
-      requiredMachineType: undefined
+      requiredMachineType: undefined,
     };
+    this.jsonInputContent = '';
   }
 }
