@@ -1,4 +1,3 @@
-// create-import-machine.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineDTO } from '../../generated-api';
@@ -15,7 +14,7 @@ export class CreateImportMachineComponent implements OnInit {
   showJsonInput: boolean = false;
 
   machine: MachineDTO = {
-    id: 0,  // Includi 'id' nell'oggetto
+    id: 0,
     name: '',
     description: '',
     status: undefined,
@@ -149,7 +148,7 @@ export class CreateImportMachineComponent implements OnInit {
 
   resetForm() {
     this.machine = {
-      id: 0,  // Reimposta 'id' al valore predefinito
+      id: 0,
       name: '',
       description: '',
       status: undefined,

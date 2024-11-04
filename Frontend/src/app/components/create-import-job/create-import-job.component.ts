@@ -1,4 +1,3 @@
-// create-import-job.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { JobDTO } from '../../generated-api';
@@ -15,7 +14,7 @@ export class CreateImportJobComponent implements OnInit {
   showJsonInput: boolean = false;
 
   job: JobDTO = {
-    id: 0,  // Includi 'id' nell'oggetto
+    id: 0,
     title: '',
     description: '',
     status: undefined,
@@ -181,7 +180,7 @@ export class CreateImportJobComponent implements OnInit {
 
   resetForm() {
     this.job = {
-      id: 0,  // Reimposta 'id' al valore predefinito
+      id: 0,
       title: '',
       description: '',
       status: undefined,

@@ -2,7 +2,6 @@ import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core
 import { Configuration } from './configuration';
 import { HttpClient } from '@angular/common/http';
 
-
 import { JobControllerService } from './api/jobController.service';
 import { JsonControllerService } from './api/jsonController.service';
 import { MachineControllerService } from './api/machineController.service';
@@ -11,9 +10,9 @@ import { ScheduleControllerService } from './api/scheduleController.service';
 import { UserControllerService } from './api/userController.service';
 
 @NgModule({
-  imports:      [],
   declarations: [],
-  exports:      [],
+  imports: [],
+  exports: [],
   providers: [
     JobControllerService,
     JsonControllerService,

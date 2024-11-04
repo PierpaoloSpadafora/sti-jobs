@@ -1,4 +1,3 @@
-// create-import-machine-type.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineTypeDTO } from '../../generated-api';
@@ -12,7 +11,6 @@ import Swal from 'sweetalert2';
 export class CreateImportMachineTypeComponent implements OnInit {
   showJsonInput: boolean = false;
 
-  // Includi 'id' nell'oggetto machineType iniziale
   machineType: MachineTypeDTO = {
     id: 0,  // Valore predefinito per id
     name: '',
@@ -57,7 +55,6 @@ export class CreateImportMachineTypeComponent implements OnInit {
         return;
       }
     } else {
-      // Assicurati che 'id' sia incluso nell'oggetto
       machineTypesToSubmit = [this.machineType];
     }
 
@@ -83,7 +80,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   resetForm() {
     this.machineType = {
-      id: 0,  // Reimposta id al valore predefinito
+      id: 0,
       name: '',
       description: ''
     };

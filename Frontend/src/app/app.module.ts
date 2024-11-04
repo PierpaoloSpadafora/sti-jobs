@@ -23,6 +23,11 @@ import { ViewExportDeleteJobsComponent } from './components/view-export-delete-j
 import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
 import { MachineTypeControllerService, UserControllerService } from "./generated-api";
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {MatIcon, MatIconModule} from "@angular/material/icon";
+import {MatMenu, MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {MatButtonModule} from "@angular/material/button";
 
 @NgModule({
   declarations: [
@@ -49,7 +54,12 @@ import { MachineTypeControllerService, UserControllerService } from "./generated
     NgOptimizedImage,
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatMenuTrigger
   ],
   providers: [MachineTypeControllerService, UserControllerService],
   bootstrap: [AppComponent]

@@ -4,7 +4,10 @@
       <img ngSrc="assets/sti-jobs-logo.png" alt="STI JOBS" />
     </div>
     <div class="header-slim-right-zone">
-      <a href="#" class="nav-link text-white" (click)="logout()">{{ userEmail }}</a>
+      <span class="user-email">{{ userEmail }}</span>
+      <button class="logout-button" (click)="logout()" aria-label="Logout">
+        <mat-icon>logout</mat-icon>
+      </button>
     </div>
   </div>
 </div>
