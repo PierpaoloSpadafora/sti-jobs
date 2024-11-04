@@ -88,7 +88,7 @@ public class JobController {
         return ResponseEntity.ok(modelMapper.map(jobServiceImpl.getJobById(id), JobDTO.class));
     }
 
-    @Operation(summary = "Get job by assignee email", description = "Retrieve a job using the assignee email.",
+    @Operation(summary = "Get jobs by assignee email", description = "Retrieve jobs using the assignee email.",
             tags = {"job-controller"})
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Jobs retrieved successfully.",

@@ -1,0 +1,26 @@
+<table *ngIf="machines && machines.length > 0" border="1">
+<thead>
+    <tr>
+    <th>ID</th>
+    <th>Nome</th>
+    <th>Descrizione</th>
+    <th>Data di Creazione</th>
+    <th>Data di Aggiornamento</th>
+    <th>Stato</th>
+    <th>ID Tipo di Macchina</th>
+    </tr>
+</thead>
+<tbody>
+    <tr *ngFor="let machine of machines">
+    <td>{{ machine.id }}</td>
+    <td>{{ machine.name }}</td>
+    <td>{{ machine.description }}</td>
+    <td>{{ machine.createdAt | date:'short' }}</td>
+    <td>{{ machine.updatedAt | date:'short' }}</td>
+    <td>{{ machine.status }}</td>
+    <td>{{ machine.typeId }}</td>
+    </tr>
+</tbody>
+</table>
+<p *ngIf="!machines || machines.length === 0">Nessuna macchina trovata.</p>
+  

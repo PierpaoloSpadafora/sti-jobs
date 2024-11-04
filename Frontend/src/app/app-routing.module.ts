@@ -11,6 +11,8 @@ import { CreateImportJobComponent } from './components/create-import-job/create-
 import { CreateImportMachineComponent } from "./components/create-import-machine/create-import-machine.component";
 import { CreateImportMachineTypeComponent } from "./components/create-import-machine-type/create-import-machine-type.component";
 import { ShowJobComponent } from './components/show-job/show-job.component';
+import { ShowMachineComponent } from './components/show-machine/show-machine.component';
+import { ShowMachineTypeComponent } from './components/show-machine-type/show-machine-type.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -25,6 +27,8 @@ const routes: Routes = [
   { path: 'create-import-machine-types', component: CreateImportMachineTypeComponent,canActivate:[AuthGuard]},
 
   { path: 'show-job', component: ShowJobComponent,canActivate:[AuthGuard]},
+  { path: 'show-machine', component: ShowMachineComponent,canActivate:[AuthGuard]},
+  { path: 'show-machine-type', component: ShowMachineTypeComponent,canActivate:[AuthGuard]},
 
   {path : 'view-export-delete-jobs', component : CreateImportJobComponent, canActivate: [AuthGuard]},
   {path : 'view-export-delete-machines', component : CreateImportMachineComponent, canActivate: [AuthGuard]},
