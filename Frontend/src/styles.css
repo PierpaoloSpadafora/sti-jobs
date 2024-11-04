@@ -1,1 +1,19 @@
-/* You can add global styles to this file, and also import other style files */
+/* CSS */
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+@import '../node_modules/sweetalert2/dist/sweetalert2.min.css';
+
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

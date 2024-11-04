@@ -11,5 +11,5 @@ public interface IUserService {
 
     Optional<User> getUserByEmail(String email);
     Optional<User> getUserById(String id);
-
+    void deleteUserById(String id);
 }

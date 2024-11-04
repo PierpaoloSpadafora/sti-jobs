@@ -1,3 +1,13 @@
+export * from './jobController.service';
+import { JobControllerService } from './jobController.service';
+export * from './jsonController.service';
+import { JsonControllerService } from './jsonController.service';
+export * from './machineController.service';
+import { MachineControllerService } from './machineController.service';
+export * from './machineTypeController.service';
+import { MachineTypeControllerService } from './machineTypeController.service';
+export * from './scheduleController.service';
+import { ScheduleControllerService } from './scheduleController.service';
 export * from './userController.service';
 import { UserControllerService } from './userController.service';
-export const APIS = [UserControllerService];
+export const APIS = [JobControllerService, JsonControllerService, MachineControllerService, MachineTypeControllerService, ScheduleControllerService, UserControllerService];

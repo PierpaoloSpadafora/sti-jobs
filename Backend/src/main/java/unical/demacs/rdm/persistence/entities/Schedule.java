@@ -1,7 +1,9 @@
 package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.JobStatus;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 
@@ -10,6 +12,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "schedules")
 @Data
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -95,4 +95,27 @@ public class UserServiceImpl implements IUserService {
             logger.info("++++++END REQUEST++++++");
         }
     }
+
+    @Override
+    public void deleteUserById(String id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to delete user by id: {}", id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for deleteUserById");
+                throw new TooManyRequestsException();
+            }
+
+            userRepository.findById(id)
+                    .ifPresentOrElse(user -> {
+                        userRepository.delete(user);
+                        logger.info("User with id {} deleted successfully", id);
+                    }, () -> {
+                        logger.warn("User not found for id: {}", id);
+                        throw new NoUserFoundException("No user found");
+                    });
+        } finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
 }

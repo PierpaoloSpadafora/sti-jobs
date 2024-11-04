@@ -24,6 +24,20 @@ public class UserController {
     private final UserServiceImpl userServiceImpl;
     private final ModelMapper modelMapper;
 
+
+    @Operation(summary = "Create user by email", description = "Create a user using their email address.",
+            tags = {"user-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User created successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(modelMapper.map(userServiceImpl.createUser(userDTO.getEmail()), UserDTO.class));
+    }
+
     @Operation(summary = "Get user by email", description = "Retrieve a user using their email address.",
             tags = {"user-controller"})
     @ApiResponses({
@@ -54,18 +68,22 @@ public class UserController {
         return ResponseEntity.ok(modelMapper.map(userServiceImpl.getUserById(id), UserDTO.class));
     }
 
+    // delete user
 
-    @Operation(summary = "Create user by email", description = "Create a user using their email address.",
+    @Operation(summary = "Delete user by id", description = "Delete a user using their id.",
             tags = {"user-controller"})
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "204", description = "User deleted successfully."),
+            @ApiResponse(responseCode = "404", description = "User not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(modelMapper.map(userServiceImpl.createUser(userDTO.getEmail()), UserDTO.class));
+    @DeleteMapping(path="/by-id/{id}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable("id") String id) {
+        userServiceImpl.deleteUserById(id);
+        return ResponseEntity.noContent().build();
     }
+
 
 }

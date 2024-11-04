@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: backend
+    env_file: ./env
+    ports:
+      - "${SERVER_PORT_HTTP}:${SERVER_PORT_HTTP}"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+
+  db:
+    image: postgres:13
+    container_name: db
+    environment:
+      POSTGRES_DB: sti-jobs
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

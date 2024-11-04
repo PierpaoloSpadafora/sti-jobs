@@ -1,12 +1,18 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { LoginService } from './services/login.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
-  template: '<router-outlet></router-outlet>'
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'STI-JOBS';
+  title = 'Frontend';
+
+  constructor(private loginService: LoginService) {
+  }
+
+  isLoggedIn(): boolean {
+    return this.loginService.isLoggedIn();
+  }
 }

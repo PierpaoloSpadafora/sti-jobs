@@ -1,18 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserControllerService, UserDTO } from '../../generated-api'; 
+import { UserControllerService, UserDTO } from '../../generated-api';
+import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-login',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule,
-    HttpClientModule
-  ],
   providers: [UserControllerService], 
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -22,31 +17,36 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   error = '';
 
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private userService: UserControllerService
+    private userService: UserControllerService,
+    private cdr: ChangeDetectorRef  
   ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
+   
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    });
   }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      this.error = '';
+      this.cdr.detectChanges(); 
       
       const email = this.loginForm.get('email')?.value;
       
       this.userService.getUserByEmail(email).subscribe({
         next: (user) => {
           localStorage.setItem('user-email', email);
-          this.router.navigate(['/scheduler']);
+          this.router.navigate(['/home']);
           this.isLoading = false;
+          this.cdr.detectChanges(); 
         },
         error: (error) => {
           if (error.status === 404) {
@@ -54,7 +54,8 @@ export class LoginComponent implements OnInit {
           } else {
             this.error = 'Si è verificato un errore durante il login';
             this.isLoading = false;
-            console.error('Errore durante il login:', error); 
+            this.cdr.detectChanges(); 
+            console.error('Errore durante il login:', error);
           }
         }
       });
@@ -69,12 +70,14 @@ export class LoginComponent implements OnInit {
     this.userService.createUser(userDTO).subscribe({
       next: (createdUser) => {
         localStorage.setItem('user-email', email);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.error = 'Si è verificato un errore durante la creazione dell\'utente';
         this.isLoading = false;
+        this.cdr.detectChanges();
         console.error('Error creating user:', error);
       }
     });
