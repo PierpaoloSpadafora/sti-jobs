@@ -28,6 +28,7 @@ import {MatIcon, MatIconModule} from "@angular/material/icon";
 import {MatMenu, MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
+import { ShowJobComponent } from './components/show-job/show-job.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import {MatButtonModule} from "@angular/material/button";
     ViewExportDeleteJobsComponent,
     ViewExportDeleteMachinesComponent,
     ViewExportDeleteMachineTypesComponent,
+    ShowJobComponent,
   ],
   imports: [
     BrowserModule,
@@ -61,7 +63,7 @@ import {MatButtonModule} from "@angular/material/button";
     MatMenuModule,
     MatMenuTrigger
   ],
-  providers: [MachineTypeControllerService, UserControllerService],
+  providers: [MachineTypeControllerService, UserControllerService, provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

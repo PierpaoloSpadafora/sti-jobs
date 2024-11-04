@@ -1,0 +1,27 @@
+<table *ngIf="jobs && jobs.length > 0" border="1">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Titolo</th>
+      <th>Descrizione</th>
+      <th>Durata</th>
+      <th>Priorità</th>
+      <th>Stato</th>
+      <th>Assegnatario</th>
+      <th>Tipo di Macchina Richiesta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let job of jobs">
+      <td>{{ job.id }}</td>
+      <td>{{ job.title }}</td>
+      <td>{{ job.description }}</td>
+      <td>{{ job.duration }}</td>
+      <td>{{ job.priority }}</td>
+      <td>{{ job.status }}</td>
+      <td>{{ job.assignee }}</td>
+      <td>{{ job.requiredMachineType }}</td>
+    </tr>
+  </tbody>
+</table>
+<p *ngIf="!jobs || jobs.length === 0">Nessun job trovato.</p>
