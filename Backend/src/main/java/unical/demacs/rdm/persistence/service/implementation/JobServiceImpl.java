@@ -43,7 +43,6 @@ public class JobServiceImpl implements IJobService {
                 .orElseThrow(() -> new UserException("Job not found"));
         job.setTitle(jobDTO.getTitle());
         job.setDescription(jobDTO.getDescription());
-        // Aggiorna altri campi necessari
         Job updatedJob = jobRepository.save(job);
         return convertToDTO(updatedJob);
     }
@@ -68,7 +67,6 @@ public class JobServiceImpl implements IJobService {
         jobDTO.setId(job.getId());
         jobDTO.setTitle(job.getTitle());
         jobDTO.setDescription(job.getDescription());
-        // Imposta altri campi necessari
         return jobDTO;
     }
 
@@ -77,7 +75,6 @@ public class JobServiceImpl implements IJobService {
         job.setId(jobDTO.getId());
         job.setTitle(jobDTO.getTitle());
         job.setDescription(jobDTO.getDescription());
-        // Imposta altri campi necessari
         return job;
     }
 }

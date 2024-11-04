@@ -102,7 +102,6 @@ export class CreateImportMachineComponent implements OnInit {
         return;
       }
     } else {
-      // Validazione dei campi
       if (!this.machine.name) {
         Swal.fire({
           icon: 'error',
@@ -120,8 +119,6 @@ export class CreateImportMachineComponent implements OnInit {
         });
         return;
       }
-
-      // Assicurati che 'id' sia incluso
       machinesToSubmit = [this.machine];
     }
 

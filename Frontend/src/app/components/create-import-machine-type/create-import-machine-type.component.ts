@@ -12,7 +12,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
   showJsonInput: boolean = false;
 
   machineType: MachineTypeDTO = {
-    id: 0,  // Valore predefinito per id
+    id: 0,
     name: '',
     description: ''
   };

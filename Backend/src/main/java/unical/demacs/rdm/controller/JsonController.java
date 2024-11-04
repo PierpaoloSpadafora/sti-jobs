@@ -1,5 +1,3 @@
-// JsonController.java
-
 package unical.demacs.rdm.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
