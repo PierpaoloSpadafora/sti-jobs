@@ -1,0 +1,163 @@
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Importa Job</h2>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-3 align-items-center">
+        <button class="btn btn-secondary" routerLink="/create">
+          <i class="bi bi-arrow-left"></i> Indietro
+        </button>
+
+        <button
+          *ngIf="!showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-code-slash"></i> Compila in JSON
+        </button>
+
+        <button
+          *ngIf="showJsonInput"
+          class="btn btn-warning"
+          (click)="toggleJsonInput()"
+        >
+          <i class="bi bi-ui-checks-grid"></i> Compila Form
+        </button>
+      </div>
+
+      <form *ngIf="!showJsonInput" (ngSubmit)="submitJob()">
+        <div class="mb-3">
+          <label for="title" class="form-label">Titolo</label>
+          <input
+            id="title"
+            class="form-control"
+            [(ngModel)]="job.title"
+            name="title"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Descrizione</label>
+          <textarea
+            id="description"
+            class="form-control"
+            [(ngModel)]="job.description"
+            name="description"
+          ></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="status" class="form-label">Stato</label>
+          <select
+            id="status"
+            class="form-select"
+            [(ngModel)]="job.status"
+            name="status"
+          >
+            <option [ngValue]="undefined">Seleziona Stato</option>
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="priority" class="form-label">Priorità</label>
+          <select
+            id="priority"
+            class="form-select"
+            [(ngModel)]="job.priority"
+            name="priority"
+          >
+            <option [ngValue]="undefined">Seleziona Priorità</option>
+            <option *ngFor="let priority of priorities" [value]="priority">
+              {{ priority }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Durata (HH:MM:SS)</label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationHours"
+              name="durationHours"
+              min="0"
+              placeholder="Ore"
+            />
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationMinutes"
+              name="durationMinutes"
+              min="0"
+              max="59"
+              placeholder="Minuti"
+            />
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="durationSeconds"
+              name="durationSeconds"
+              min="0"
+              max="59"
+              placeholder="Secondi"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="machineType" class="form-label"
+          >Tipo Macchina Richiesto</label
+          >
+          <select
+            id="machineType"
+            class="form-select"
+            [(ngModel)]="job.requiredMachineType"
+            name="machineType"
+            required
+          >
+            <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
+            <option
+              *ngFor="let machineType of machineTypes"
+              [ngValue]="machineType"
+            >
+              {{ machineType.name }}
+            </option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Invia</button>
+      </form>
+
+      <div *ngIf="showJsonInput">
+        <label for="jsonInput" class="form-label"
+        >Inserisci il JSON dei Job</label
+        >
+        <textarea
+          id="jsonInput"
+          class="form-control mb-3"
+          [(ngModel)]="jsonInputContent"
+          (input)="validateJsonInput()"
+          [ngClass]="{'is-invalid': jsonError}"
+          rows="15"
+          name="jsonInput"
+        ></textarea>
+        <div *ngIf="jsonError" class="text-danger mb-3">
+          {{ jsonError }}
+        </div>
+        <small class="text-muted">Esempio di JSON atteso:</small>
+        <pre class="bg-light p-2">{{ jsonExample }}</pre>
+        <button
+          (click)="submitJob()"
+          class="btn btn-primary w-100"
+          [disabled]="jsonError"
+        >
+          Invia JSON
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

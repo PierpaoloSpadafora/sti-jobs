@@ -1,0 +1,29 @@
+.card {
+  width: 260px;
+  padding: 24px;
+  margin: 10px;
+  border-radius: 16px;
+  background-color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header i {
+  font-size: 2.5em;
+  color: #007bff;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: #333;
+  margin-top: 10px;
+}

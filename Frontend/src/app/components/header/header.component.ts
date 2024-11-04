@@ -1,22 +1,25 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
-  userEmail = localStorage.getItem('user-email') || '';
+  userEmail = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private loginService: LoginService) {
+    this.userEmail = localStorage.getItem('user-email') || '';
+  }
 
   logout() {
-    localStorage.removeItem('user-email');
+    this.loginService.logout();
     this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return this.loginService.isLoggedIn();
   }
 }
