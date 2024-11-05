@@ -15,6 +15,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     Optional<Job> findByTitle(String title);
     List<Job> findByStatus(JobStatus status);
     List<Job> findByAssignee_Id(String assigneeId);
+    List<Job> findByAssigneeEmail(String email);
     List<Job> findByPriority(JobPriority priority);
     List<Job> findByDurationGreaterThan(java.time.Duration duration);
     List<Job> findByRequiredMachineType_Id(Long machineTypeId);

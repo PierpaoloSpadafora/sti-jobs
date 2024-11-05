@@ -8,10 +8,11 @@ import java.util.Optional;
 public interface IJobService {
     List<JobDTO> getAllJobs();
     Optional<JobDTO> getJobById(Long id);
+    Optional<List<JobDTO>> getJobByAssigneeEmail(String email);
     JobDTO createJob(JobDTO jobDTO);
     JobDTO updateJob(Long id, JobDTO jobDTO);
     void deleteJob(Long id);
 
     Optional<JobDTO> findById(Long id);
-    JobDTO saveJob(JobDTO jobDTO);
+    void saveJob(JobDTO jobDTO);
 }
