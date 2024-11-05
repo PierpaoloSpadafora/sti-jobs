@@ -15,6 +15,11 @@ import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.service.implementation.JobServiceImpl;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping(value = "/api/v1/job", produces = "application/json")
 @CrossOrigin
@@ -81,6 +86,30 @@ public class JobController {
     @GetMapping(path="/jobs-by-id/{id}")
     public ResponseEntity<JobDTO> getJobById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(modelMapper.map(jobServiceImpl.getJobById(id), JobDTO.class));
+    }
+
+    @Operation(summary = "Get jobs by assignee email", description = "Retrieve jobs using the assignee email.",
+            tags = {"job-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Jobs retrieved successfully.",
+                    content = @Content(mediaType = "application/job", schema = @Schema(implementation = Job.class))),
+            @ApiResponse(responseCode = "404", description = "Job not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @GetMapping(path="/jobs-by-assignee-email/{email}")
+    public ResponseEntity<List<JobDTO>> getJobByAssigneeEmail(@PathVariable("email") String email) {
+        Optional<List<JobDTO>> jobs = jobServiceImpl.getJobByAssigneeEmail(email);
+
+        if (jobs.isPresent()) {
+            List<JobDTO> jobDTOList = jobs.get().stream()
+                    .map(job -> modelMapper.map(job, JobDTO.class))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(jobDTOList);
+        } else {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
     }
 
     @Operation(summary = "Delete a job", description = "Delete a job using their id.",

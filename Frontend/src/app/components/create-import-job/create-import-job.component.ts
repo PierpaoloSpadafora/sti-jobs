@@ -119,13 +119,11 @@ export class CreateImportJobComponent implements OnInit {
         return;
       }
     } else {
-      // Calcola la durata totale in secondi
       this.job.duration =
         (this.durationHours * 3600) +
         (this.durationMinutes * 60) +
         this.durationSeconds;
 
-      // Validazione dei campi
       if (!this.job.title) {
         Swal.fire({
           icon: 'error',
@@ -152,8 +150,6 @@ export class CreateImportJobComponent implements OnInit {
         });
         return;
       }
-
-      // Assicurati che 'id' sia incluso
       jobsToSubmit = [this.job];
     }
 

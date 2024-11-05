@@ -1,6 +1,5 @@
 package unical.demacs.rdm.persistence.repository;
 
-// Repository for Schedule
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import unical.demacs.rdm.persistence.entities.Schedule;

@@ -1,6 +1,8 @@
 package unical.demacs.rdm.config.exception.handler;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,12 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionsHandler {
+
+    private final ObjectMapper objectMapper;
+
+    public ExceptionsHandler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @ExceptionHandler(TooManyRequestsException.class)
     private ResponseEntity<?> handleTooManyRequests() {
@@ -26,9 +34,11 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(NoUserFoundException.class)
-    private ResponseEntity<?> handleNoUserFoundExceptionException(NoUserFoundException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleNoUserFoundException(NoUserFoundException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("error", "No user found");
+        response.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response.toString());
     }
 
     @ExceptionHandler(ScheduleNotFoundException.class)

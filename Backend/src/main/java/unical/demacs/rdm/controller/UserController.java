@@ -68,8 +68,6 @@ public class UserController {
         return ResponseEntity.ok(modelMapper.map(userServiceImpl.getUserById(id), UserDTO.class));
     }
 
-    // delete user
-
     @Operation(summary = "Delete user by id", description = "Delete a user using their id.",
             tags = {"user-controller"})
     @ApiResponses({

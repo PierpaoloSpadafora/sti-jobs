@@ -1,1 +1,3 @@
-docker-compose --env-file env up --build
+@echo off
+docker-compose --env-file ./env up --build
+pause
