@@ -24,13 +24,10 @@ import { ViewExportDeleteMachinesComponent } from './components/view-export-dele
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
 import { MachineTypeControllerService, UserControllerService } from "./generated-api";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import {MatIcon, MatIconModule} from "@angular/material/icon";
-import {MatMenu, MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
+import {MatIconModule} from "@angular/material/icon";
+import {MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
-import { ShowJobComponent } from './components/show-job/show-job.component';
-import { ShowMachineComponent } from './components/show-machine/show-machine.component';
-import { ShowMachineTypeComponent } from './components/show-machine-type/show-machine-type.component';
 
 @NgModule({
   declarations: [
@@ -49,9 +46,6 @@ import { ShowMachineTypeComponent } from './components/show-machine-type/show-ma
     ViewExportDeleteJobsComponent,
     ViewExportDeleteMachinesComponent,
     ViewExportDeleteMachineTypesComponent,
-    ShowJobComponent,
-    ShowMachineComponent,
-    ShowMachineTypeComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,1 +1,45 @@
-<p>view-export-delete-machines works!</p>
+<div class="machines-container">
+  <div class="table-responsive" *ngIf="machines && machines.length > 0">
+    <table class="machines-table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Created At</th>
+        <th>Updated At</th>
+        <th>Status</th>
+        <th>Machine Type ID</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let machine of machines">
+        <td>{{ machine.id }}</td>
+        <td>{{ machine.name }}</td>
+        <td>{{ machine.description }}</td>
+        <td>{{ machine.createdAt | date:'short' }}</td>
+        <td>{{ machine.updatedAt | date:'short' }}</td>
+        <td>
+            <span class="status-badge" [ngClass]="getStatusClass(machine.status)">
+              {{ machine.status }}
+            </span>
+        </td>
+        <td>{{ machine.typeId }}</td>
+        <td class="actions-cell">
+          <button class="action-button" title="Export">
+            <i class="fas fa-file-export"></i>
+          </button>
+          <button class="action-button delete" title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="no-data" *ngIf="!machines || machines.length === 0">
+    <i class="fas fa-industry"></i>
+    <p>No machines found.</p>
+  </div>
+</div>
