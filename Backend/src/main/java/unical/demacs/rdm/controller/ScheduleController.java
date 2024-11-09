@@ -33,20 +33,14 @@ public class ScheduleController {
         }
     }
 
-    @GetMapping("/{id}")
-
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ScheduleDTO> updateScheduleStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
+    public ResponseEntity<ScheduleDTO> updateScheduleStatus(@PathVariable Long id, @RequestParam String status) {
         try {
-            ScheduleStatus newStatus = ScheduleStatus.valueOf(status.toUpperCase());
-            ScheduleDTO updatedSchedule = scheduleService.updateScheduleStatus(id, newStatus);
-            return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
+            ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status);
+            ScheduleDTO updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
+            return ResponseEntity.ok(updatedSchedule);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -58,6 +52,13 @@ public class ScheduleController {
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ScheduleDTO> getScheduleById(@PathVariable Long id) {
+        return scheduleService.getScheduleById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping

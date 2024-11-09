@@ -37,18 +37,24 @@ public class ScheduleServiceImpl implements IScheduleService {
 
     @Override
     public ScheduleDTO createSchedule(ScheduleDTO scheduleDTO) {
-        try {
-            validateScheduleTime(scheduleDTO);
+        Job job = jobRepository.findById(scheduleDTO.getJobId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Job ID"));
+        Machine machine = machineRepository.findById(scheduleDTO.getMachineId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Machine ID"));
 
-            Schedule schedule = new Schedule();
-            updateScheduleFromDTO(schedule, scheduleDTO);
-
-            Schedule savedSchedule = scheduleRepository.save(schedule);
-            return convertToDTO(savedSchedule);
-        } catch (IllegalArgumentException e) {
-            System.err.println("Validation error: " + e.getMessage());
-            throw e;
+        if (!isTimeSlotAvailable(scheduleDTO.getMachineId(), scheduleDTO.getStartTime(), scheduleDTO.getEndTime())) {
+            throw new IllegalArgumentException("Time slot is not available for the selected machine");
         }
+        Schedule schedule = new Schedule();
+        schedule.setJob(job);
+        schedule.setMachine(machine);
+        schedule.setDueDate(scheduleDTO.getDueDate());
+        schedule.setStartTime(scheduleDTO.getStartTime());
+        schedule.setEndTime(scheduleDTO.getEndTime());
+        schedule.setStatus(ScheduleStatus.valueOf(scheduleDTO.getStatus()));
+        schedule = scheduleRepository.save(schedule);
+
+        return convertToDTO(schedule);
     }
 
     @Override
@@ -118,7 +124,7 @@ public class ScheduleServiceImpl implements IScheduleService {
         List<Schedule> conflictingSchedules = scheduleRepository.findByMachine_Id(machineId).stream()
                 .filter(schedule ->
                         !(schedule.getEndTime().isBefore(startTime) || schedule.getStartTime().isAfter(endTime)))
-                .collect(Collectors.toList());
+                .toList();
 
         return conflictingSchedules.isEmpty();
     }

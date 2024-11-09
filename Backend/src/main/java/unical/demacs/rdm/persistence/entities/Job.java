@@ -27,15 +27,15 @@ public class Job {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private JobStatus status;
+    private JobStatus status = JobStatus.PENDING;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User assignee;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private JobPriority priority;
+    @Column(nullable = false)
+    private JobPriority priority = JobPriority.LOW;
 
     @Column(nullable = false)
     private long duration;
