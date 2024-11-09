@@ -3,16 +3,16 @@
 
 ## Avviare Docker
 
-1. Assicuratevi di essere in `./sti-jobs/`.
-2. Eseguite:
+- Assicuratevi di essere in `./sti-jobs/`.
+- Eseguite:
 
    ```bash
    docker-compose --env-file .env up --build
    ```
 
-#### oppure se siete su windows
+### oppure se siete su windows
 
-2. Eseguite:
+- Eseguite:
 
    ```bash
    ./RUNALL.bat
@@ -23,22 +23,14 @@ Al primo avvio del backend, JPA provvederà a creare automaticamente le tabelle 
 
 ## Definition of Ready (DoR)
 
-Perché un ticket sia considerato "Ready" per lo sviluppo, devono essere soddisfatti i seguenti criteri:
+Perché un ticket (user-story o task) sia considerato "Ready" per lo sviluppo, devono essere soddisfatti i seguenti criteri:
 
-1. **Descrizione Completa**: Il ticket contiene una descrizione dettagliata degli obiettivi e del contesto. Specifica chiaramente quale funzionalità deve essere testata e quali sono i criteri di successo.
-2. **Casi di Test Preliminari**: I casi di test principali sono stati identificati e documentati, specificando cosa deve essere verificato nei test automatizzati.
-3. **Ambiente Configurato**: Gli ambienti di test e sviluppo sono pronti e configurati correttamente. È stata verificata la disponibilità delle dipendenze e delle librerie necessarie (in questo caso, JUnit).
-4. **Prerequisiti Soddisfatti**: Tutti i requisiti precedenti o le dipendenze (es. implementazioni o bug fix) sono stati completati e chiusi.
-5. **Accettazione e Priorità**: Il ticket è stato approvato dal Product Owner o dal referente tecnico ed è stato assegnato un livello di priorità.
-6. **Definition of Done (DoD)**: La Definition of Done per il task è stata chiaramente definita e inclusa nel ticket.
-
-## Definition of Done (DoD) per le user stories
-
-Perché una user story sia considerata "Done", devono essere soddisfatti i seguenti criteri:
-
-1. **Completata tutte le relative task**: Tutte le task associate alla user story sono state completate e soddisfano i criteri di "Done".
-2. **Approvato dal Product Owner**: La user story è stata approvata dal Product Owner o dal referente tecnico.
-3. **Merge in dev**: Il codice è stato integrato nel branch `dev` tramite una pull request.
+1. La descrizione del ticket è chiara e completa, includendo tutti i dettagli necessari per lo sviluppo.
+2. Sono stati definiti i casi di test preliminari per la user story o la task e sono stati inclusi nel ticket.
+3. L'ambiente di sviluppo è stato configurato correttamente e tutti i requisiti sono stati soddisfatti.
+4. Tutti i prerequisiti per lo sviluppo del ticket sono stati soddisfatti.
+5. Il ticket è stato approvato dal Product Owner e gli è stato assegnato un livello di priorità.
+6. La Definition of Done per il task è stata chiaramente definita e inclusa nel ticket.
 
 ## Definition of Done (DoD) per le tasks
 
@@ -47,7 +39,12 @@ Perché una task sia considerata "Done", devono essere soddisfatti i seguenti cr
 1. **Il progetto builda senza errori**: Il progetto compila senza errori e tutte le dipendenze sono state risolte correttamente.
 2. **Gli unit test sono stati scritti/aggiornati**: Sono stati scritti o aggiornati i test di unità per verificare il corretto funzionamento del codice.
 3. **Tutti i test passano**: Tutti i test di unità e di integrazione passano senza errori.
+4. **Merge in dev**: Il codice è stato integrato nel branch `dev` tramite una pull request.
 
+## Definition of Done (DoD) per le user stories
 
+Perché una user story sia considerata "Done", devono essere soddisfatti i seguenti criteri:
 
-
+1. **Completata tutte le relative task**: Tutte le task associate alla user story sono state completate e soddisfano la loro DoD.
+2. **Approvato dal Product Owner**: La user story è stata approvata dal Product Owner o dal referente tecnico.
+3. **Merge in main**: Il codice è stato integrato nel branch `main` tramite una pull request.
