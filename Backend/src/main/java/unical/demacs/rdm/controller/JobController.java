@@ -52,7 +52,7 @@ public class JobController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PutMapping(value = "/update-job{id}", produces = "application/json")
+    @PutMapping(value = "/update-job/{id}", produces = "application/json")
     public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @Valid @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobServiceImpl.updateJob(id, jobDTO);
         return ResponseEntity.ok(updatedJob);
@@ -101,7 +101,6 @@ public class JobController {
     @GetMapping(path="/jobs-by-assignee-email/{email}")
     public ResponseEntity<List<JobDTO>> getJobByAssigneeEmail(@PathVariable("email") String email) {
         Optional<List<JobDTO>> jobs = jobServiceImpl.getJobByAssigneeEmail(email);
-
         if (jobs.isPresent()) {
             List<JobDTO> jobDTOList = jobs.get().stream()
                     .map(job -> modelMapper.map(job, JobDTO.class))
@@ -120,7 +119,7 @@ public class JobController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @DeleteMapping(value = "/delete-job{id}", produces = "application/json")
+    @DeleteMapping(value = "/delete-job/{id}", produces = "application/json")
     public ResponseEntity<JobDTO> deleteJob(@PathVariable("id") Long id) {
         jobServiceImpl.deleteJob(id);
         return ResponseEntity.ok().build();
