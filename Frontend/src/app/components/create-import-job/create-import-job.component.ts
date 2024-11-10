@@ -13,8 +13,7 @@ import Swal from 'sweetalert2';
 export class CreateImportJobComponent implements OnInit {
   showJsonInput: boolean = false;
 
-  job: JobDTO = {
-    id: 0,
+  job: Omit<JobDTO, 'id'> = {
     title: '',
     description: '',
     status: undefined,
@@ -45,16 +44,10 @@ export class CreateImportJobComponent implements OnInit {
 
   ngOnInit(): void {
     this.jsonExample =
-      `[
-        {
-          "id": 1,
+      `[{
           "title": "Job 1",
           "description": "First job",
           "status": "PENDING",
-          "assignee": {
-            "id": "1",
-            "email": "prova@gmail.com"
-          },
           "priority": "LOW",
           "duration": 3600,
           "requiredMachineType": {
@@ -62,8 +55,7 @@ export class CreateImportJobComponent implements OnInit {
             "name": "Type 1",
             "description": "Description of Type 1"
           }
-        }
-      ]`;
+        }]`;
     this.jsonInputContent = this.jsonExample;
 
     this.machineTypeService.getAllMachineTypes().subscribe({
@@ -96,7 +88,8 @@ export class CreateImportJobComponent implements OnInit {
   }
 
   submitJob() {
-    let jobsToSubmit: JobDTO[];
+    let jobsToSubmit: JobDTO[] = [];
+    const email = localStorage.getItem('user-email');
 
     if (this.showJsonInput) {
       try {
@@ -110,6 +103,12 @@ export class CreateImportJobComponent implements OnInit {
           });
           return;
         }
+
+        // Aggiungi l'assegnatario (email) a ciascun job
+        jobsToSubmit.forEach(job => {
+          job.assignee = { email: email || 'default@example.com' }; // Impostazione dell'email dal localStorage
+        });
+
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -150,10 +149,27 @@ export class CreateImportJobComponent implements OnInit {
         });
         return;
       }
+
+      if (email) {
+        this.job.assignee = { email };
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Non è stato trovato un assignee valido.',
+        });
+        return;
+      }
+
       jobsToSubmit = [this.job];
     }
 
-    this.jsonService.importJob(jobsToSubmit).subscribe({
+    const jobsToSubmitWithId: JobDTO[] = jobsToSubmit.map(job => ({
+      ...job,
+      id: 0, // Omessione dell'id
+    }));
+
+    this.jsonService.importJob(jobsToSubmitWithId).subscribe({
       next: (response: string) => {
         Swal.fire({
           icon: 'success',
@@ -176,7 +192,6 @@ export class CreateImportJobComponent implements OnInit {
 
   resetForm() {
     this.job = {
-      id: 0,
       title: '',
       description: '',
       status: undefined,
