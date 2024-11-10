@@ -13,8 +13,7 @@ import { MachineTypeControllerService } from '../../generated-api';
 export class CreateImportMachineComponent implements OnInit {
   showJsonInput: boolean = false;
 
-  machine: MachineDTO = {
-    id: 0,
+  machine: Omit<MachineDTO, 'id'> = {
     name: '',
     description: '',
     status: undefined,
@@ -40,7 +39,6 @@ export class CreateImportMachineComponent implements OnInit {
     this.jsonExample =
       `[
         {
-          "id": 0,
           "name": "Machine 1",
           "description": "First machine",
           "status": "AVAILABLE",
@@ -79,7 +77,7 @@ export class CreateImportMachineComponent implements OnInit {
   }
 
   submitMachine() {
-    let machinesToSubmit: MachineDTO[];
+    let machinesToSubmit: Array<Omit<MachineDTO, 'id'>>;
 
     if (this.showJsonInput) {
       try {
@@ -122,7 +120,12 @@ export class CreateImportMachineComponent implements OnInit {
       machinesToSubmit = [this.machine];
     }
 
-    this.jsonService.importMachine(machinesToSubmit).subscribe({
+    const machinesToSubmitWithId: MachineDTO[] = machinesToSubmit.map(machine => ({
+      ...machine,
+      id: 0
+    }));
+
+    this.jsonService.importMachine(machinesToSubmitWithId).subscribe({
       next: (response: string) => {
         Swal.fire({
           icon: 'success',
@@ -145,7 +148,6 @@ export class CreateImportMachineComponent implements OnInit {
 
   resetForm() {
     this.machine = {
-      id: 0,
       name: '',
       description: '',
       status: undefined,
