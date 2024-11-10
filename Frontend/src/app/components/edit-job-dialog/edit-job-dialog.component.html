@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>Edit Job</h2>
+<mat-dialog-content>
+    <form [formGroup]="editForm">
+    <mat-form-field appearance="fill">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title">
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Duration (minutes)</mat-label>
+        <input matInput type="number" formControlName="duration">
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+        <mat-option value="high">High</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="low">Low</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+        <mat-option value="pending">Pending</mat-option>
+        <mat-option value="in progress">In Progress</mat-option>
+        <mat-option value="completed">Completed</mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Assignee</mat-label>
+        <input matInput formControlName="assignee">
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Required Machine Type</mat-label>
+        <input matInput formControlName="requiredMachineType">
+    </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button color="primary" (click)="onSave()" [disabled]="!editForm.valid">Save</button>
+</mat-dialog-actions>
