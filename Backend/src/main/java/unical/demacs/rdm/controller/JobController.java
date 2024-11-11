@@ -52,7 +52,7 @@ public class JobController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PutMapping(value = "/update-job/{id}", produces = "application/json")
+    @PutMapping(value = "/update-job{id}", produces = "application/json")
     public ResponseEntity<JobDTO> updateJob(@PathVariable("id") Long id, @Valid @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobServiceImpl.updateJob(id, jobDTO);
         return ResponseEntity.ok(updatedJob);
@@ -104,7 +104,7 @@ public class JobController {
                 .orElse(Collections.emptyList());
 
         return ResponseEntity.ok(jobDTOList);
-      }
+    }
 
     @Operation(summary = "Delete a job", description = "Delete a job using their id.",
             tags = {"job-controller"})
@@ -114,7 +114,7 @@ public class JobController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @DeleteMapping(value = "/delete-job/{id}", produces = "application/json")
+    @DeleteMapping(value = "/delete-job{id}", produces = "application/json")
     public ResponseEntity<JobDTO> deleteJob(@PathVariable("id") Long id) {
         jobServiceImpl.deleteJob(id);
         return ResponseEntity.ok().build();
