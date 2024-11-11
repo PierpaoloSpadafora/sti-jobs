@@ -25,9 +25,15 @@ import { ViewExportDeleteMachineTypesComponent } from './components/view-export-
 import { MachineTypeControllerService, UserControllerService } from "./generated-api";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {MatIconModule} from "@angular/material/icon";
+import { MatDialogModule } from '@angular/material/dialog';
 import {MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
+import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-dialog.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +52,7 @@ import {MatButtonModule} from "@angular/material/button";
     ViewExportDeleteJobsComponent,
     ViewExportDeleteMachinesComponent,
     ViewExportDeleteMachineTypesComponent,
+    EditJobDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -57,9 +64,15 @@ import {MatButtonModule} from "@angular/material/button";
     BrowserAnimationsModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDialogModule,
     MatIconModule,
     MatMenuModule,
-    MatMenuTrigger
+    MatMenuTrigger,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSnackBarModule
   ],
   providers: [MachineTypeControllerService, UserControllerService, provideAnimationsAsync()],
   bootstrap: [AppComponent]

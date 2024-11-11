@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Job } from '../interfaces/job';
 
 import { JobDTO } from '../generated-api';
 
@@ -18,8 +19,16 @@ export class JobService {
     if (!email) {
       throw new Error('User email not found in local storage');
     }
-  
     return this.http.get<any>(`${this.baseUrl}/jobs-by-assignee-email/${email}`);
+  }
+
+  deleteJob(id: number): Observable<any> {
+    console.log("Cerco di cancellare:", id);
+    return this.http.delete(`${this.baseUrl}/delete-job/${id}`);
+  }
+
+  updateJob(job: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/update-job/${job.id}`, job);
   }
 
 }

@@ -36,7 +36,10 @@
           <button class="action-button" title="Export">
             <i class="fas fa-file-export"></i>
           </button>
-          <button class="action-button delete" title="Delete">
+          <button class="action-button edit" title="Edit" (click)="openEditDialog(job)">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="action-button delete" title="Delete" (click)="deleteJob(job.id)">
             <i class="fas fa-trash"></i>
           </button>
         </td>
