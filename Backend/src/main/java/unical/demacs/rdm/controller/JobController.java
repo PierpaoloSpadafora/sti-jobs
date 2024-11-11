@@ -100,16 +100,11 @@ public class JobController {
     })
     @GetMapping(path="/jobs-by-assignee-email/{email}")
     public ResponseEntity<List<JobDTO>> getJobByAssigneeEmail(@PathVariable("email") String email) {
-        Optional<List<JobDTO>> jobs = jobServiceImpl.getJobByAssigneeEmail(email);
-        if (jobs.isPresent()) {
-            List<JobDTO> jobDTOList = jobs.get().stream()
-                    .map(job -> modelMapper.map(job, JobDTO.class))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(jobDTOList);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-    }
+        List<JobDTO> jobDTOList = jobServiceImpl.getJobByAssigneeEmail(email)
+                .orElse(Collections.emptyList());
+
+        return ResponseEntity.ok(jobDTOList);
+      }
 
     @Operation(summary = "Delete a job", description = "Delete a job using their id.",
             tags = {"job-controller"})
