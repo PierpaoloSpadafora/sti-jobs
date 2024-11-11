@@ -11,8 +11,7 @@ import Swal from 'sweetalert2';
 export class CreateImportMachineTypeComponent implements OnInit {
   showJsonInput: boolean = false;
 
-  machineType: MachineTypeDTO = {
-    id: 0,
+  machineType: Omit<MachineTypeDTO, 'id'> = {
     name: '',
     description: ''
   };
@@ -23,10 +22,9 @@ export class CreateImportMachineTypeComponent implements OnInit {
   constructor(private jsonService: JsonService) {}
 
   ngOnInit(): void {
-    this.jsonExample =
+    this.jsonExample = 
       `[
         {
-          "id": 0,
           "name": "string",
           "description": "string"
         }
@@ -40,7 +38,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   submitMachineType() {
     console.log('submitMachineType called');
-    let machineTypesToSubmit: MachineTypeDTO[];
+    let machineTypesToSubmit: Array<Omit<MachineTypeDTO, 'id'>>;
 
     if (this.showJsonInput) {
       try {
@@ -50,6 +48,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
           alert('Il JSON inserito deve essere un array di Machine Types.');
           return;
         }
+
       } catch (error) {
         alert('Il JSON inserito non è valido.');
         return;
@@ -58,9 +57,14 @@ export class CreateImportMachineTypeComponent implements OnInit {
       machineTypesToSubmit = [this.machineType];
     }
 
-    console.log('machineTypesToSubmit:', machineTypesToSubmit);
+    const machineTypesToSubmitWithId: MachineTypeDTO[] = machineTypesToSubmit.map(machineType => ({
+      ...machineType,
+      id: 0
+    }));
 
-    this.jsonService.importMachineType(machineTypesToSubmit).subscribe({
+    console.log('machineTypesToSubmitWithId:', machineTypesToSubmitWithId);
+
+    this.jsonService.importMachineType(machineTypesToSubmitWithId).subscribe({
       next: (response: string) => {
         console.log('Response:', response);
         Swal.fire({
@@ -80,7 +84,6 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   resetForm() {
     this.machineType = {
-      id: 0,
       name: '',
       description: ''
     };
