@@ -6,12 +6,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import unical.demacs.rdm.config.ModelMapperConfig;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
+import unical.demacs.rdm.persistence.dto.UserDTO;
+import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
+import unical.demacs.rdm.persistence.service.interfaces.IUserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +30,8 @@ public class JsonController {
     private final IJobService jobService;
     private final IMachineService machineService;
     private final IMachineTypeService machineTypeService;
+    private final IUserService userService;
+    private final ModelMapperConfig modelMapperConfig;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})
@@ -33,6 +39,17 @@ public class JsonController {
     public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs) {
         try {
             jobs.forEach(job -> {
+                if (job.getAssignee() != null && job.getAssignee().getEmail() != null) {
+                    String email = job.getAssignee().getEmail();
+                    Optional<User> user = userService.getUserByEmail(email);
+                    UserDTO userDTO = modelMapperConfig.getModelMapper().map(user, UserDTO.class);
+
+                    if (user.isPresent()) {
+                        job.setAssignee(userDTO);
+                    } else {
+                        throw new RuntimeException("Utente con email " + email + " non trovato.");
+                    }
+                }
                 Optional<JobDTO> existingJob = jobService.findById(job.getId());
                 if (existingJob.isEmpty()) {
                     jobService.saveJob(job);
