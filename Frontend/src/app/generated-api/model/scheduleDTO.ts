@@ -11,13 +11,8 @@
  */
 
 export interface ScheduleDTO { 
-    id?: number;
-    jobId?: number;
-    machineId?: number;
-    dueDate?: Date;
-    startTime?: Date;
-    endTime?: Date;
-    status?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    jobId: number;
+    startTime: string;
+    endTime: string;
+    // ...altri campi se necessari...
 }

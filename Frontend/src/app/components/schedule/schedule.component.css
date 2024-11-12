@@ -1,0 +1,28 @@
+.schedule-container {
+  padding: 20px;
+}
+
+.mat-form-field.full-width {
+  width: 100%;
+}
+
+.mat-elevation-z8 {
+  box-shadow: 0 8px 17px rgba(0, 0, 0, 0.2);
+}
+
+mat-table {
+  width: 100%;
+  overflow: auto;
+}
+
+mat-header-cell, mat-cell {
+  padding: 16px;
+}
+
+mat-dialog-content {
+  overflow: hidden;
+}
+
+mat-dialog-actions {
+  margin-top: 20px;
+}
