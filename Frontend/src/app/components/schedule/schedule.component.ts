@@ -101,7 +101,6 @@ export class ScheduleComponent implements OnInit {
 
     console.log('this.selectedJob.requiredMachineType:', this.selectedJob.requiredMachineType);
 
-    // Extract the machine type string from the object
     // @ts-ignore
     const machineTypeString = this.selectedJob.requiredMachineType.name; // Adjust if needed
 
