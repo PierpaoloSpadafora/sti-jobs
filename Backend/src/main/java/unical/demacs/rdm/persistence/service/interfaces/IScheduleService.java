@@ -15,9 +15,9 @@ public interface IScheduleService {
 
     List<ScheduleDTO> getSchedulesByStatus(ScheduleStatus status);
     List<ScheduleDTO> getSchedulesByJobId(Long jobId);
-    List<ScheduleDTO> getSchedulesByMachineId(Long machineId);
+    List<ScheduleDTO> getSchedulesByMachineType(String machineType);
     List<ScheduleDTO> getSchedulesInTimeRange(LocalDateTime startTime, LocalDateTime endTime);
-    boolean isTimeSlotAvailable(Long machineId, LocalDateTime startTime, LocalDateTime endTime);
+    boolean isTimeSlotAvailable(String machineType, LocalDateTime startTime, LocalDateTime endTime);
     ScheduleDTO updateScheduleStatus(Long id, ScheduleStatus newStatus);
     List<ScheduleDTO> getUpcomingSchedules(LocalDateTime from);
     List<ScheduleDTO> getPastSchedules(LocalDateTime until);

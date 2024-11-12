@@ -104,9 +104,12 @@ export class ScheduleComponent implements OnInit {
 
     const scheduleData: ScheduleDTO = {
       jobId: this.selectedJob.id,
+      machineId: this.selectedJob.requiredMachineType,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString()
     };
+
+    console.log(scheduleData);
 
     this.scheduleService.createSchedule(scheduleData).subscribe({
       next: (response) => {

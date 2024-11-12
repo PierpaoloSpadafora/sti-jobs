@@ -13,11 +13,9 @@ public class ScheduleDTO {
 
     private Long id;
     private Long jobId;
-    private Long machineId;
+    private String machineType;
     private LocalDateTime dueDate;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Long duration;
     private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

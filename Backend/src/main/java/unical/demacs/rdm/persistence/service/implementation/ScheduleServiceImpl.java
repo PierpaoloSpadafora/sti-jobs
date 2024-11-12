@@ -6,11 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.entities.Job;
-import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 import unical.demacs.rdm.persistence.repository.JobRepository;
-import unical.demacs.rdm.persistence.repository.MachineRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IScheduleService;
 
 import java.time.LocalDateTime;
@@ -24,33 +22,28 @@ public class ScheduleServiceImpl implements IScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final JobRepository jobRepository;
-    private final MachineRepository machineRepository;
 
     @Autowired
     public ScheduleServiceImpl(ScheduleRepository scheduleRepository,
-                               JobRepository jobRepository,
-                               MachineRepository machineRepository) {
+                               JobRepository jobRepository) {
         this.scheduleRepository = scheduleRepository;
         this.jobRepository = jobRepository;
-        this.machineRepository = machineRepository;
     }
 
     @Override
     public ScheduleDTO createSchedule(ScheduleDTO scheduleDTO) {
         Job job = jobRepository.findById(scheduleDTO.getJobId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Job ID"));
-        Machine machine = machineRepository.findById(scheduleDTO.getMachineId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Machine ID"));
 
-        if (!isTimeSlotAvailable(scheduleDTO.getMachineId(), scheduleDTO.getStartTime(), scheduleDTO.getEndTime())) {
-            throw new IllegalArgumentException("Time slot is not available for the selected machine");
+        if (!isTimeSlotAvailable(scheduleDTO.getMachineType(), scheduleDTO.getStartTime(), scheduleDTO.getStartTime().plusMinutes(scheduleDTO.getDuration()))) {
+            throw new IllegalArgumentException("Time slot is not available for the selected machine type");
         }
         Schedule schedule = new Schedule();
         schedule.setJob(job);
-        schedule.setMachine(machine);
+        schedule.setMachineType(scheduleDTO.getMachineType());
         schedule.setDueDate(scheduleDTO.getDueDate());
         schedule.setStartTime(scheduleDTO.getStartTime());
-        schedule.setEndTime(scheduleDTO.getEndTime());
+        schedule.setDuration(scheduleDTO.getDuration());
         schedule.setStatus(ScheduleStatus.valueOf(scheduleDTO.getStatus()));
         schedule = scheduleRepository.save(schedule);
 
@@ -106,25 +99,33 @@ public class ScheduleServiceImpl implements IScheduleService {
     }
 
     @Override
-    public List<ScheduleDTO> getSchedulesByMachineId(Long machineId) {
-        return scheduleRepository.findByMachine_Id(machineId).stream()
+    public List<ScheduleDTO> getSchedulesByMachineType(String machineType) {
+        return scheduleRepository.findByMachineType(machineType).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ScheduleDTO> getSchedulesInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        return scheduleRepository.findByStartTimeBetween(startTime, endTime).stream()
+        return scheduleRepository.findAll().stream()
+                .filter(schedule -> {
+                    LocalDateTime scheduleStartTime = schedule.getStartTime();
+                    LocalDateTime scheduleEndTime = scheduleStartTime.plusMinutes(schedule.getDuration());
+                    return !(scheduleEndTime.isBefore(startTime) || scheduleStartTime.isAfter(endTime));
+                })
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean isTimeSlotAvailable(Long machineId, LocalDateTime startTime, LocalDateTime endTime) {
-        List<Schedule> conflictingSchedules = scheduleRepository.findByMachine_Id(machineId).stream()
-                .filter(schedule ->
-                        !(schedule.getEndTime().isBefore(startTime) || schedule.getStartTime().isAfter(endTime)))
-                .toList();
+    public boolean isTimeSlotAvailable(String machineType, LocalDateTime startTime, LocalDateTime endTime) {
+        List<Schedule> conflictingSchedules = scheduleRepository.findByMachineType(machineType).stream()
+                .filter(schedule -> {
+                    LocalDateTime scheduleStartTime = schedule.getStartTime();
+                    LocalDateTime scheduleEndTime = scheduleStartTime.plusMinutes(schedule.getDuration());
+                    return !(scheduleEndTime.isBefore(startTime) || scheduleStartTime.isAfter(endTime));
+                })
+                .collect(Collectors.toList());
 
         return conflictingSchedules.isEmpty();
     }
@@ -148,7 +149,8 @@ public class ScheduleServiceImpl implements IScheduleService {
 
     @Override
     public List<ScheduleDTO> getPastSchedules(LocalDateTime until) {
-        return scheduleRepository.findByEndTimeBefore(until).stream()
+        return scheduleRepository.findAll().stream()
+                .filter(schedule -> schedule.getStartTime().plusMinutes(schedule.getDuration()).isBefore(until))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -157,13 +159,11 @@ public class ScheduleServiceImpl implements IScheduleService {
         ScheduleDTO dto = new ScheduleDTO();
         dto.setId(schedule.getId());
         dto.setJobId(schedule.getJob().getId());
-        dto.setMachineId(schedule.getMachine().getId());
+        dto.setMachineType(schedule.getMachineType());
         dto.setDueDate(schedule.getDueDate());
         dto.setStartTime(schedule.getStartTime());
-        dto.setEndTime(schedule.getEndTime());
+        dto.setDuration(schedule.getDuration());
         dto.setStatus(schedule.getStatus().toString());
-        dto.setCreatedAt(schedule.getCreatedAt());
-        dto.setUpdatedAt(schedule.getUpdatedAt());
         return dto;
     }
 
@@ -173,26 +173,26 @@ public class ScheduleServiceImpl implements IScheduleService {
         }
         Job job = jobRepository.findById(dto.getJobId())
                 .orElseThrow(() -> new RuntimeException("Job not found with id: " + dto.getJobId()));
-        Machine machine = machineRepository.findById(dto.getMachineId())
-                .orElseThrow(() -> new RuntimeException("Machine not found with id: " + dto.getMachineId()));
 
         schedule.setJob(job);
-        schedule.setMachine(machine);
+        schedule.setMachineType(dto.getMachineType());
         schedule.setDueDate(dto.getDueDate());
         schedule.setStartTime(dto.getStartTime());
-        schedule.setEndTime(dto.getEndTime());
+        schedule.setDuration(dto.getDuration());
         schedule.setStatus(ScheduleStatus.valueOf(dto.getStatus()));
     }
 
     private void validateScheduleTime(ScheduleDTO dto) {
-        if (dto.getStartTime().isAfter(dto.getEndTime())) {
+        LocalDateTime endTime = dto.getStartTime().plusMinutes(dto.getDuration());
+
+        if (dto.getStartTime().isAfter(endTime)) {
             throw new IllegalArgumentException("Start time must be before end time");
         }
-        if (dto.getDueDate() != null && dto.getEndTime().isAfter(dto.getDueDate())) {
+        if (dto.getDueDate() != null && endTime.isAfter(dto.getDueDate())) {
             throw new IllegalArgumentException("End time must be before or equal to due date");
         }
-        if (!isTimeSlotAvailable(dto.getMachineId(), dto.getStartTime(), dto.getEndTime())) {
-            throw new IllegalArgumentException("Time slot is not available for the selected machine");
+        if (!isTimeSlotAvailable(dto.getMachineType(), dto.getStartTime(), endTime)) {
+            throw new IllegalArgumentException("Time slot is not available for the selected machine type");
         }
     }
 }

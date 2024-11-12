@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import unical.demacs.rdm.persistence.enums.JobStatus;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 
 import java.time.LocalDateTime;
@@ -24,9 +23,8 @@ public class Schedule {
     @JoinColumn(name = "job_id", nullable = false)
     private Job job;
 
-    @ManyToOne
     @JoinColumn(name = "machine_id", nullable = false)
-    private Machine machine;
+    private String machineType;
 
     @Column
     private LocalDateTime dueDate;
@@ -35,7 +33,7 @@ public class Schedule {
     private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private Long duration;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -44,17 +42,5 @@ public class Schedule {
     @PrePersist
     protected void onCreate() {
         status = ScheduleStatus.SCHEDULED;
-        createdAt = LocalDateTime.now();
     }
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
 }

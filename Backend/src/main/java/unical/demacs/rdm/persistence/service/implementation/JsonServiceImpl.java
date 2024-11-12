@@ -7,18 +7,14 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import unical.demacs.rdm.config.exception.JsonException;
-import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.*;
 import unical.demacs.rdm.persistence.entities.*;
-import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.*;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -65,10 +61,12 @@ public class JsonServiceImpl implements IJsonService {
                 importJobs(jsonDTO.getJobs());
             }
 
+            /*
             if (jsonDTO.getSchedules() != null) {
                 logger.debug("Importing Schedules: {}", jsonDTO.getSchedules());
                 importSchedules(jsonDTO.getSchedules());
             }
+            */
 
         } catch (Exception e) {
             logger.error("Errore durante il processo di importazione", e);
@@ -146,6 +144,7 @@ public class JsonServiceImpl implements IJsonService {
         }
     }
 
+    /*
     private void importSchedules(List<ScheduleDTO> scheduleDTOs) {
         for (ScheduleDTO dto : scheduleDTOs) {
             logger.debug("Processing ScheduleDTO: {}", dto);
@@ -219,4 +218,5 @@ public class JsonServiceImpl implements IJsonService {
 
         return jsonDTO;
     }
+    */
 }
