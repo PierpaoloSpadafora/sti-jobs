@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { JobControllerService } from '../../generated-api';
 import { JobDTO } from '../../generated-api';
 import { ScheduleControllerService } from '../../generated-api';
+import { JobService } from '../../services/job.service';
 
 @Component({
   selector: 'app-schedule',
@@ -14,19 +14,19 @@ export class ScheduleComponent implements OnInit {
   endTime: any;
 
   constructor(
-    private jobService: JobControllerService,
+    private jobService: JobService,
     private scheduleService: ScheduleControllerService
   ) { }
 
   ngOnInit() {
-    this.jobService.getAllJobs().subscribe((data) => {
-      this.jobs = Array.isArray(data) ? data : [data];
-      console.log(this.jobs);
-      /*
-      for(let job in this.jobs){
-        console.log(job.title);
+    this.jobService.showJob().subscribe({
+      next: (response: any) => {
+        this.jobs = Array.isArray(response) ? response : [response];
+        console.log("Jobs retrieved:", this.jobs);
+      },
+      error: (error) => {
+        console.error("Error while retrieving jobs:", error);
       }
-      */
     });
   }
 
