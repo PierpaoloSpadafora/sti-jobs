@@ -16,6 +16,8 @@ export class ScheduleComponent implements OnInit {
   scheduleForm: FormGroup;
   dialogRef!: MatDialogRef<any>;
   selectedJob!: JobDTO;
+  calculatedEndTime!: Date | null;
+  availableStartTimes: Date[] = [];
 
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
@@ -26,9 +28,9 @@ export class ScheduleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.scheduleForm = this.fb.group({
-      startTime: [null, Validators.required],
-      endTime: [null, Validators.required]
+      startTime: [null, Validators.required]
     });
+    this.generateAvailableStartTimes();
   }
 
   ngOnInit() {
@@ -43,13 +45,41 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
+  generateAvailableStartTimes() {
+    const startHour = 8;
+    const endHour = 18;
+    const interval = 30;
+    this.availableStartTimes = [];
+
+    const today = new Date();
+    today.setSeconds(0, 0);
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minutes = 0; minutes < 60; minutes += interval) {
+        const time = new Date(today.getTime());
+        time.setHours(hour, minutes, 0, 0);
+        this.availableStartTimes.push(time);
+      }
+    }
+  }
+
   openScheduleDialog(job: JobDTO) {
     this.selectedJob = job;
     this.scheduleForm.reset();
+    this.calculatedEndTime = null;
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
-      width: '400px',
+      width: '600px',
       data: { job }
     });
+  }
+
+  onStartTimeChange() {
+    if (this.scheduleForm.value.startTime && this.selectedJob.duration) {
+      const startTime = new Date(this.scheduleForm.value.startTime);
+      const durationInMinutes = this.selectedJob.duration/60;
+      this.calculatedEndTime = new Date(startTime.getTime() + durationInMinutes * 60000);
+    } else {
+      this.calculatedEndTime = null;
+    }
   }
 
   scheduleJob() {
@@ -58,10 +88,24 @@ export class ScheduleComponent implements OnInit {
       return;
     }
 
+    const startTime = new Date(this.scheduleForm.value.startTime);
+    if (!startTime) {
+      console.error('Start time is invalid');
+      return;
+    }
+
+    if (!this.selectedJob.duration) {
+      console.error('Job duration is undefined');
+      return;
+    }
+
+    const durationInMinutes = this.selectedJob.duration;
+    const endTime = new Date(startTime.getTime() + durationInMinutes * 60000);
+
     const scheduleData: ScheduleDTO = {
       jobId: this.selectedJob.id,
-      startTime: this.scheduleForm.value.startTime.toISOString(),
-      endTime: this.scheduleForm.value.endTime.toISOString()
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString()
     };
 
     this.scheduleService.createSchedule(scheduleData).subscribe({
@@ -74,4 +118,18 @@ export class ScheduleComponent implements OnInit {
       }
     });
   }
+
+  secondsToDuration(seconds: number) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if(hours === 0) {
+      return `${minutes}m`;
+    }
+    else if(minutes === 0) {
+      return `${hours}h`;
+    }
+    return `${hours}h ${minutes}m`;
+  }
+
+  protected readonly Number = Number;
 }

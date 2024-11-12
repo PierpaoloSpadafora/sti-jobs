@@ -1,44 +1,47 @@
 <div class="schedule-container">
-  <h2>Your Jobs</h2>
-  <mat-table [dataSource]="jobs" class="mat-elevation-z8">
+  <h2>I tuoi Jobs</h2>
+  <div class="jobs-container">
+    <div class="table-responsive">
+      <table class="jobs-table">
+        <thead>
+        <tr>
+          <th>Titolo</th>
+          <th>Descrizione</th>
 
-    <ng-container matColumnDef="title">
-      <mat-header-cell *matHeaderCellDef> Titolo </mat-header-cell>
-      <mat-cell *matCellDef="let job"> {{ job.title }} </mat-cell>
-    </ng-container>
-
-    <ng-container matColumnDef="description">
-      <mat-header-cell *matHeaderCellDef> Descrizione </mat-header-cell>
-      <mat-cell *matCellDef="let job"> {{ job.description }} </mat-cell>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <mat-header-cell *matHeaderCellDef> Azioni </mat-header-cell>
-      <mat-cell *matCellDef="let job">
-        <button mat-button color="primary" (click)="openScheduleDialog(job)">Schedula</button>
-      </mat-cell>
-    </ng-container>
-
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
+          <th>Durata</th>
+          <th>Azioni</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let job of jobs">
+          <td>{{ job.title }}</td>
+          <td>{{ job.description }}</td>
+          <td>{{ secondsToDuration(Number(job.duration)) }}</td>
+          <td class="actions-cell">
+            <button class="action-button" (click)="openScheduleDialog(job)">Schedula</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <ng-template #scheduleDialog let-data>
-  <h2 mat-dialog-title>Schedule Job: {{ data.job.title }}</h2>
+  <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
   <mat-dialog-content [formGroup]="scheduleForm">
     <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Start Time</mat-label>
-      <input matInput [matDatepicker]="startPicker" formControlName="startTime" required>
-      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-      <mat-datepicker #startPicker></mat-datepicker>
+      <mat-label>Ora di Inizio</mat-label>
+      <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required>
+        <mat-option *ngFor="let time of availableStartTimes" [value]="time">
+          {{ time | date: 'shortTime' }}
+        </mat-option>
+      </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="fill" class="full-width">
-      <mat-label>End Time</mat-label>
-      <input matInput [matDatepicker]="endPicker" formControlName="endTime" required>
-      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-      <mat-datepicker #endPicker></mat-datepicker>
+      <mat-label>Ora di Fine</mat-label>
+      <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
     </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">

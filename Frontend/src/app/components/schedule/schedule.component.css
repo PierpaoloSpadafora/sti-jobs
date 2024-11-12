@@ -2,27 +2,78 @@
   padding: 20px;
 }
 
+.jobs-container {
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  transition: box-shadow 0.2s ease;
+}
+
+.jobs-container:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 0 -8px;
+}
+
+.jobs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px;
+}
+
+.jobs-table th,
+.jobs-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95em;
+}
+
+.jobs-table th {
+  font-weight: 600;
+  color: #333;
+  background-color: #f8f9fa;
+  white-space: nowrap;
+}
+
+.jobs-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 8px;
+  margin: 0 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: #e8f0ff;
+  color: #0056b3;
+}
+
 .mat-form-field.full-width {
   width: 100%;
 }
 
-.mat-elevation-z8 {
-  box-shadow: 0 8px 17px rgba(0, 0, 0, 0.2);
-}
-
-mat-table {
-  width: 100%;
-  overflow: auto;
-}
-
-mat-header-cell, mat-cell {
-  padding: 16px;
-}
-
-mat-dialog-content {
+.mat-dialog-content {
   overflow: hidden;
 }
 
-mat-dialog-actions {
+.mat-dialog-actions {
   margin-top: 20px;
 }
