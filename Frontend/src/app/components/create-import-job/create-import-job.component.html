@@ -53,6 +53,7 @@
             class="form-select"
             [(ngModel)]="job.status"
             name="status"
+            required
           >
             <option [ngValue]="undefined">Seleziona Stato</option>
             <option *ngFor="let status of statuses" [value]="status">
@@ -68,6 +69,7 @@
             class="form-select"
             [(ngModel)]="job.priority"
             name="priority"
+            required
           >
             <option [ngValue]="undefined">Seleziona Priorità</option>
             <option *ngFor="let priority of priorities" [value]="priority">
