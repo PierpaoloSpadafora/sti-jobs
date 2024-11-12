@@ -1,6 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { JsonService } from '../../services/json.service';
+import { MachineTypeDTO } from '../../interfaces/interfaces';
 
 @Component({
   selector: 'app-edit-job-dialog',
@@ -10,10 +12,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class EditJobDialogComponent {
 
   editForm: FormGroup;
+  machineTypes: MachineTypeDTO[] = [];
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<EditJobDialogComponent>,
+    private jsonService: JsonService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.editForm = this.fb.group({
@@ -25,6 +29,21 @@ export class EditJobDialogComponent {
       status: [data.status],
       assignee: [data.assignee],
       requiredMachineType: [data.requiredMachineType]
+    });
+  }
+
+  ngOnInit() {
+    this.loadMachineTypes();
+  }
+
+  loadMachineTypes() {
+    this.jsonService.exportMachineType().subscribe({
+      next: (types) => {
+        this.machineTypes = types;
+      },
+      error: (error) => {
+        console.error('Error loading machine types:', error);
+      }
     });
   }
 
