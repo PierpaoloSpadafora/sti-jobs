@@ -18,4 +18,5 @@ public class ScheduleDTO {
     private LocalDateTime startTime;
     private Long duration;
     private String status;
+
 }
