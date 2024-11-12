@@ -9,7 +9,6 @@
         <th>Duration</th>
         <th>Priority</th>
         <th>Status</th>
-        <th>Assignee</th>
         <th>Required Machine</th>
         <th>Actions</th>
       </tr>
@@ -30,8 +29,7 @@
               {{ job.status || 'Unknown' }}
             </span>
         </td>
-        <td>{{ job.assignee || 'Unassigned' }}</td>
-        <td>{{ job.requiredMachineType || 'Any' }}</td>
+        <td>{{ getMachineTypeName(job.requiredMachineType) }}</td>
         <td class="actions-cell">
           <button class="action-button" title="Export">
             <i class="fas fa-file-export"></i>

@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Machine } from '../../interfaces/machine'; 
+import { Machine } from '../../interfaces/interfaces'; 
 import { JsonService } from '../../services/json.service';
 
 @Component({

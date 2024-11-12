@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineTypeService } from '../../services/machineType.service';
-import { MachineType } from '../../interfaces/machineType';
+import { MachineType } from '../../interfaces/interfaces';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditMachineTypesDialogComponent } from '../edit-machine-types-dialog/edit-machine-types-dialog.component';

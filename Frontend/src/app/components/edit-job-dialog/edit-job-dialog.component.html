@@ -19,24 +19,23 @@
     <mat-form-field appearance="fill">
         <mat-label>Priority</mat-label>
         <mat-select formControlName="priority">
-        <mat-option value="high">High</mat-option>
-        <mat-option value="medium">Medium</mat-option>
-        <mat-option value="low">Low</mat-option>
+        <mat-option value="LOW">Low</mat-option>
+        <mat-option value="MEDIUM">Medium</mat-option>
+        <mat-option value="HIGH">High</mat-option>
+        <mat-option value="URGENT">Urgent</mat-option>
         </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
         <mat-label>Status</mat-label>
         <mat-select formControlName="status">
-        <mat-option value="pending">Pending</mat-option>
-        <mat-option value="in progress">In Progress</mat-option>
-        <mat-option value="completed">Completed</mat-option>
+        <mat-option value="PENDING">Pending</mat-option>
+        <mat-option value="SCHEDULED">Scheduled</mat-option>
+        <mat-option value="IN_PROGRESS">In Progress</mat-option>
+        <mat-option value="COMPLETED">Completed</mat-option>
+        <mat-option value="CANCELLED">Cancelled</mat-option>
+        <mat-option value=""></mat-option>
         </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-        <mat-label>Assignee</mat-label>
-        <input matInput formControlName="assignee">
     </mat-form-field>
 
     <mat-form-field appearance="fill">

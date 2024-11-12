@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { JobService } from '../../services/job.service';
 import { MatDialog } from '@angular/material/dialog';
-import {Job} from '../../interfaces/job';
+import {Job, MachineType, MachineTypeDTO} from '../../interfaces/interfaces';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditJobDialogComponent } from '../edit-job-dialog/edit-job-dialog.component';
+import { forkJoin } from 'rxjs';
+import { JsonService } from '../../services/json.service';
 
 @Component({
   selector: 'app-view-export-delete-jobs',
@@ -13,9 +15,11 @@ import { EditJobDialogComponent } from '../edit-job-dialog/edit-job-dialog.compo
 export class ViewExportDeleteJobsComponent implements OnInit {
   jobs: Job[] = [];
   isLoading = false;
+  machineTypes: MachineType[] = [];
 
   constructor(
     private jobService: JobService,
+    private jsonService: JsonService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -25,17 +29,61 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   }
 
   loadJobs(): void {
-    this.jobService.showJob().subscribe({
-      next: (response: any) => {
-        this.jobs = Array.isArray(response) ? response : [response];
-        console.log("Jobs retrieved:", this.jobs);
+    this.isLoading = true;
+    forkJoin({
+      jobs: this.jobService.showJob(),
+      types: this.jsonService.exportMachineType()
+    }).subscribe({
+      next: (response) => {
+        this.jobs = Array.isArray(response.jobs) && response.jobs.every(job => typeof job === 'object')
+          ? response.jobs as Job[] 
+          : [];
+        this.machineTypes = this.transformMachineTypes(response.types);
+        
+        // Debug log per vedere la struttura dei job
+        console.log("Jobs structure:", this.jobs.map(job => ({
+          jobId: job.id,
+          requiredMachineType: job.requiredMachineType
+        })));
+        
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error("Error while retrieving jobs:", error);
+        console.error("Error while retrieving data:", error);
+        this.isLoading = false;
+        this.showMessage('Error loading data. Please try again later.');
       }
     });
   }
 
+  getMachineTypeName(machineType: any): string {
+    if (!machineType) return 'Any';
+    if (typeof machineType === 'object' && machineType.id) {
+      const machineTypeId = Number(machineType.id);
+      const foundType = this.machineTypes.find(type => type.id === machineTypeId);
+      return foundType ? foundType.name : 'Unknown Type';
+    }
+    if (typeof machineType === 'number' || !isNaN(Number(machineType))) {
+      const machineTypeId = Number(machineType);
+      const foundType = this.machineTypes.find(type => type.id === machineTypeId);
+      return foundType ? foundType.name : 'Unknown Type';
+    }
+    console.warn('Unexpected machine type format:', machineType);
+    return 'Unknown Type';
+  }
+
+  private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
+    return dtos.filter(dto => 
+      dto.id != null && 
+      dto.name != null && 
+      dto.description != null
+    ).map(dto => ({
+      id: dto.id!,
+      name: dto.name!,
+      description: dto.description!
+    }));
+  }
+  
   deleteJob(id: number): void {
     if (confirm('Are you sure you want to delete this job?')) {
       this.isLoading = true;

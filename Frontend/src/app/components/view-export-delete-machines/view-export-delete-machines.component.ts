@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineService } from '../../services/machine.service';
-import { Machine } from '../../interfaces/machine';
+import { Machine, MachineDTO, MachineTypeDTO, MachineType } from '../../interfaces/interfaces';
 import { EditMachineDialogComponent } from '../edit-machine-dialog/edit-machine-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { MachineType } from '../../interfaces/machineType';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MachineDTO, MachineTypeDTO } from '../../interfaces/interfaces';
 
 @Component({
   selector: 'app-view-export-delete-machines',

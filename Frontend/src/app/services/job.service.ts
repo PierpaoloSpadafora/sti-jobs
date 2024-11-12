@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Job } from '../interfaces/job';
-
-import { JobDTO } from '../generated-api';
 
 @Injectable({
   providedIn: 'root'
