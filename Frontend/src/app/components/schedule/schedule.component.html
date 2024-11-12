@@ -1,1 +1,18 @@
-<p>schedule works!</p>
+<table>
+  <tr>
+    <th>Titolo</th>
+    <th>Descrizione</th>
+    <th>Azioni</th>
+  </tr>
+  <tr *ngFor="let job of jobs">
+    <td>{{ job.title }}</td>
+    <td>{{ job.description }}</td>
+    <td>
+      <form (ngSubmit)="scheduleJob(job)">
+        <input type="datetime-local" name="startTime" [(ngModel)]="startTime" required>
+        <input type="datetime-local" name="endTime" [(ngModel)]="endTime" required>
+        <button type="submit">Schedula</button>
+      </form>
+    </td>
+  </tr>
+</table>
