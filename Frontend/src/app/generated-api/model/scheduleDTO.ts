@@ -9,10 +9,13 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
+import {MachineTypeDTO} from "./machineTypeDTO";
 
 export interface ScheduleDTO {
   jobId: number;
-  machineId: string;
+  machineType: MachineTypeDTO;
+  dueDate: string;
   startTime: string;
-  endTime: string;
+  duration: number;
+  status: string;
 }

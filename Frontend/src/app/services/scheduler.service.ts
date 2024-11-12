@@ -14,7 +14,7 @@ export class SchedulerService {
   constructor(private http: HttpClient, private scheduleApi: ScheduleControllerService) { }
 
   createSchedule(scheduleData: ScheduleDTO): Observable<ScheduleDTO> {
-    return this.http.post<ScheduleDTO>(`${this.baseUrl}`, scheduleData);
+    return this.http.post<ScheduleDTO>(`${this.baseUrl}/create-schedule`, scheduleData);
   }
 
 }

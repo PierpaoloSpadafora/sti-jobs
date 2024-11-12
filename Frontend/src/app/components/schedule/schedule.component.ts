@@ -4,6 +4,7 @@ import { ScheduleControllerService } from '../../generated-api';
 import { JobService } from '../../services/job.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import {SchedulerService} from "../../services/scheduler.service";
 
 @Component({
   selector: 'app-schedule',
@@ -23,7 +24,7 @@ export class ScheduleComponent implements OnInit {
 
   constructor(
     private jobService: JobService,
-    private scheduleService: ScheduleControllerService,
+    private scheduleService: SchedulerService,
     private dialog: MatDialog,
     private fb: FormBuilder
   ) {
@@ -99,14 +100,16 @@ export class ScheduleComponent implements OnInit {
       return;
     }
 
-    const durationInMinutes = this.selectedJob.duration;
+    const durationInMinutes = this.selectedJob.duration/60;
     const endTime = new Date(startTime.getTime() + durationInMinutes * 60000);
 
     const scheduleData: ScheduleDTO = {
       jobId: this.selectedJob.id,
-      machineId: this.selectedJob.requiredMachineType,
+      machineType: this.selectedJob.requiredMachineType!,
+      dueDate: startTime.toISOString(),
       startTime: startTime.toISOString(),
-      endTime: endTime.toISOString()
+      duration: this.selectedJob.duration,
+      status: 'SCHEDULED'
     };
 
     console.log(scheduleData);
