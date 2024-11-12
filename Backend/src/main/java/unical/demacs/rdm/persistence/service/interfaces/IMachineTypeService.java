@@ -10,4 +10,5 @@ public interface IMachineTypeService {
     Optional<MachineTypeDTO> getMachineTypeById(Long id);
     List<MachineTypeDTO> getAllMachineTypes();
     void deleteMachineType(Long id);
+    MachineTypeDTO updateMachineType(Long id, MachineTypeDTO machineTypeDTO);
 }

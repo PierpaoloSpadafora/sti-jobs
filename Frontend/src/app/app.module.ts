@@ -34,6 +34,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
 import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-dialog.component';
+import { EditMachineTypesDialogComponent } from './components/edit-machine-types-dialog/edit-machine-types-dialog.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-di
     ViewExportDeleteMachinesComponent,
     ViewExportDeleteMachineTypesComponent,
     EditJobDialogComponent,
+    EditMachineTypesDialogComponent,
   ],
   imports: [
     BrowserModule,
