@@ -1,10 +1,9 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { JobDTO, ScheduleDTO } from '../../generated-api';
-import { ScheduleControllerService } from '../../generated-api';
-import { JobService } from '../../services/job.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import {SchedulerService} from "../../services/scheduler.service";
+import { SchedulerService } from '../../services/scheduler.service';
+import {JobService} from "../../services/job.service";
 
 @Component({
   selector: 'app-schedule',
@@ -40,7 +39,7 @@ export class ScheduleComponent implements OnInit {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error while retrieving jobs:', error);
       }
     });
@@ -76,7 +75,7 @@ export class ScheduleComponent implements OnInit {
   onStartTimeChange() {
     if (this.scheduleForm.value.startTime && this.selectedJob.duration) {
       const startTime = new Date(this.scheduleForm.value.startTime);
-      const durationInMinutes = this.selectedJob.duration/60;
+      const durationInMinutes = this.selectedJob.duration / 60;
       this.calculatedEndTime = new Date(startTime.getTime() + durationInMinutes * 60000);
     } else {
       this.calculatedEndTime = null;
@@ -100,19 +99,23 @@ export class ScheduleComponent implements OnInit {
       return;
     }
 
-    const durationInMinutes = this.selectedJob.duration/60;
-    const endTime = new Date(startTime.getTime() + durationInMinutes * 60000);
+    console.log('this.selectedJob.requiredMachineType:', this.selectedJob.requiredMachineType);
+
+    // Extract the machine type string from the object
+    // @ts-ignore
+    const machineTypeString = this.selectedJob.requiredMachineType.name; // Adjust if needed
 
     const scheduleData: ScheduleDTO = {
       jobId: this.selectedJob.id,
-      machineType: this.selectedJob.requiredMachineType!,
+      // @ts-ignore
+      machineType: machineTypeString,
       dueDate: startTime.toISOString(),
       startTime: startTime.toISOString(),
       duration: this.selectedJob.duration,
       status: 'SCHEDULED'
     };
 
-    console.log(scheduleData);
+    console.log('scheduleData:', scheduleData);
 
     this.scheduleService.createSchedule(scheduleData).subscribe({
       next: (response) => {
@@ -128,10 +131,9 @@ export class ScheduleComponent implements OnInit {
   secondsToDuration(seconds: number) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    if(hours === 0) {
+    if (hours === 0) {
       return `${minutes}m`;
-    }
-    else if(minutes === 0) {
+    } else if (minutes === 0) {
       return `${hours}h`;
     }
     return `${hours}h ${minutes}m`;
