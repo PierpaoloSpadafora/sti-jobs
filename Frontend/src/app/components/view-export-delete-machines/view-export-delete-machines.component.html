@@ -9,7 +9,7 @@
         <th>Created At</th>
         <th>Updated At</th>
         <th>Status</th>
-        <th>Machine Type ID</th>
+        <th>Machine Type</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -25,12 +25,15 @@
               {{ machine.status }}
             </span>
         </td>
-        <td>{{ machine.typeId }}</td>
+        <td>{{ getMachineTypeName(machine.typeId) }}</td>
         <td class="actions-cell">
           <button class="action-button" title="Export">
             <i class="fas fa-file-export"></i>
           </button>
-          <button class="action-button delete" title="Delete">
+          <button class="action-button edit" title="Edit" (click)="openEditDialog(machine)">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="action-button delete" title="Delete" (click)="delete(machine.id)">
             <i class="fas fa-trash"></i>
           </button>
         </td>
