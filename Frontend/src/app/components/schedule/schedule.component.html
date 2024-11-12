@@ -1,1 +1,78 @@
-<p>schedule works!</p>
+<div class="schedule-container">
+  <h2>Jobs da schedulare</h2>
+  <div class="jobs-container">
+    <div class="table-responsive">
+      <table class="jobs-table">
+        <thead>
+        <tr>
+          <th>Titolo</th>
+          <th>Descrizione</th>
+          <th>Durata</th>
+          <th>Azioni</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let job of jobs">
+          <td>{{ job.title }}</td>
+          <td>{{ job.description }}</td>
+          <td>{{ secondsToDuration(Number(job.duration)) }}</td>
+          <td class="actions-cell">
+            <button class="action-button" (click)="openScheduleDialog(job)">Schedula</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="schedules-container">
+    <h2>Elenco dei Job Schedulati</h2>
+    <div class="table-responsive">
+      <table class="schedules-table">
+        <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Tipo Macchina</th>
+          <th>Ora di Inizio</th>
+          <th>Data di Scadenza</th>
+          <th>Durata</th>
+          <th>Stato</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let schedule of schedules">
+          <td>{{ schedule.jobId }}</td>
+          <td>{{ schedule.machineType }}</td>
+          <td>{{ schedule.startTime | date: 'short' }}</td>
+          <td>{{ schedule.dueDate | date: 'short' }}</td>
+          <td>{{ secondsToDuration(schedule.duration) }}</td>
+          <td>{{ schedule.status }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #scheduleDialog let-data>
+  <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
+  <mat-dialog-content [formGroup]="scheduleForm">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Ora di Inizio</mat-label>
+      <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required>
+        <mat-option *ngFor="let time of availableStartTimes" [value]="time">
+          {{ time | date: 'shortTime' }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Ora di Fine</mat-label>
+      <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancella</button>
+    <button mat-button color="primary" [disabled]="scheduleForm.invalid" (click)="scheduleJob()">Schedula</button>
+  </mat-dialog-actions>
+</ng-template>

@@ -12,8 +12,8 @@ import java.util.List;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByStatus(ScheduleStatus status);
     List<Schedule> findByJob_Id(Long jobId);
-    List<Schedule> findByMachine_Id(Long machineId);
+    List<Schedule> findByMachineType(String machineType);
     List<Schedule> findByStartTimeAfter(LocalDateTime startTime);
-    List<Schedule> findByEndTimeBefore(LocalDateTime endTime);
+    List<Schedule> findByStartTimeBefore(LocalDateTime endTime);
     List<Schedule> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 }

@@ -22,7 +22,12 @@ import { CreateImportMachineTypeComponent } from './components/create-import-mac
 import { ViewExportDeleteJobsComponent } from './components/view-export-delete-jobs/view-export-delete-jobs.component';
 import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
-import { MachineTypeControllerService, UserControllerService } from "./generated-api";
+import {
+  JobControllerService,
+  MachineTypeControllerService,
+  ScheduleControllerService,
+  UserControllerService
+} from "./generated-api";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {MatIconModule} from "@angular/material/icon";
 import { MatDialogModule } from '@angular/material/dialog';
@@ -37,6 +42,14 @@ import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-di
 import { EditMachineTypesDialogComponent } from './components/edit-machine-types-dialog/edit-machine-types-dialog.component';
 import { EditMachineDialogComponent } from './components/edit-machine-dialog/edit-machine-dialog.component';
 
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerModule,
+  MatDatepickerToggle
+} from "@angular/material/datepicker";
+import {MatNativeDateModule} from "@angular/material/core";
+import {MatTableModule} from "@angular/material/table";
 
 @NgModule({
   declarations: [
@@ -77,9 +90,24 @@ import { EditMachineDialogComponent } from './components/edit-machine-dialog/edi
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDatepickerToggle,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatTableModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
-  providers: [MachineTypeControllerService, UserControllerService, provideAnimationsAsync()],
+  providers: [
+    MachineTypeControllerService,
+    UserControllerService,
+    JobControllerService,
+    ScheduleControllerService,
+    provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -104,9 +104,8 @@ export class CreateImportJobComponent implements OnInit {
           return;
         }
 
-        // Aggiungi l'assegnatario (email) a ciascun job
         jobsToSubmit.forEach(job => {
-          job.assignee = { email: email || 'default@example.com' }; // Impostazione dell'email dal localStorage
+          job.assignee = { email: email || 'default@example.com' };
         });
 
       } catch (error) {
@@ -166,7 +165,7 @@ export class CreateImportJobComponent implements OnInit {
 
     const jobsToSubmitWithId: JobDTO[] = jobsToSubmit.map(job => ({
       ...job,
-      id: 0, // Omessione dell'id
+      id: 0,
     }));
 
     this.jsonService.importJob(jobsToSubmitWithId).subscribe({

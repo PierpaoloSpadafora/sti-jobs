@@ -7,11 +7,9 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Job;
-import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.JobRepository;
-import unical.demacs.rdm.persistence.repository.MachineRepository;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 import unical.demacs.rdm.persistence.service.implementation.ScheduleServiceImpl;
 
@@ -32,72 +30,64 @@ public class ScheduleServiceImplTest {
     @Mock
     private JobRepository jobRepository;
 
-    @Mock
-    private MachineRepository machineRepository;
-
     private ScheduleServiceImpl scheduleService;
 
     private ScheduleDTO scheduleDTO;
     private Schedule schedule;
     private Job job;
-    private Machine machine;
 
     @BeforeEach
     void setUp() {
         job = new Job();
         job.setId(1L);
 
-        machine = new Machine();
-        machine.setId(1L);
-
         scheduleDTO = new ScheduleDTO();
         scheduleDTO.setId(1L);
         scheduleDTO.setJobId(job.getId());
-        scheduleDTO.setMachineId(machine.getId());
+        scheduleDTO.setMachineType("TypeA");
         scheduleDTO.setDueDate(LocalDateTime.now().plusDays(1));
         scheduleDTO.setStartTime(LocalDateTime.now());
-        scheduleDTO.setEndTime(LocalDateTime.now().plusHours(2));
+        scheduleDTO.setDuration(120L); // Duration in minutes
         scheduleDTO.setStatus(ScheduleStatus.SCHEDULED.toString());
 
         schedule = new Schedule();
         schedule.setId(1L);
         schedule.setJob(job);
-        schedule.setMachine(machine);
+        schedule.setMachineType(scheduleDTO.getMachineType());
         schedule.setDueDate(scheduleDTO.getDueDate());
         schedule.setStartTime(scheduleDTO.getStartTime());
-        schedule.setEndTime(scheduleDTO.getEndTime());
+        schedule.setDuration(scheduleDTO.getDuration());
         schedule.setStatus(ScheduleStatus.SCHEDULED);
 
-        scheduleService = new ScheduleServiceImpl(scheduleRepository, jobRepository, machineRepository);
+        scheduleService = new ScheduleServiceImpl(scheduleRepository, jobRepository);
     }
 
     @Test
     void testCreateSchedule_Success() {
         when(jobRepository.findById(eq(scheduleDTO.getJobId()))).thenReturn(Optional.of(job));
-        when(machineRepository.findById(eq(scheduleDTO.getMachineId()))).thenReturn(Optional.of(machine));
-        when(scheduleRepository.findByMachine_Id(eq(scheduleDTO.getMachineId()))).thenReturn(new ArrayList<>());
+        when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(new ArrayList<>());
         when(scheduleRepository.save(any(Schedule.class))).thenReturn(schedule);
 
         ScheduleDTO createdSchedule = scheduleService.createSchedule(scheduleDTO);
 
         assertNotNull(createdSchedule);
         assertEquals(scheduleDTO.getJobId(), createdSchedule.getJobId());
-        assertEquals(scheduleDTO.getMachineId(), createdSchedule.getMachineId());
+        assertEquals(scheduleDTO.getMachineType(), createdSchedule.getMachineType());
         verify(scheduleRepository, times(1)).save(any(Schedule.class));
     }
 
     @Test
     void testCreateSchedule_InvalidTimeSlot() {
         when(jobRepository.findById(eq(scheduleDTO.getJobId()))).thenReturn(Optional.of(job));
-        when(machineRepository.findById(eq(scheduleDTO.getMachineId()))).thenReturn(Optional.of(machine));
         Schedule conflictingSchedule = new Schedule();
         conflictingSchedule.setStartTime(scheduleDTO.getStartTime().minusHours(1));
-        conflictingSchedule.setEndTime(scheduleDTO.getEndTime().plusHours(1));
-        when(scheduleRepository.findByMachine_Id(eq(scheduleDTO.getMachineId()))).thenReturn(List.of(conflictingSchedule));
+        conflictingSchedule.setDuration(240L); // 4 hours duration
+        conflictingSchedule.setMachineType(scheduleDTO.getMachineType());
+        when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(List.of(conflictingSchedule));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> scheduleService.createSchedule(scheduleDTO));
 
-        assertEquals("Time slot is not available for the selected machine", exception.getMessage());
+        assertEquals("Time slot is not available for the selected machine type", exception.getMessage());
     }
 
     @Test
@@ -133,8 +123,7 @@ public class ScheduleServiceImplTest {
     void testUpdateSchedule_Success() {
         when(scheduleRepository.findById(eq(schedule.getId()))).thenReturn(Optional.of(schedule));
         when(jobRepository.findById(eq(scheduleDTO.getJobId()))).thenReturn(Optional.of(job));
-        when(machineRepository.findById(eq(scheduleDTO.getMachineId()))).thenReturn(Optional.of(machine));
-        when(scheduleRepository.findByMachine_Id(eq(scheduleDTO.getMachineId()))).thenReturn(new ArrayList<>());
+        when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(new ArrayList<>());
         when(scheduleRepository.save(any(Schedule.class))).thenReturn(schedule);
 
         ScheduleDTO updatedSchedule = scheduleService.updateSchedule(schedule.getId(), scheduleDTO);
@@ -196,23 +185,22 @@ public class ScheduleServiceImplTest {
     }
 
     @Test
-    void testGetSchedulesByMachineId() {
-        when(scheduleRepository.findByMachine_Id(eq(machine.getId()))).thenReturn(List.of(schedule));
+    void testGetSchedulesByMachineType() {
+        when(scheduleRepository.findByMachineType(eq(schedule.getMachineType()))).thenReturn(List.of(schedule));
 
-        List<ScheduleDTO> schedules = scheduleService.getSchedulesByMachineId(machine.getId());
+        List<ScheduleDTO> schedules = scheduleService.getSchedulesByMachineType(schedule.getMachineType());
 
         assertNotNull(schedules);
         assertEquals(1, schedules.size());
-        assertEquals(machine.getId(), schedules.get(0).getMachineId());
+        assertEquals(schedule.getMachineType(), schedules.get(0).getMachineType());
     }
 
     @Test
     void testGetSchedulesInTimeRange() {
         LocalDateTime startTime = schedule.getStartTime().minusHours(1);
-        LocalDateTime endTime = schedule.getEndTime().plusHours(1);
+        LocalDateTime endTime = schedule.getStartTime().plusMinutes(schedule.getDuration()).plusHours(1);
 
-        when(scheduleRepository.findByStartTimeBetween(eq(startTime), eq(endTime)))
-                .thenReturn(List.of(schedule));
+        when(scheduleRepository.findAll()).thenReturn(List.of(schedule));
 
         List<ScheduleDTO> schedules = scheduleService.getSchedulesInTimeRange(startTime, endTime);
 
@@ -222,18 +210,26 @@ public class ScheduleServiceImplTest {
 
     @Test
     void testIsTimeSlotAvailable_Available() {
-        when(scheduleRepository.findByMachine_Id(eq(machine.getId()))).thenReturn(new ArrayList<>());
+        when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(new ArrayList<>());
 
-        boolean isAvailable = scheduleService.isTimeSlotAvailable(machine.getId(), scheduleDTO.getStartTime(), scheduleDTO.getEndTime());
+        boolean isAvailable = scheduleService.isTimeSlotAvailable(
+                scheduleDTO.getMachineType(),
+                scheduleDTO.getStartTime(),
+                scheduleDTO.getStartTime().plusMinutes(scheduleDTO.getDuration())
+        );
 
         assertTrue(isAvailable);
     }
 
     @Test
     void testIsTimeSlotAvailable_NotAvailable() {
-        when(scheduleRepository.findByMachine_Id(eq(machine.getId()))).thenReturn(List.of(schedule));
+        when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(List.of(schedule));
 
-        boolean isAvailable = scheduleService.isTimeSlotAvailable(machine.getId(), scheduleDTO.getStartTime(), scheduleDTO.getEndTime());
+        boolean isAvailable = scheduleService.isTimeSlotAvailable(
+                scheduleDTO.getMachineType(),
+                scheduleDTO.getStartTime(),
+                scheduleDTO.getStartTime().plusMinutes(scheduleDTO.getDuration())
+        );
 
         assertFalse(isAvailable);
     }
@@ -275,7 +271,7 @@ public class ScheduleServiceImplTest {
     void testGetPastSchedules() {
         LocalDateTime until = LocalDateTime.now().plusDays(1);
 
-        when(scheduleRepository.findByEndTimeBefore(eq(until))).thenReturn(List.of(schedule));
+        when(scheduleRepository.findAll()).thenReturn(List.of(schedule));
 
         List<ScheduleDTO> schedules = scheduleService.getPastSchedules(until);
 

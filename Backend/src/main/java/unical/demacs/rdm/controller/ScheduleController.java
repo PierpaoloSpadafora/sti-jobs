@@ -23,7 +23,7 @@ public class ScheduleController {
 
     private final IScheduleService scheduleService;
 
-    @PostMapping
+    @PostMapping("/create-schedule")
     public ResponseEntity<ScheduleDTO> createSchedule(@Valid @RequestBody ScheduleDTO scheduleDTO) {
         try {
             ScheduleDTO createdSchedule = scheduleService.createSchedule(scheduleDTO);
@@ -36,7 +36,7 @@ public class ScheduleController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<ScheduleDTO> updateScheduleStatus(@PathVariable Long id, @RequestParam String status) {
         try {
-            ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status);
+            ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
             ScheduleDTO updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
             return ResponseEntity.ok(updatedSchedule);
         } catch (IllegalArgumentException e) {
@@ -61,7 +61,7 @@ public class ScheduleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping("/get-all-schedules")
     public ResponseEntity<List<ScheduleDTO>> getAllSchedules() {
         List<ScheduleDTO> schedules = scheduleService.getAllSchedules();
         return new ResponseEntity<>(schedules, HttpStatus.OK);
@@ -84,9 +84,9 @@ public class ScheduleController {
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
-    @GetMapping("/machine/{machineId}")
-    public ResponseEntity<List<ScheduleDTO>> getSchedulesByMachineId(@PathVariable Long machineId) {
-        List<ScheduleDTO> schedules = scheduleService.getSchedulesByMachineId(machineId);
+    @GetMapping("/machine/{machineType}")
+    public ResponseEntity<List<ScheduleDTO>> getSchedulesByMachineType(@PathVariable String machineType) {
+        List<ScheduleDTO> schedules = scheduleService.getSchedulesByMachineType(machineType);
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
@@ -100,13 +100,12 @@ public class ScheduleController {
 
     @GetMapping("/availability")
     public ResponseEntity<Boolean> checkTimeSlotAvailability(
-            @RequestParam Long machineId,
+            @RequestParam String machineType,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        boolean isAvailable = scheduleService.isTimeSlotAvailable(machineId, startTime, endTime);
+        boolean isAvailable = scheduleService.isTimeSlotAvailable(machineType, startTime, endTime);
         return new ResponseEntity<>(isAvailable, HttpStatus.OK);
     }
-
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<ScheduleDTO>> getUpcomingSchedules(
@@ -123,7 +122,6 @@ public class ScheduleController {
         List<ScheduleDTO> schedules = scheduleService.getPastSchedules(endTime);
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
