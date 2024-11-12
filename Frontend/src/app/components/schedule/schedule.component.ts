@@ -3,7 +3,7 @@ import { JobDTO, ScheduleDTO } from '../../generated-api';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { SchedulerService } from '../../services/scheduler.service';
-import {JobService} from "../../services/job.service";
+import { JobService } from "../../services/job.service";
 
 @Component({
   selector: 'app-schedule',
@@ -12,6 +12,7 @@ import {JobService} from "../../services/job.service";
 })
 export class ScheduleComponent implements OnInit {
   jobs: JobDTO[] = [];
+  schedules: ScheduleDTO[] = []; // Aggiunta proprietà per gli schedule
   displayedColumns: string[] = ['title', 'description', 'actions'];
   scheduleForm: FormGroup;
   dialogRef!: MatDialogRef<any>;
@@ -34,6 +35,11 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getJobs();
+    this.getAllSchedules(); // Recupera gli schedule all'avvio
+  }
+
+  getJobs() {
     this.jobService.showJob().subscribe({
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
@@ -41,6 +47,18 @@ export class ScheduleComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error while retrieving jobs:', error);
+      }
+    });
+  }
+
+  getAllSchedules() {
+    this.scheduleService.getAllSchedules().subscribe({
+      next: (response: ScheduleDTO[]) => {
+        this.schedules = response;
+        console.log('Schedules retrieved:', this.schedules);
+      },
+      error: (error: any) => {
+        console.error('Error while retrieving schedules:', error);
       }
     });
   }
@@ -120,6 +138,7 @@ export class ScheduleComponent implements OnInit {
       next: (response) => {
         console.log('Schedule created successfully:', response);
         this.dialogRef.close();
+        this.getAllSchedules(); // Aggiorna l'elenco degli schedule dopo la creazione
       },
       error: (error) => {
         console.error('Error creating schedule:', error);

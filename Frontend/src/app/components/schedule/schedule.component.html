@@ -7,7 +7,6 @@
         <tr>
           <th>Titolo</th>
           <th>Descrizione</th>
-
           <th>Durata</th>
           <th>Azioni</th>
         </tr>
@@ -20,6 +19,34 @@
           <td class="actions-cell">
             <button class="action-button" (click)="openScheduleDialog(job)">Schedula</button>
           </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="schedules-container">
+    <h2>Elenco dei Job Schedulati</h2>
+    <div class="table-responsive">
+      <table class="schedules-table">
+        <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Tipo Macchina</th>
+          <th>Ora di Inizio</th>
+          <th>Data di Scadenza</th>
+          <th>Durata</th>
+          <th>Stato</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let schedule of schedules">
+          <td>{{ schedule.jobId }}</td>
+          <td>{{ schedule.machineType }}</td>
+          <td>{{ schedule.startTime | date: 'short' }}</td>
+          <td>{{ schedule.dueDate | date: 'short' }}</td>
+          <td>{{ secondsToDuration(schedule.duration) }}</td>
+          <td>{{ schedule.status }}</td>
         </tr>
         </tbody>
       </table>
