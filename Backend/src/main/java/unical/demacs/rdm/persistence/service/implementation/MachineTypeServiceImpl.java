@@ -56,4 +56,14 @@ public class MachineTypeServiceImpl implements IMachineTypeService {
     private MachineTypeDTO convertToDTO(MachineType machineType) {
         return new MachineTypeDTO(machineType.getId(), machineType.getName(), machineType.getDescription());
     }
+
+    @Override
+    public MachineTypeDTO updateMachineType(Long id, MachineTypeDTO machineTypeDTO) {
+        MachineType machineType = machineTypeRepository.findById(machineTypeDTO.getId())
+                .orElseThrow(() -> new MachineException("Machine type not found"));
+        machineType.setName(machineTypeDTO.getName());
+        machineType.setDescription(machineTypeDTO.getDescription());
+        machineType = machineTypeRepository.save(machineType);
+        return convertToDTO(machineType);
+    }
 }

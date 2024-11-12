@@ -69,6 +69,21 @@ public class MachineTypeController {
         return ResponseEntity.ok(machineTypes);
     }
 
+    @Operation(summary = "Update machine type", description = "Update a machine type using its id.",
+            tags = {"machine-type-controller"})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Machine type updated successfully.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineTypeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Machine type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
+    })
+    @PutMapping(path="/{id}")
+    public ResponseEntity<MachineTypeDTO> updateMachineType(@PathVariable("id") Long id, @Valid @RequestBody MachineTypeDTO machineTypeDTO) {
+        return ResponseEntity.ok(machineTypeServiceImpl.updateMachineType(id, machineTypeDTO));
+    }
+
     @Operation(summary = "Delete machine type", description = "Delete a machine type using its id.",
             tags = {"machine-type-controller"})
     @ApiResponses({
@@ -78,7 +93,7 @@ public class MachineTypeController {
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @DeleteMapping(path="/by-id/{id}")
+    @DeleteMapping(path="/{id}")
     public ResponseEntity<Void> deleteMachineType(@PathVariable("id") Long id) {
         machineTypeServiceImpl.deleteMachineType(id);
         return ResponseEntity.noContent().build();
