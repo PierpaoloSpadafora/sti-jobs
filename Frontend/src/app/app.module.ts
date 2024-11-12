@@ -35,6 +35,8 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
 import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-dialog.component';
 import { EditMachineTypesDialogComponent } from './components/edit-machine-types-dialog/edit-machine-types-dialog.component';
+import { EditMachineDialogComponent } from './components/edit-machine-dialog/edit-machine-dialog.component';
+
 
 @NgModule({
   declarations: [
@@ -55,6 +57,7 @@ import { EditMachineTypesDialogComponent } from './components/edit-machine-types
     ViewExportDeleteMachineTypesComponent,
     EditJobDialogComponent,
     EditMachineTypesDialogComponent,
+    EditMachineDialogComponent,
   ],
   imports: [
     BrowserModule,
