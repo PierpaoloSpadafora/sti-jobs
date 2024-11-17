@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.config.exception.MachineException;
+import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 
@@ -52,7 +53,7 @@ public class MachineTypeController {
     @GetMapping(path="/by-id/{id}")
     public ResponseEntity<MachineTypeDTO> getMachineTypeById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(machineTypeServiceImpl.getMachineTypeById(id)
-                .orElseThrow(() -> new MachineException("Machine type not found")));
+                .orElseThrow(() -> new MachineNotFoundException("Machine type not found")));
     }
 
     @Operation(summary = "Get all machine types", description = "Retrieve all machine types.",
