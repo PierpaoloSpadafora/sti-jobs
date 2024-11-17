@@ -19,7 +19,7 @@ import unical.demacs.rdm.service.UserServiceImplTest;
 		JobControllerTest.class,
 		MachineControllerTest.class,
 		ScheduleControllerTest.class,
-	
+		UserControllerTest.class,
 
 		JobServiceImplTest.class,
 		MachineServiceImplTest.class,
