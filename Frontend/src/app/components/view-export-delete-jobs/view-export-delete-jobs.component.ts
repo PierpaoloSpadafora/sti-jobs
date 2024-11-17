@@ -36,16 +36,15 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         this.jobs = Array.isArray(response.jobs) && response.jobs.every(job => typeof job === 'object')
-          ? response.jobs as Job[] 
+          ? response.jobs as Job[]
           : [];
         this.machineTypes = this.transformMachineTypes(response.types);
-        
-        // Debug log per vedere la struttura dei job
+
         console.log("Jobs structure:", this.jobs.map(job => ({
           jobId: job.id,
           requiredMachineType: job.requiredMachineType
         })));
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -73,9 +72,9 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   }
 
   private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
-    return dtos.filter(dto => 
-      dto.id != null && 
-      dto.name != null && 
+    return dtos.filter(dto =>
+      dto.id != null &&
+      dto.name != null &&
       dto.description != null
     ).map(dto => ({
       id: dto.id!,
@@ -83,7 +82,7 @@ export class ViewExportDeleteJobsComponent implements OnInit {
       description: dto.description!
     }));
   }
-  
+
   deleteJob(id: number): void {
     if (confirm('Are you sure you want to delete this job?')) {
       this.isLoading = true;

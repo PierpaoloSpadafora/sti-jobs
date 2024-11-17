@@ -12,7 +12,7 @@ import { JobService } from "../../services/job.service";
 })
 export class ScheduleComponent implements OnInit {
   jobs: JobDTO[] = [];
-  schedules: ScheduleDTO[] = []; // Aggiunta proprietà per gli schedule
+  schedules: ScheduleDTO[] = [];
   displayedColumns: string[] = ['title', 'description', 'actions'];
   scheduleForm: FormGroup;
   dialogRef!: MatDialogRef<any>;
@@ -36,7 +36,7 @@ export class ScheduleComponent implements OnInit {
 
   ngOnInit() {
     this.getJobs();
-    this.getAllSchedules(); // Recupera gli schedule all'avvio
+    this.getAllSchedules();
   }
 
   getJobs() {
@@ -138,7 +138,7 @@ export class ScheduleComponent implements OnInit {
       next: (response) => {
         console.log('Schedule created successfully:', response);
         this.dialogRef.close();
-        this.getAllSchedules(); // Aggiorna l'elenco degli schedule dopo la creazione
+        this.getAllSchedules();
       },
       error: (error) => {
         console.error('Error creating schedule:', error);
