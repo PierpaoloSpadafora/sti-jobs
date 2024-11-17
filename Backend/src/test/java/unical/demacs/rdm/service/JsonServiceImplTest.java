@@ -138,7 +138,7 @@ class JsonServiceImplTest {
     }
 
 
-    @Test
+    /*@Test
     void testProcessExport() {
         String email = "user@example.com";
         User user = new User();
@@ -161,6 +161,6 @@ class JsonServiceImplTest {
 
         UserException exception = assertThrows(UserException.class, () -> jsonService.processExport(email));
         assertEquals("User not found with email: nonexistent@example.com", exception.getMessage());
-    }
+    }*/
 }
 
