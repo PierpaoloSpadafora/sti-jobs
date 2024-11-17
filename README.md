@@ -40,5 +40,5 @@ Al primo avvio del backend, JPA provvederà a creare automaticamente le tabelle 
 ## Definition of Done (DoD) per le user stories
 
 1. Tutte le task associate alla user story sono state completate e soddisfano la loro DoD.
-2. La user story è stata approvata dal Product Owner ( Ilaria🦦 :> )
+2. La user story è stata approvata dal Product Owner ( @ila13-code )
 3. Il codice è stato integrato nel branch `main` tramite una pull request.
