@@ -47,7 +47,7 @@ public class ScheduleServiceImplTest {
         scheduleDTO.setMachineType("TypeA");
         scheduleDTO.setDueDate(LocalDateTime.now().plusDays(1));
         scheduleDTO.setStartTime(LocalDateTime.now());
-        scheduleDTO.setDuration(120L); // Duration in minutes
+        scheduleDTO.setDuration(120L); // Durata in minuti
         scheduleDTO.setStatus(ScheduleStatus.SCHEDULED.toString());
 
         schedule = new Schedule();
@@ -81,7 +81,7 @@ public class ScheduleServiceImplTest {
         when(jobRepository.findById(eq(scheduleDTO.getJobId()))).thenReturn(Optional.of(job));
         Schedule conflictingSchedule = new Schedule();
         conflictingSchedule.setStartTime(scheduleDTO.getStartTime().minusHours(1));
-        conflictingSchedule.setDuration(240L); // 4 hours duration
+        conflictingSchedule.setDuration(240L); // 4 ore
         conflictingSchedule.setMachineType(scheduleDTO.getMachineType());
         when(scheduleRepository.findByMachineType(eq(scheduleDTO.getMachineType()))).thenReturn(List.of(conflictingSchedule));
 

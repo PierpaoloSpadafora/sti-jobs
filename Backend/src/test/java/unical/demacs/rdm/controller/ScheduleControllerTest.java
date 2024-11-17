@@ -1,7 +1,7 @@
 package unical.demacs.rdm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Importa questo modulo
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,10 +43,10 @@ public class ScheduleControllerTest {
         scheduleDTO = new ScheduleDTO();
         scheduleDTO.setId(1L);
         scheduleDTO.setJobId(1L);
-        scheduleDTO.setMachineId(1L);
+        scheduleDTO.setMachineType("TypeA");
         scheduleDTO.setDueDate(LocalDateTime.now().plusDays(1));
         scheduleDTO.setStartTime(LocalDateTime.now());
-        scheduleDTO.setEndTime(LocalDateTime.now().plusHours(2));
+        scheduleDTO.setDuration(120L); // Durata in minuti
         scheduleDTO.setStatus(ScheduleStatus.SCHEDULED.toString());
     }
 
@@ -55,9 +55,9 @@ public class ScheduleControllerTest {
         when(scheduleService.createSchedule(any(ScheduleDTO.class))).thenReturn(scheduleDTO);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule()); // Registra il modulo
+        mapper.registerModule(new JavaTimeModule());
 
-        mockMvc.perform(post("/api/v1/schedules")
+        mockMvc.perform(post("/api/v1/schedules/create-schedule")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(scheduleDTO)))
                 .andExpect(status().isCreated())
@@ -69,9 +69,9 @@ public class ScheduleControllerTest {
         when(scheduleService.createSchedule(any(ScheduleDTO.class))).thenThrow(new IllegalArgumentException());
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule()); // Registra il modulo
+        mapper.registerModule(new JavaTimeModule());
 
-        mockMvc.perform(post("/api/v1/schedules")
+        mockMvc.perform(post("/api/v1/schedules/create-schedule")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(scheduleDTO)))
                 .andExpect(status().isBadRequest());
@@ -118,7 +118,7 @@ public class ScheduleControllerTest {
 
         when(scheduleService.getAllSchedules()).thenReturn(schedules);
 
-        mockMvc.perform(get("/api/v1/schedules"))
+        mockMvc.perform(get("/api/v1/schedules/get-all-schedules"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(scheduleDTO.getId()));
     }
@@ -143,10 +143,10 @@ public class ScheduleControllerTest {
 
     @Test
     void testCheckTimeSlotAvailability() throws Exception {
-        when(scheduleService.isTimeSlotAvailable(eq(1L), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(true);
+        when(scheduleService.isTimeSlotAvailable(eq("TypeA"), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(true);
 
         mockMvc.perform(get("/api/v1/schedules/availability")
-                        .param("machineId", "1")
+                        .param("machineType", "TypeA")
                         .param("startTime", LocalDateTime.now().toString())
                         .param("endTime", LocalDateTime.now().plusHours(2).toString()))
                 .andExpect(status().isOk())
