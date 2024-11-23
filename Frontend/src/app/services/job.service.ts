@@ -21,11 +21,11 @@ export class JobService {
 
   deleteJob(id: number): Observable<any> {
     console.log("Cerco di cancellare:", id);
-    return this.http.delete(`${this.baseUrl}/delete-job/${id}`);
+    return this.http.delete(`${this.baseUrl}/delete-job${id}`);
   }
 
   updateJob(job: any): Observable<any> {
-    return this.http.put(`${this.baseUrl}/update-job/${job.id}`, job);
+    return this.http.put(`${this.baseUrl}/update-job${job.id}`, job);
   }
 
 }
