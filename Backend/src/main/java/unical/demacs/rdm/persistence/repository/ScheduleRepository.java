@@ -7,6 +7,7 @@ import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
@@ -16,4 +17,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByStartTimeAfter(LocalDateTime startTime);
     List<Schedule> findByStartTimeBefore(LocalDateTime endTime);
     List<Schedule> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
+
+    List<Schedule> findByMachineTypeAndStatus(String machineType, ScheduleStatus scheduleStatus);
+
+    Optional<LocalDateTime> findLatestEndTimeForMachine(String machineType);
 }
