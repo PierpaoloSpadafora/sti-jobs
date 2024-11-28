@@ -38,12 +38,21 @@ export class JobService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    if (error.status === 0) {
-      console.error('An error occurred:', error.error);
+    let errorMessage = 'Qualcosa è andato storto; per favore riprova più tardi.';
+    if (error.error instanceof ErrorEvent) {
+      // Errore client-side
+      console.error('Si è verificato un errore:', error.error.message);
+      errorMessage = error.error.message;
     } else {
+      // Errore server-side
       console.error(
-        `Backend returned code ${error.status}, body was: `, error.error);
+        `Il backend ha restituito il codice ${error.status}, il corpo della risposta è: `, error.error);
+      if (error.error) {
+        errorMessage = error.error;
+      }
     }
-    return throwError(() => new Error('Something bad happened; please try again later.'));
+    return throwError(() => new Error(errorMessage));
   }
+
+
 }

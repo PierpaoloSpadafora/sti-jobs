@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.persistence.dto.JobDTO;
@@ -115,8 +116,13 @@ public class JobController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @DeleteMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Void> deleteJob(@PathVariable("id") Long id) {
-        jobServiceImpl.deleteJob(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteJob(@PathVariable("id") Long id) {
+        try {
+            jobServiceImpl.deleteJob(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
+
 }

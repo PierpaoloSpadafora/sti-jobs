@@ -1,6 +1,7 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JobDTO;
@@ -68,7 +69,11 @@ public class JobServiceImpl implements IJobService {
 
     @Override
     public void deleteJob(Long id) {
-        jobRepository.deleteById(id);
+        try {
+            jobRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Impossibile eliminare il job con id " + id + " perché è referenziato da altri enti", e);
+        }
     }
 
     @Override

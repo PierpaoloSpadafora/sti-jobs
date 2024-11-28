@@ -71,7 +71,7 @@
     <div class="form-field">
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Ora di Inizio</mat-label>
-        <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required>
+        <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required [compareWith]="compareDate">
           <mat-option *ngFor="let time of availableStartTimes" [value]="time">
             {{ time | date: 'shortTime' }}
           </mat-option>

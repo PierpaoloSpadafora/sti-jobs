@@ -66,7 +66,7 @@ public class ScheduleServiceImpl implements IScheduleService {
     @Override
     public ScheduleDTO updateSchedule(Long id, ScheduleDTO scheduleDTO) {
         Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Schedule not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Schedule non trovato con id: " + id));
 
         validateScheduleTime(scheduleDTO);
         updateScheduleFromDTO(schedule, scheduleDTO);

@@ -37,8 +37,13 @@ export class ScheduleComponent implements OnInit {
     this.generateAvailableStartTimes();
   }
 
+  compareDate(d1: Date, d2: Date): boolean {
+    return d1 && d2 && d1.getTime() === d2.getTime();
+  }
+
   ngOnInit() {
     this.getJobs();
+    this.scheduleForm.get('startTime')?.valueChanges.subscribe(() => this.onStartTimeChange());
   }
 
   getJobs() {
@@ -163,18 +168,22 @@ export class ScheduleComponent implements OnInit {
 
   openEditScheduleDialog(schedule: ScheduleDTO) {
     this.selectedSchedule = schedule;
+    this.selectedJob = this.jobs.find(job => job.id === schedule.jobId)!;
+
     this.scheduleForm.patchValue({
       startTime: new Date(schedule.startTime),
       dueDate: new Date(schedule.dueDate)
     });
+
     if (schedule.duration) {
       this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
     } else {
       this.calculatedEndTime = null;
     }
+
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
       width: '600px',
-      data: { job: this.jobs.find(job => job.id === schedule.jobId) }
+      data: { job: this.selectedJob }
     });
   }
 
