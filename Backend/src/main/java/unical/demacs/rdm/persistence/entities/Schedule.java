@@ -2,6 +2,7 @@ package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(builderMethodName = "scheduleBuilder")
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +25,9 @@ public class Schedule {
     @JoinColumn(name = "job_id", nullable = false)
     private Job job;
 
-    @JoinColumn(name = "machine_id", nullable = false)
-    private String machineType;
+    @ManyToOne
+    @JoinColumn(name = "machine_type_id", nullable = false)
+    private MachineType machineType;
 
     @Column
     private LocalDateTime dueDate;

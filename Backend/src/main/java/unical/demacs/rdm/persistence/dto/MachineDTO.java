@@ -27,7 +27,6 @@ public class MachineDTO {
     @NotNull(message = "Il tipo di macchina è obbligatorio")
     private Long typeId;
 
-    private String typeName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

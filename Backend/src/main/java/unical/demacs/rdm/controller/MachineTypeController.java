@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import unical.demacs.rdm.config.ExtendedModelMapper;
 import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -26,6 +27,8 @@ import java.util.List;
 public class MachineTypeController {
 
     private final MachineTypeServiceImpl machineTypeServiceImpl;
+    private final ModelMapper modelMapper;
+    private final ExtendedModelMapper extendedModelMapper;
 
     @Operation(summary = "Create machine type", description = "Create a new machine type.",
             tags = {"machine-type-controller"})
@@ -37,7 +40,7 @@ public class MachineTypeController {
     })
     @PostMapping(path="create")
     public ResponseEntity<MachineTypeDTO> createMachineType(@Valid @RequestBody MachineTypeDTO machineTypeDTO) {
-        return ResponseEntity.ok(machineTypeServiceImpl.createMachineType(machineTypeDTO));
+        return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.createMachineType(machineTypeDTO), MachineTypeDTO.class));
     }
 
     @Operation(summary = "Get machine type by id", description = "Retrieve a machine type using its id.",
@@ -52,8 +55,11 @@ public class MachineTypeController {
     })
     @GetMapping(path="/by-id/{id}")
     public ResponseEntity<MachineTypeDTO> getMachineTypeById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(machineTypeServiceImpl.getMachineTypeById(id)
-                .orElseThrow(() -> new MachineNotFoundException("Machine type not found")));
+        try {
+            return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.getMachineTypeById(id), MachineTypeDTO.class));
+        } catch (MachineNotFoundException e) {
+            throw new MachineNotFoundException("Machine type not found.");
+        }
     }
 
     @Operation(summary = "Get all machine types", description = "Retrieve all machine types.",
@@ -66,8 +72,7 @@ public class MachineTypeController {
     })
     @GetMapping(path="/get-all")
     public ResponseEntity<List<MachineTypeDTO>> getAllMachineTypes() {
-        List<MachineTypeDTO> machineTypes = machineTypeServiceImpl.getAllMachineTypes();
-        return ResponseEntity.ok(machineTypes);
+        return ResponseEntity.ok(extendedModelMapper.mapList(machineTypeServiceImpl.getAllMachineTypes(), MachineTypeDTO.class));
     }
 
     @Operation(summary = "Update machine type", description = "Update a machine type using its id.",
@@ -82,7 +87,7 @@ public class MachineTypeController {
     })
     @PutMapping(path="/{id}")
     public ResponseEntity<MachineTypeDTO> updateMachineType(@PathVariable("id") Long id, @Valid @RequestBody MachineTypeDTO machineTypeDTO) {
-        return ResponseEntity.ok(machineTypeServiceImpl.updateMachineType(id, machineTypeDTO));
+        return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.updateMachineType(id, machineTypeDTO), MachineTypeDTO.class));
     }
 
     @Operation(summary = "Delete machine type", description = "Delete a machine type using its id.",
@@ -95,9 +100,9 @@ public class MachineTypeController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @DeleteMapping(path="/{id}")
-    public ResponseEntity<Void> deleteMachineType(@PathVariable("id") Long id) {
+    public ResponseEntity<Boolean> deleteMachineType(@PathVariable("id") Long id) {
         machineTypeServiceImpl.deleteMachineType(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(true);
     }
 
 

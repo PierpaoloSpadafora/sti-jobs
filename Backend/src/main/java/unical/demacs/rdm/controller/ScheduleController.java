@@ -3,16 +3,20 @@ package unical.demacs.rdm.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import unical.demacs.rdm.config.ExtendedModelMapper;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
+import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.service.interfaces.IScheduleService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/v1/schedules", produces = "application/json")
@@ -22,83 +26,65 @@ import java.util.List;
 public class ScheduleController {
 
     private final IScheduleService scheduleService;
+    private final ModelMapper modelMapper;
+    private final ExtendedModelMapper modelMapperExtended;
 
     @PostMapping("/create-schedule")
     public ResponseEntity<ScheduleDTO> createSchedule(@Valid @RequestBody ScheduleDTO scheduleDTO) {
-        try {
-            ScheduleDTO createdSchedule = scheduleService.createSchedule(scheduleDTO);
-            return new ResponseEntity<>(createdSchedule, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        Schedule createdSchedule = scheduleService.createSchedule(scheduleDTO);
+        return new ResponseEntity<>(modelMapper.map(createdSchedule, ScheduleDTO.class), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<ScheduleDTO> updateScheduleStatus(@PathVariable Long id, @RequestParam String status) {
-        try {
-            ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
-            ScheduleDTO updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
-            return ResponseEntity.ok(updatedSchedule);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
+        Schedule updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
+        return new ResponseEntity<>(modelMapper.map(updatedSchedule, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDTO scheduleDTO) {
-        try {
-            ScheduleDTO updatedSchedule = scheduleService.updateSchedule(id, scheduleDTO);
-            return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return new ResponseEntity<>(modelMapper.map(scheduleService.updateSchedule(id, scheduleDTO), ScheduleDTO.class), HttpStatus.OK);
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleDTO> getScheduleById(@PathVariable Long id) {
-        return scheduleService.getScheduleById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Schedule> schedule = scheduleService.getScheduleById(id);
+        return schedule.map(value -> new ResponseEntity<>(modelMapper.map(value, ScheduleDTO.class), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/get-all-schedules")
     public ResponseEntity<List<ScheduleDTO>> getAllSchedules() {
-        List<ScheduleDTO> schedules = scheduleService.getAllSchedules();
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getAllSchedules();
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesByStatus(@PathVariable String status) {
-        try {
-            ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
-            List<ScheduleDTO> schedules = scheduleService.getSchedulesByStatus(scheduleStatus);
-            return new ResponseEntity<>(schedules, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        List<Schedule> schedules = scheduleService.getSchedulesByStatus(ScheduleStatus.valueOf(status.toUpperCase()));
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/job/{jobId}")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesByJobId(@PathVariable Long jobId) {
-        List<ScheduleDTO> schedules = scheduleService.getSchedulesByJobId(jobId);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getSchedulesByJobId(jobId);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/machine/{machineType}")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesByMachineType(@PathVariable String machineType) {
-        List<ScheduleDTO> schedules = scheduleService.getSchedulesByMachineType(machineType);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getSchedulesByMachineType(machineType);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/timeRange")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<ScheduleDTO> schedules = scheduleService.getSchedulesInTimeRange(startTime, endTime);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getSchedulesInTimeRange(startTime, endTime);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/availability")
@@ -114,16 +100,16 @@ public class ScheduleController {
     public ResponseEntity<List<ScheduleDTO>> getUpcomingSchedules(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from) {
         LocalDateTime startTime = from != null ? from : LocalDateTime.now();
-        List<ScheduleDTO> schedules = scheduleService.getUpcomingSchedules(startTime);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getUpcomingSchedules(startTime);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @GetMapping("/past")
     public ResponseEntity<List<ScheduleDTO>> getPastSchedules(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime until) {
         LocalDateTime endTime = until != null ? until : LocalDateTime.now();
-        List<ScheduleDTO> schedules = scheduleService.getPastSchedules(endTime);
-        return new ResponseEntity<>(schedules, HttpStatus.OK);
+        List<Schedule> schedules = scheduleService.getPastSchedules(endTime);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

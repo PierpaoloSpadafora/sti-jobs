@@ -8,7 +8,6 @@ import java.util.Optional;
 public interface IUserService {
     @Transactional
     User createUser(String email);
-
     Optional<User> getUserByEmail(String email);
     Optional<User> getUserById(String id);
     void deleteUserById(String id);

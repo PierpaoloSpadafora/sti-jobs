@@ -25,8 +25,6 @@ public class JobDTO {
     @NotNull(message = "Lo stato è obbligatorio")
     private JobStatus status;
 
-    private UserDTO assignee;
-
     @NotNull(message = "La priorità è obbligatoria")
     private JobPriority priority;
 
@@ -34,5 +32,7 @@ public class JobDTO {
     private long duration;
 
     @NotNull(message = "Il tipo di macchina richiesto è obbligatorio")
-    private MachineTypeDTO requiredMachineType;
+    private long idMachineType;
+
+    private String assigneeEmail;
 }

@@ -13,7 +13,7 @@ public class ScheduleDTO {
 
     private Long id;
     private Long jobId;
-    private String machineType;
+    private long machineTypeId;
     private LocalDateTime dueDate;
     private LocalDateTime startTime;
     private Long duration;

@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import unical.demacs.rdm.config.ExtendedModelMapper;
 import unical.demacs.rdm.config.ModelMapperConfig;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.dto.UserDTO;
+import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
@@ -28,31 +30,17 @@ import java.util.Optional;
 public class JsonController {
 
     private final IJobService jobService;
-    private final IMachineService machineService;
-    private final IMachineTypeService machineTypeService;
-    private final IUserService userService;
-    private final ModelMapperConfig modelMapperConfig;
+    private final ExtendedModelMapper extendedModelMapper;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importJob", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs) {
+    public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs, @RequestParam("assigneeEmail") String assigneeEmail) {
         try {
             jobs.forEach(job -> {
-                if (job.getAssignee() != null && job.getAssignee().getEmail() != null) {
-                    String email = job.getAssignee().getEmail();
-                    Optional<User> user = userService.getUserByEmail(email);
-                    UserDTO userDTO = modelMapperConfig.getModelMapper().map(user, UserDTO.class);
-
-                    if (user.isPresent()) {
-                        job.setAssignee(userDTO);
-                    } else {
-                        throw new RuntimeException("Utente con email " + email + " non trovato.");
-                    }
-                }
-                Optional<JobDTO> existingJob = jobService.findById(job.getId());
+                Optional<Job> existingJob = jobService.getJobById(job.getId());
                 if (existingJob.isEmpty()) {
-                    jobService.saveJob(job);
+                    jobService.createJob(assigneeEmail, job);
                 }
             });
             return ResponseEntity.ok("Jobs imported successfully.");
@@ -65,57 +53,38 @@ public class JsonController {
             tags = {"json-controller"})
     @GetMapping(value = "/exportJob", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<JobDTO>> exportJob() {
-        List<JobDTO> jobs = jobService.getAllJobs();
-        return ResponseEntity.ok(jobs);
+        List<Job> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(extendedModelMapper.mapList(jobs, JobDTO.class));
     }
 
+    /*
     @Operation(summary = "Import MachineType data from JSON", description = "Import MachineType data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
-        try {
-            machineTypes.forEach(machineType -> {
-                Optional<MachineTypeDTO> existingType = machineTypeService.getMachineTypeById(machineType.getId());
-                if (existingType.isEmpty()) {
-                    machineTypeService.createMachineType(machineType);
-                }
-            });
-            return ResponseEntity.ok("Machine Types imported successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error importing machine types: " + e.getMessage());
-        }
+
     }
 
     @Operation(summary = "Export MachineType data to JSON", description = "Export all MachineType data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/exportMachineType", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineTypeDTO>> exportMachineType() {
-        List<MachineTypeDTO> machineTypes = machineTypeService.getAllMachineTypes();
-        return ResponseEntity.ok(machineTypes);
+
     }
 
     @Operation(summary = "Import Machine data from JSON", description = "Import Machine data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importMachine", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> importMachine(@RequestBody List<MachineDTO> machines) {
-        try {
-            machines.forEach(machine -> {
-                Optional<MachineDTO> existingMachine = machineService.findByIdOrName(machine.getId(), machine.getName());
-                if (existingMachine.isEmpty()) {
-                    machineService.saveMachine(machine);
-                }
-            });
-            return ResponseEntity.ok("Machines imported successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error importing machines: " + e.getMessage());
-        }
+
     }
 
     @Operation(summary = "Export Machine data to JSON", description = "Export all Machine data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineDTO>> exportMachine() {
-        List<MachineDTO> machines = machineService.getAllMachines();
-        return ResponseEntity.ok(machines);
+
     }
+
+     */
 }

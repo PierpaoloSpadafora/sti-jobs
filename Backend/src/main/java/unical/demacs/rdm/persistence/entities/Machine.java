@@ -1,7 +1,10 @@
 package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.MachineStatus;
 
 import java.time.LocalDateTime;
@@ -9,6 +12,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "machines")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(builderMethodName = "machineBuilder")
 public class Machine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

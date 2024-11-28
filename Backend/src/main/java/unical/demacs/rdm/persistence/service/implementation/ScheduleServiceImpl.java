@@ -1,5 +1,9 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.google.common.util.concurrent.RateLimiter;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +11,7 @@ import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
+import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IScheduleService;
@@ -18,181 +23,348 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class ScheduleServiceImpl implements IScheduleService {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(ScheduleServiceImpl.class);
+    private final RateLimiter rateLimiter;
     private final ScheduleRepository scheduleRepository;
     private final JobRepository jobRepository;
-
-    @Autowired
-    public ScheduleServiceImpl(ScheduleRepository scheduleRepository,
-                               JobRepository jobRepository) {
-        this.scheduleRepository = scheduleRepository;
-        this.jobRepository = jobRepository;
-    }
+    private final MachineTypeRepository machineTypeRepository;
 
     @Override
-    public ScheduleDTO createSchedule(ScheduleDTO scheduleDTO) {
-        Job job = jobRepository.findById(scheduleDTO.getJobId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Job ID"));
-
-        if (!isTimeSlotAvailable(scheduleDTO.getMachineType(), scheduleDTO.getStartTime(), scheduleDTO.getStartTime().plusMinutes(scheduleDTO.getDuration()))) {
-            throw new IllegalArgumentException("Time slot is not available for the selected machine type");
+    public Schedule createSchedule(ScheduleDTO scheduleDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Creating schedule for job with id: " + scheduleDTO.getJobId());
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for createSchedule");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            if(jobRepository.findById(scheduleDTO.getJobId()).isEmpty()){
+                logger.error("Job with id {} not found", scheduleDTO.getJobId());
+                throw new RuntimeException("Job not found");
+            }
+            Schedule schedule = Schedule.scheduleBuilder()
+                    .job(jobRepository.findById(scheduleDTO.getJobId()).orElse(null))
+                    .machineType(machineTypeRepository.findById(scheduleDTO.getMachineTypeId()).orElse(null))
+                    .dueDate(scheduleDTO.getDueDate())
+                    .startTime(scheduleDTO.getStartTime())
+                    .duration(scheduleDTO.getDuration())
+                    .build();
+            scheduleRepository.save(schedule);
+            logger.info("Schedule for job with id {} created successfully", scheduleDTO.getJobId());
+            return schedule;
+        } catch (Exception e) {
+            logger.error("Error creating schedule for job with id: {}", scheduleDTO.getJobId(), e);
+            throw new RuntimeException("Error creating schedule");
         }
-        Schedule schedule = new Schedule();
-        schedule.setJob(job);
-        schedule.setMachineType(scheduleDTO.getMachineType());
-        schedule.setDueDate(scheduleDTO.getDueDate());
-        schedule.setStartTime(scheduleDTO.getStartTime());
-        schedule.setDuration(scheduleDTO.getDuration());
-        schedule.setStatus(ScheduleStatus.valueOf(scheduleDTO.getStatus()));
-        schedule = scheduleRepository.save(schedule);
-
-        return convertToDTO(schedule);
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public Optional<ScheduleDTO> getScheduleById(Long id) {
-        return scheduleRepository.findById(id)
-                .map(this::convertToDTO);
+    public Optional<Schedule> getScheduleById(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedule by id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getScheduleById");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            Optional<Schedule> schedule = scheduleRepository.findById(id);
+            if (schedule.isEmpty()) {
+                logger.error("Schedule with id {} not found", id);
+                throw new RuntimeException("Schedule not found");
+            }
+            logger.info("Schedule with id {} found successfully", id);
+            return schedule;
+        } catch (Exception e) {
+            logger.error("Error getting schedule with id: {}", id, e);
+            throw new RuntimeException("Error getting schedule");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getAllSchedules() {
-        return scheduleRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getAllSchedules() {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting all schedules");
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getAllSchedules");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll();
+            logger.info("All schedules found successfully");
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting all schedules", e);
+            throw new RuntimeException("Error getting all schedules");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public ScheduleDTO updateSchedule(Long id, ScheduleDTO scheduleDTO) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Schedule non trovato con id: " + id));
-
-        validateScheduleTime(scheduleDTO);
-        updateScheduleFromDTO(schedule, scheduleDTO);
-
-        Schedule updatedSchedule = scheduleRepository.save(schedule);
-        return convertToDTO(updatedSchedule);
+    public Schedule updateSchedule(Long id, ScheduleDTO scheduleDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Updating schedule with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for updateSchedule");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            Optional<Schedule> schedule = scheduleRepository.findById(id);
+            if (schedule.isEmpty()) {
+                logger.error("Schedule with id {} not found", id);
+                throw new RuntimeException("Schedule not found");
+            }
+            if(jobRepository.findById(scheduleDTO.getJobId()).isEmpty()){
+                logger.error("Job with id {} not found", scheduleDTO.getJobId());
+                throw new RuntimeException("Job not found");
+            }
+            Schedule updatedSchedule = schedule.get();
+            updatedSchedule.setJob(jobRepository.findById(scheduleDTO.getJobId()).orElse(null));
+            updatedSchedule.setMachineType(machineTypeRepository.findById(scheduleDTO.getMachineTypeId()).orElse(null));
+            updatedSchedule.setDueDate(scheduleDTO.getDueDate());
+            updatedSchedule.setStartTime(scheduleDTO.getStartTime());
+            updatedSchedule.setDuration(scheduleDTO.getDuration());
+            scheduleRepository.save(updatedSchedule);
+            logger.info("Schedule with id {} updated successfully", id);
+            return updatedSchedule;
+        } catch (Exception e) {
+            logger.error("Error updating schedule with id: {}", id, e);
+            throw new RuntimeException("Error updating schedule");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
     public boolean deleteSchedule(Long id) {
-        if (scheduleRepository.existsById(id)) {
-            scheduleRepository.deleteById(id);
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Deleting schedule with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for deleteSchedule");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            Optional<Schedule> schedule = scheduleRepository.findById(id);
+            if (schedule.isEmpty()) {
+                logger.error("Schedule with id {} not found", id);
+                throw new RuntimeException("Schedule not found");
+            }
+            scheduleRepository.delete(schedule.get());
+            logger.info("Schedule with id {} deleted successfully", id);
             return true;
+        } catch (Exception e) {
+            logger.error("Error deleting schedule with id: {}", id, e);
+            throw new RuntimeException("Error deleting schedule");
         }
-        return false;
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getSchedulesByStatus(ScheduleStatus status) {
-        return scheduleRepository.findByStatus(status).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getSchedulesByStatus(ScheduleStatus status) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules by status: " + status);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesByStatus");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getStatus().equals(status))
+                    .collect(Collectors.toList());
+            logger.info("Schedules with status {} found successfully", status);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules by status: {}", status, e);
+            throw new RuntimeException("Error getting schedules by status");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getSchedulesByJobId(Long jobId) {
-        return scheduleRepository.findByJob_Id(jobId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getSchedulesByJobId(Long jobId) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules by job id: " + jobId);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesByJobId");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getJob().getId().equals(jobId))
+                    .collect(Collectors.toList());
+            logger.info("Schedules with job id {} found successfully", jobId);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules by job id: {}", jobId, e);
+            throw new RuntimeException("Error getting schedules by job id");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getSchedulesByMachineType(String machineType) {
-        return scheduleRepository.findByMachineType(machineType).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getSchedulesByMachineType(String machineType) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules by machine type: " + machineType);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesByMachineType");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getMachineType().equals(machineType))
+                    .collect(Collectors.toList());
+            logger.info("Schedules with machine type {} found successfully", machineType);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules by machine type: {}", machineType, e);
+            throw new RuntimeException("Error getting schedules by machine type");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getSchedulesInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        return scheduleRepository.findAll().stream()
-                .filter(schedule -> {
-                    LocalDateTime scheduleStartTime = schedule.getStartTime();
-                    LocalDateTime scheduleEndTime = scheduleStartTime.plusMinutes(schedule.getDuration());
-                    return !(scheduleEndTime.isBefore(startTime) || scheduleStartTime.isAfter(endTime));
-                })
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getSchedulesInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules in time range: " + startTime + " - " + endTime);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesInTimeRange");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getStartTime().isAfter(startTime) && schedule.getStartTime().isBefore(endTime))
+                    .collect(Collectors.toList());
+            logger.info("Schedules in time range {} - {} found successfully", startTime, endTime);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules in time range: {} - {}", startTime, endTime, e);
+            throw new RuntimeException("Error getting schedules in time range");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
     public boolean isTimeSlotAvailable(String machineType, LocalDateTime startTime, LocalDateTime endTime) {
-        List<Schedule> conflictingSchedules = scheduleRepository.findByMachineType(machineType).stream()
-                .filter(schedule -> {
-                    LocalDateTime scheduleStartTime = schedule.getStartTime();
-                    LocalDateTime scheduleEndTime = scheduleStartTime.plusMinutes(schedule.getDuration());
-                    return !(scheduleEndTime.isBefore(startTime) || scheduleStartTime.isAfter(endTime));
-                })
-                .toList();
-
-        return conflictingSchedules.isEmpty();
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Checking if time slot is available for machine type: " + machineType);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for isTimeSlotAvailable");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getMachineType().equals(machineType))
+                    .collect(Collectors.toList());
+            for (Schedule schedule : schedules) {
+                if (schedule.getStartTime().isBefore(endTime) && schedule.getStartTime().plusMinutes(schedule.getDuration()).isAfter(startTime)) {
+                    logger.info("Time slot not available for machine type: {}", machineType);
+                    return false;
+                }
+            }
+            logger.info("Time slot available for machine type: {}", machineType);
+            return true;
+        } catch (Exception e) {
+            logger.error("Error checking if time slot is available for machine type: {}", machineType, e);
+            throw new RuntimeException("Error checking if time slot is available");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public ScheduleDTO updateScheduleStatus(Long id, ScheduleStatus newStatus) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Schedule not found with id: " + id));
-
-        schedule.setStatus(newStatus);
-        Schedule updatedSchedule = scheduleRepository.save(schedule);
-        return convertToDTO(updatedSchedule);
+    public Schedule updateScheduleStatus(Long id, ScheduleStatus newStatus) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Updating schedule status with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for updateScheduleStatus");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            Optional<Schedule> schedule = scheduleRepository.findById(id);
+            if (schedule.isEmpty()) {
+                logger.error("Schedule with id {} not found", id);
+                throw new RuntimeException("Schedule not found");
+            }
+            Schedule updatedSchedule = schedule.get();
+            updatedSchedule.setStatus(newStatus);
+            scheduleRepository.save(updatedSchedule);
+            logger.info("Schedule status with id {} updated successfully", id);
+            return updatedSchedule;
+        } catch (Exception e) {
+            logger.error("Error updating schedule status with id: {}", id, e);
+            throw new RuntimeException("Error updating schedule status");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getUpcomingSchedules(LocalDateTime from) {
-        return scheduleRepository.findByStartTimeAfter(from).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<Schedule> getUpcomingSchedules(LocalDateTime from) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting upcoming schedules from: " + from);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getUpcomingSchedules");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getStartTime().isAfter(from))
+                    .collect(Collectors.toList());
+            logger.info("Upcoming schedules from {} found successfully", from);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting upcoming schedules from: {}", from, e);
+            throw new RuntimeException("Error getting upcoming schedules");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public List<ScheduleDTO> getPastSchedules(LocalDateTime until) {
-        return scheduleRepository.findAll().stream()
-                .filter(schedule -> schedule.getStartTime().plusMinutes(schedule.getDuration()).isBefore(until))
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private ScheduleDTO convertToDTO(Schedule schedule) {
-        ScheduleDTO dto = new ScheduleDTO();
-        dto.setId(schedule.getId());
-        dto.setJobId(schedule.getJob().getId());
-        dto.setMachineType(schedule.getMachineType());
-        dto.setDueDate(schedule.getDueDate());
-        dto.setStartTime(schedule.getStartTime());
-        dto.setDuration(schedule.getDuration());
-        dto.setStatus(schedule.getStatus().toString());
-        return dto;
-    }
-
-    private void updateScheduleFromDTO(Schedule schedule, ScheduleDTO dto) {
-        if (dto.getJobId() == null || dto.getJobId() <= 0) {
-            throw new IllegalArgumentException("Invalid Job ID: " + dto.getJobId());
+    public List<Schedule> getPastSchedules(LocalDateTime until) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting past schedules until: " + until);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getPastSchedules");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findAll().stream()
+                    .filter(schedule -> schedule.getStartTime().isBefore(until))
+                    .collect(Collectors.toList());
+            logger.info("Past schedules until {} found successfully", until);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting past schedules until: {}", until, e);
+            throw new RuntimeException("Error getting past schedules");
         }
-        Job job = jobRepository.findById(dto.getJobId())
-                .orElseThrow(() -> new RuntimeException("Job not found with id: " + dto.getJobId()));
-
-        schedule.setJob(job);
-        schedule.setMachineType(dto.getMachineType());
-        schedule.setDueDate(dto.getDueDate());
-        schedule.setStartTime(dto.getStartTime());
-        schedule.setDuration(dto.getDuration());
-        schedule.setStatus(ScheduleStatus.valueOf(dto.getStatus()));
-    }
-
-    private void validateScheduleTime(ScheduleDTO dto) {
-        LocalDateTime endTime = dto.getStartTime().plusMinutes(dto.getDuration());
-
-        if (dto.getStartTime().isAfter(endTime)) {
-            throw new IllegalArgumentException("Start time must be before end time");
-        }
-        if (dto.getDueDate() != null && endTime.isAfter(dto.getDueDate())) {
-            throw new IllegalArgumentException("End time must be before or equal to due date");
-        }
-        if (!isTimeSlotAvailable(dto.getMachineType(), dto.getStartTime(), endTime)) {
-            throw new IllegalArgumentException("Time slot is not available for the selected machine type");
+        finally {
+            logger.info("++++++END REQUEST++++++");
         }
     }
 }

@@ -1,18 +1,18 @@
 package unical.demacs.rdm.persistence.service.interfaces;
 
 import unical.demacs.rdm.persistence.dto.MachineDTO;
+import unical.demacs.rdm.persistence.entities.Machine;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IMachineService {
-    MachineDTO createMachine(MachineDTO machineDTO);
-    MachineDTO getMachineById(Long id);
-    MachineDTO updateMachine(Long id, MachineDTO machineDTO);
-    void deleteMachine(Long id);
-    List<MachineDTO> getAllMachines();
+    Machine createMachine(MachineDTO machineDTO);
+    Machine getMachineById(Long id);
+    Machine updateMachine(Long id, MachineDTO machineDTO);
+    Boolean deleteMachine(Long id);
+    List<Machine> getAllMachines();
 
-    Optional<MachineDTO> findById(Long id);
-    Optional<MachineDTO> findByIdOrName(Long id, String name);
-    MachineDTO saveMachine(MachineDTO machineDTO);
+    Optional<Machine> findById(Long id);
+    Optional<Machine> findByIdOrName(Long id, String name);
 }

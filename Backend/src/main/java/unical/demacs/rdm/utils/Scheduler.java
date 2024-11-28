@@ -22,8 +22,8 @@ public class Scheduler {
     private final JobRepository jobRepository;
 
     @Transactional
-    public List<ScheduleViewDTO> scheduleByPriority(String machineType) {
-        List<Schedule> pendingSchedules = scheduleRepository.findByMachineTypeAndStatus(
+    public List<ScheduleViewDTO> scheduleByPriority(Long machineType) {
+        List<Schedule> pendingSchedules = scheduleRepository.findByMachineType_IdAndStatus(
                 machineType,
                 ScheduleStatus.PENDING
         );
@@ -32,7 +32,7 @@ public class Scheduler {
             return getScheduleTimeline(machineType);
         }
 
-        List<Schedule> existingSchedules = scheduleRepository.findByMachineTypeAndStatus(
+        List<Schedule> existingSchedules = scheduleRepository.findByMachineType_IdAndStatus(
                 machineType,
                 ScheduleStatus.SCHEDULED
         );
@@ -119,8 +119,8 @@ public class Scheduler {
         return windows;
     }
 
-    private List<ScheduleViewDTO> getScheduleTimeline(String machineType) {
-        List<Schedule> allSchedules = scheduleRepository.findByMachineType(machineType);
+    private List<ScheduleViewDTO> getScheduleTimeline(Long machineType) {
+        List<Schedule> allSchedules = scheduleRepository.findByMachineType_Id(machineType);
 
         return allSchedules.stream()
                 .map(schedule -> {
@@ -128,7 +128,7 @@ public class Scheduler {
                     viewDTO.setId(schedule.getId());
                     viewDTO.setJobId(schedule.getJob().getId());
                     viewDTO.setJobName(schedule.getJob().getTitle());
-                    viewDTO.setMachineType(schedule.getMachineType());
+                    viewDTO.setMachineType(schedule.getMachineType().getName());
                     viewDTO.setStartTime(schedule.getStartTime());
                     viewDTO.setEndTime(schedule.getStartTime().plusSeconds(schedule.getDuration()));
                     viewDTO.setDuration(schedule.getDuration());

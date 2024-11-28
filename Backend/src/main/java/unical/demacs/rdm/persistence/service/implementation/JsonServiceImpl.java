@@ -40,6 +40,12 @@ public class JsonServiceImpl implements IJsonService {
     }
 
     @Override
+    public void processImport(JsonDTO jsonDTO) {
+
+    }
+
+    /*
+    @Override
     @Transactional
     public void processImport(JsonDTO jsonDTO) {
         logger.info("++++++ START IMPORT PROCESS ++++++");
@@ -66,7 +72,7 @@ public class JsonServiceImpl implements IJsonService {
                 logger.debug("Importing Schedules: {}", jsonDTO.getSchedules());
                 importSchedules(jsonDTO.getSchedules());
             }
-            */
+
 
         } catch (Exception e) {
             logger.error("Errore durante il processo di importazione", e);
@@ -105,6 +111,7 @@ public class JsonServiceImpl implements IJsonService {
         }
     }
 
+
     private void importJobs(List<JobDTO> jobDTOs) {
         for (JobDTO dto : jobDTOs) {
             logger.debug("Processing JobDTO: {}", dto);
@@ -116,7 +123,9 @@ public class JsonServiceImpl implements IJsonService {
             job.setPriority(dto.getPriority());
             job.setDuration(dto.getDuration());
 
-            UserDTO assigneeDTO = dto.getAssignee();
+            UserDTO assigneeDTO = userRepository.findByEmail(dto.getAssigneeEmail())
+                    .map(user -> modelMapper.map(user, UserDTO.class))
+                    .orElseThrow(() -> new JsonException("Assignee non trovato per email: " + dto.getAssigneeEmail()));
             User assignee = userRepository.findById(assigneeDTO.getId())
                     .orElseGet(() -> {
                         logger.debug("Assignee not found, creating new User: {}", assigneeDTO);
@@ -127,7 +136,7 @@ public class JsonServiceImpl implements IJsonService {
                     });
             job.setAssignee(assignee);
 
-            MachineTypeDTO machineTypeDTO = dto.getRequiredMachineType();
+            MachineTypeDTO machineTypeDTO =
             MachineType machineType = machineTypeRepository.findById(machineTypeDTO.getId())
                     .orElseGet(() -> {
                         logger.debug("MachineType not found, creating new MachineType: {}", machineTypeDTO);
@@ -144,7 +153,6 @@ public class JsonServiceImpl implements IJsonService {
         }
     }
 
-    /*
     private void importSchedules(List<ScheduleDTO> scheduleDTOs) {
         for (ScheduleDTO dto : scheduleDTOs) {
             logger.debug("Processing ScheduleDTO: {}", dto);

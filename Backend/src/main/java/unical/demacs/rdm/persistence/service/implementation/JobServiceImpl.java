@@ -1,8 +1,13 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import unical.demacs.rdm.config.exception.JobException;
+import unical.demacs.rdm.config.exception.TooManyRequestsException;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -11,6 +16,8 @@ import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.repository.JobRepository;
+import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
+import unical.demacs.rdm.persistence.repository.UserRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 
 import java.util.List;
@@ -21,122 +28,140 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class JobServiceImpl implements IJobService {
 
+    public static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
+    private final RateLimiter rateLimiter;
     private final JobRepository jobRepository;
-    private final UserServiceImpl userServiceImpl;
+    private final UserRepository userRepository;
+    private final MachineTypeRepository machineTypeRepository;
+
 
     @Override
-    public List<JobDTO> getAllJobs() {
-        return jobRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<JobDTO> getJobById(Long id) {
-        return jobRepository.findById(id).map(this::convertToDTO);
-    }
-
-    @Override
-    public Optional<List<JobDTO>> getJobByAssigneeEmail(String email) {
-        List<JobDTO> jobDTOList = jobRepository.findByAssigneeEmail(email).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        return jobDTOList.isEmpty() ? Optional.empty() : Optional.of(jobDTOList);
-    }
-
-    @Override
-    public JobDTO createJob(JobDTO jobDTO) {
-        Job job = convertToEntity(jobDTO);
-        Job savedJob = jobRepository.save(job);
-        return convertToDTO(savedJob);
-    }
-
-    @Override
-    public JobDTO createJob(String email, JobDTO jobDTO) {
-        if(email == null) {
-            throw new UserException("Email is required");
-        }
-        Optional<User> userDTO = userServiceImpl.getUserByEmail(email);
-        if(userDTO.isEmpty()) {
-            throw new UserException("User not found");
-        }
-        jobDTO.setAssignee(new UserDTO(userDTO.get().getId(), userDTO.get().getEmail()));
-        return createJob(jobDTO);
-    }
-
-    @Override
-    public JobDTO updateJob(Long id, JobDTO jobDTO) {
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new UserException("Job not found"));
-        job.setTitle(jobDTO.getTitle());
-        job.setDescription(jobDTO.getDescription());
-        job.setDuration(jobDTO.getDuration());
-        job.setPriority(jobDTO.getPriority());
-        job.setStatus(jobDTO.getStatus());
-        MachineType mt = new MachineType();
-        mt.setId(job.getRequiredMachineType().getId());
-        job.setRequiredMachineType(mt);
-        Job updatedJob = jobRepository.save(job);
-        return convertToDTO(updatedJob);
-    }
-
-    @Override
-    public void deleteJob(Long id) {
+    public List<Job> getAllJobs() {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to get all jobs");
         try {
-            jobRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Impossibile eliminare il job con id " + id + " perché è referenziato da altri enti", e);
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getAllJobs");
+                throw new TooManyRequestsException();
+            }
+            List<Job> jobs = jobRepository.findAll();
+            logger.info("Jobs found: {}", jobs.size());
+            return jobs;
+        }
+        catch (Exception e) {
+            logger.error("Error getting all jobs", e);
+            throw new JobException("Error getting all jobs");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
         }
     }
 
     @Override
-    public Optional<JobDTO> findById(Long id) {
-        return getJobById(id);
+    public Optional<Job> getJobById(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to get job by id: {}", id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getJobById");
+                throw new TooManyRequestsException();
+            }
+            Optional<Job> job = jobRepository.findById(id);
+            if (job.isEmpty()) {
+                logger.info("Job with id {} not found", id);
+                return Optional.empty();
+            }
+            logger.info("Job with id {} found", id);
+            return job;
+        }
+        catch (Exception e) {
+            logger.error("Error getting job by id: {}", id, e);
+            throw new JobException("Error getting job by id");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
     @Override
-    public void saveJob(JobDTO jobDTO) {
-        createJob(jobDTO);
+    public Job createJob(String email, JobDTO jobDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to create job with email: {}", email);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for createJob");
+                throw new TooManyRequestsException();
+            }
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new UserException("User not found"));
+            Job job = Job.buildJob()
+                    .assignee(user)
+                    .title(jobDTO.getTitle())
+                    .priority(jobDTO.getPriority())
+                    .status(jobDTO.getStatus())
+                    .duration(jobDTO.getDuration())
+                    .description(jobDTO.getDescription())
+                    .requiredMachineType(machineTypeRepository.findById(jobDTO.getIdMachineType()).orElseThrow(() -> new JobException("Machine type not found")))
+                    .build();
+            jobRepository.save(job);
+            logger.info("Job with email {} created successfully", email);
+            return job;
+        }
+        catch (DataIntegrityViolationException e) {
+            logger.error("Error creating job with email: {}", email, e);
+            throw new JobException("Error creating job");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
-    private JobDTO convertToDTO(Job job) {
-        JobDTO jobDTO = new JobDTO();
-        jobDTO.setId(job.getId());
-        jobDTO.setTitle(job.getTitle());
-        jobDTO.setDescription(job.getDescription());
-        jobDTO.setDuration(job.getDuration());
-        jobDTO.setPriority(job.getPriority());
-        jobDTO.setStatus(job.getStatus());
-        UserDTO u = new UserDTO();
-        u.setId(job.getAssignee().getId());
-        u.setEmail(job.getAssignee().getEmail());
-        jobDTO.setAssignee(u);
-        MachineTypeDTO mt = new MachineTypeDTO();
-        mt.setId(job.getRequiredMachineType().getId());
-        mt.setName(job.getRequiredMachineType().getName());
-        mt.setDescription(job.getRequiredMachineType().getDescription());
-        jobDTO.setRequiredMachineType(mt);
-        return jobDTO;
+    @Override
+    public Job updateJob(Long id, JobDTO jobDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to update job with id: {}", id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for updateJob");
+                throw new TooManyRequestsException();
+            }
+            Job job = jobRepository.findById(id).orElseThrow(() -> new JobException("Job not found"));
+            job.setTitle(jobDTO.getTitle());
+            job.setDescription(jobDTO.getDescription());
+            job.setDuration(jobDTO.getDuration());
+            job.setPriority(jobDTO.getPriority());
+            job.setRequiredMachineType(machineTypeRepository.findById(jobDTO.getIdMachineType()).orElseThrow(() -> new JobException("Machine type not found")));
+            jobRepository.save(job);
+            logger.info("Job with id {} updated successfully", id);
+            return job;
+        }
+        catch (DataIntegrityViolationException e) {
+            logger.error("Error updating job with id: {}", id, e);
+            throw new JobException("Error updating job");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 
-    private Job convertToEntity(JobDTO jobDTO) {
-        Job job = new Job();
-        job.setId(jobDTO.getId());
-        job.setTitle(jobDTO.getTitle());
-        job.setDescription(jobDTO.getDescription());
-        job.setDuration(jobDTO.getDuration());
-        job.setPriority(jobDTO.getPriority());
-        job.setStatus(jobDTO.getStatus());
-        User u = new User();
-        u.setId(jobDTO.getAssignee().getId());
-        u.setEmail(jobDTO.getAssignee().getEmail());
-        job.setAssignee(u);
-        MachineType mt = new MachineType();
-        mt.setId(jobDTO.getRequiredMachineType().getId());
-        mt.setName(jobDTO.getRequiredMachineType().getName());
-        mt.setDescription(jobDTO.getRequiredMachineType().getDescription());
-        job.setRequiredMachineType(mt);
-        return job;
+    @Override
+    public Boolean deleteJob(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to delete job with id: {}", id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for deleteJob");
+                throw new TooManyRequestsException();
+            }
+            jobRepository.deleteById(id);
+            logger.info("Job with id {} deleted successfully", id);
+            return true;
+        }
+        catch (Exception e) {
+            logger.error("Error deleting job with id: {}", id, e);
+            throw new JobException("Error deleting job");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
 }

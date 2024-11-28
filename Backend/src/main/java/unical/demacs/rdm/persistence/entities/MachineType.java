@@ -1,6 +1,7 @@
 package unical.demacs.rdm.persistence.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(builderMethodName = "buildMachineType")
 public class MachineType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

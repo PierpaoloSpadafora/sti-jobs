@@ -5,13 +5,7 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import unical.demacs.rdm.controller.JobControllerTest;
-import unical.demacs.rdm.controller.MachineControllerTest;
-import unical.demacs.rdm.controller.ScheduleControllerTest;
 import unical.demacs.rdm.controller.UserControllerTest;
-import unical.demacs.rdm.service.JobServiceImplTest;
-import unical.demacs.rdm.service.MachineServiceImplTest;
-import unical.demacs.rdm.service.ScheduleServiceImplTest;
 import unical.demacs.rdm.service.UserServiceImplTest;
 
 @Suite

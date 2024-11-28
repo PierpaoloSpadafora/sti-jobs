@@ -1,123 +1,214 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
+import com.google.common.util.concurrent.RateLimiter;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unical.demacs.rdm.config.exception.TooManyRequestsException;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.entities.Machine;
-import unical.demacs.rdm.persistence.entities.MachineType;
-import unical.demacs.rdm.persistence.enums.MachineStatus;
 import unical.demacs.rdm.persistence.repository.MachineRepository;
+import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
+@AllArgsConstructor
 public class MachineServiceImpl implements IMachineService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MachineServiceImpl.class);
+    private final RateLimiter rateLimiter;
     private final MachineRepository machineRepository;
-
-    public MachineServiceImpl(MachineRepository machineRepository) {
-        this.machineRepository = machineRepository;
-    }
+    private final MachineTypeRepository machineTypeRepository;
 
     @Override
-    public MachineDTO createMachine(MachineDTO machineDTO) {
-        Machine machine = convertToEntity(machineDTO);
-        machine.setCreatedAt(LocalDateTime.now());
-        machine.setStatus(MachineStatus.AVAILABLE);
-        Machine savedMachine = machineRepository.save(machine);
-        return convertToDTO(savedMachine);
-    }
-
-    @Override
-    public MachineDTO getMachineById(Long id) {
-        Machine machine = machineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Machine not found with id: " + id));
-        return convertToDTO(machine);
-    }
-
-    @Override
-    public MachineDTO updateMachine(Long id, MachineDTO machineDTO) {
-        Machine machine = machineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Machine not found with id: " + id));
-
-        machine.setName(machineDTO.getName());
-        machine.setDescription(machineDTO.getDescription());
-        machine.setStatus(machineDTO.getStatus());
-        machine.setUpdatedAt(LocalDateTime.now());
-
-        if (machineDTO.getTypeId() != null) {
-            MachineType machineType = new MachineType();
-            machineType.setId(machineDTO.getTypeId());
-            machine.setType(machineType);
+    public Machine createMachine(MachineDTO machineDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Creating machine with name: " + machineDTO.getName());
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for createMachine");
+                throw new TooManyRequestsException();
+            }
+            if(machineTypeRepository.findById(machineDTO.getTypeId()).isEmpty()){
+                logger.error("Machine type with id {} not found", machineDTO.getTypeId());
+                throw new RuntimeException("Machine type not found");
+            }
+            Machine machine = Machine.machineBuilder()
+                    .name(machineDTO.getName())
+                    .description(machineDTO.getDescription())
+                    .type(machineTypeRepository.findById(machineDTO.getTypeId()).orElse(null))
+                    .build();
+            machineRepository.save(machine);
+            logger.info("Machine with name {} created successfully", machineDTO.getName());
+            return machine;
+        } catch (Exception e) {
+            logger.error("Error creating machine with name: {}", machineDTO.getName(), e);
+            throw new RuntimeException("Error creating machine");
         }
-
-        Machine updatedMachine = machineRepository.save(machine);
-        return convertToDTO(updatedMachine);
-    }
-
-    @Override
-    public void deleteMachine(Long id) {
-        if (!machineRepository.existsById(id)) {
-            throw new RuntimeException("Machine not found with id: " + id);
+        finally {
+            logger.info("++++++END REQUEST++++++");
         }
-        machineRepository.deleteById(id);
     }
 
     @Override
-    public List<MachineDTO> getAllMachines() {
-        return machineRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<MachineDTO> findById(Long id) {
-        return machineRepository.findById(id).map(this::convertToDTO);
-    }
-
-    @Override
-    public Optional<MachineDTO> findByIdOrName(Long id, String name) {
-        Optional<Machine> machine = machineRepository.findByIdOrName(id, name);
-        return machine.map(this::convertToDTO);
-    }
-
-    @Override
-    public MachineDTO saveMachine(MachineDTO machineDTO) {
-        Machine machine = convertToEntity(machineDTO);
-        Machine savedMachine = machineRepository.save(machine);
-        return convertToDTO(savedMachine);
-    }
-
-    private MachineDTO convertToDTO(Machine machine) {
-        MachineDTO dto = new MachineDTO();
-        dto.setId(machine.getId());
-        dto.setName(machine.getName());
-        dto.setDescription(machine.getDescription());
-        dto.setStatus(machine.getStatus());
-        dto.setTypeId(machine.getType() != null ? machine.getType().getId() : null);
-        dto.setTypeName(machine.getType() != null ? machine.getType().getName() : null);
-        dto.setCreatedAt(machine.getCreatedAt());
-        dto.setUpdatedAt(machine.getUpdatedAt());
-        return dto;
-    }
-
-    private Machine convertToEntity(MachineDTO machineDTO) {
-        Machine machine = new Machine();
-        machine.setId(machineDTO.getId());
-        machine.setName(machineDTO.getName());
-        machine.setDescription(machineDTO.getDescription());
-        machine.setStatus(machineDTO.getStatus());
-        machine.setCreatedAt(machineDTO.getCreatedAt());
-
-        if (machineDTO.getTypeId() != null) {
-            MachineType machineType = new MachineType();
-            machineType.setId(machineDTO.getTypeId());
-            machine.setType(machineType);
+    public Machine getMachineById(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting machine by id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getMachineById");
+                throw new TooManyRequestsException();
+            }
+            Optional<Machine> machine = machineRepository.findById(id);
+            if (machine.isEmpty()) {
+                logger.error("Machine with id {} not found", id);
+                throw new RuntimeException("Machine not found");
+            }
+            logger.info("Machine with id {} found", id);
+            return machine.get();
+        } catch (Exception e) {
+            logger.error("Error getting machine by id: {}", id, e);
+            throw new RuntimeException("Error getting machine");
         }
-
-        return machine;
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
     }
+
+    @Override
+    public Machine updateMachine(Long id, MachineDTO machineDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Updating machine with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getUserByEmail");
+                throw new TooManyRequestsException();
+            }
+            Optional<Machine> machine = machineRepository.findById(id);
+            if (machine.isEmpty()) {
+                logger.error("Machine with id {} not found", id);
+                throw new RuntimeException("Machine not found");
+            }
+            if(machineTypeRepository.findById(machineDTO.getTypeId()).isEmpty()){
+                logger.error("Machine type with id {} not found", machineDTO.getTypeId());
+                throw new RuntimeException("Machine type not found");
+            }
+            machine.get().setName(machineDTO.getName());
+            machine.get().setDescription(machineDTO.getDescription());
+            machine.get().setType(machineTypeRepository.findById(machineDTO.getTypeId()).orElse(null));
+            machineRepository.save(machine.get());
+            logger.info("Machine with id {} updated successfully", id);
+            return machine.get();
+        } catch (Exception e) {
+            logger.error("Error updating machine with id: {}", id, e);
+            throw new RuntimeException("Error updating machine");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public Boolean deleteMachine(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Deleting machine with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for deleteMachine");
+                throw new TooManyRequestsException();
+            }
+            Optional<Machine> machine = machineRepository.findById(id);
+            if (machine.isEmpty()) {
+                logger.error("Machine with id {} not found", id);
+                throw new RuntimeException("Machine not found");
+            }
+            machineRepository.delete(machine.get());
+            logger.info("Machine with id {} deleted successfully", id);
+            return true;
+        } catch (Exception e) {
+            logger.error("Error deleting machine with id: {}", id, e);
+            throw new RuntimeException("Error deleting machine");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public List<Machine> getAllMachines() {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting all machines");
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getAllMachines");
+                throw new TooManyRequestsException();
+            }
+            List<Machine> machines = machineRepository.findAll();
+            logger.info("All machines found");
+            return machines;
+        } catch (Exception e) {
+            logger.error("Error getting all machines", e);
+            throw new RuntimeException("Error getting all machines");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public Optional<Machine> findById(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting machine by id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for findById");
+                throw new TooManyRequestsException();
+            }
+            Optional<Machine> machine = machineRepository.findById(id);
+            if (machine.isEmpty()) {
+                logger.error("Machine with id {} not found", id);
+                throw new RuntimeException("Machine not found");
+            }
+            logger.info("Machine with id {} found", id);
+            return machine;
+        } catch (Exception e) {
+            logger.error("Error getting machine by id: {}", id, e);
+            throw new RuntimeException("Error getting machine");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public Optional<Machine> findByIdOrName(Long id, String name) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting machine by id: " + id + " or name: " + name);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for findByIdOrName");
+                throw new TooManyRequestsException();
+            }
+            Optional<Machine> machine = machineRepository.findByIdOrName(id, name);
+            if (machine.isEmpty()) {
+                logger.error("Machine with id {} or name {} not found", id, name);
+                throw new RuntimeException("Machine not found");
+            }
+            logger.info("Machine with id {} or name {} found", id, name);
+            return machine;
+        } catch (Exception e) {
+            logger.error("Error getting machine by id: {} or name: {}", id, name, e);
+            throw new RuntimeException("Error getting machine");
+        }
+        finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+
 }

@@ -1,19 +1,16 @@
 package unical.demacs.rdm.persistence.service.interfaces;
 
 import unical.demacs.rdm.persistence.dto.JobDTO;
+import unical.demacs.rdm.persistence.entities.Job;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IJobService {
-    List<JobDTO> getAllJobs();
-    Optional<JobDTO> getJobById(Long id);
-    Optional<List<JobDTO>> getJobByAssigneeEmail(String email);
-    JobDTO createJob(JobDTO jobDTO);
-    JobDTO createJob(String email,JobDTO jobDTO);
-    JobDTO updateJob(Long id, JobDTO jobDTO);
-    void deleteJob(Long id);
+    List<Job> getAllJobs();
+    Optional<Job> getJobById(Long id);
+    Job createJob(String email, JobDTO jobDTO);
+    Job updateJob(Long id, JobDTO jobDTO);
+    Boolean deleteJob(Long id);
 
-    Optional<JobDTO> findById(Long id);
-    void saveJob(JobDTO jobDTO);
 }

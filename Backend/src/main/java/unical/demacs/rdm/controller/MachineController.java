@@ -99,8 +99,7 @@ public class MachineController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> deleteMachine(@PathVariable("id") Long id) {
-        machineServiceImpl.deleteMachine(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Boolean> deleteMachine(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(machineServiceImpl.deleteMachine(id));
     }
 }
