@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineTypeDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-create-import-machine-type',
@@ -19,14 +20,16 @@ export class CreateImportMachineTypeComponent implements OnInit {
   jsonInputContent: string = '';
   jsonExample: string = '';
 
+  jsonError: string = '';
+
   constructor(private jsonService: JsonService) {}
 
   ngOnInit(): void {
-    this.jsonExample = 
+    this.jsonExample =
       `[
         {
-          "name": "string",
-          "description": "string"
+          "name": "Esempio Nome",
+          "description": "Esempio Descrizione"
         }
       ]`;
     this.jsonInputContent = this.jsonExample;
@@ -34,10 +37,31 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
+    this.jsonError = '';
+    if (!this.showJsonInput) {
+      this.resetForm();
+    }
   }
 
-  submitMachineType() {
+  submitMachineType(form?: NgForm) {
     console.log('submitMachineType called');
+
+    if (!this.showJsonInput && form) {
+      if (!form.valid) {
+        Object.keys(form.controls).forEach(field => {
+          const control = form.controls[field];
+          control.markAsTouched({ onlySelf: true });
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Per favore, compila tutti i campi obbligatori.'
+        });
+        return;
+      }
+    }
+
     let machineTypesToSubmit: Array<Omit<MachineTypeDTO, 'id'>>;
 
     if (this.showJsonInput) {
@@ -45,12 +69,20 @@ export class CreateImportMachineTypeComponent implements OnInit {
         machineTypesToSubmit = JSON.parse(this.jsonInputContent);
 
         if (!Array.isArray(machineTypesToSubmit)) {
-          alert('Il JSON inserito deve essere un array di Machine Types.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Errore',
+            text: 'Il JSON inserito deve essere un array di Machine Types.',
+          });
           return;
         }
 
       } catch (error) {
-        alert('Il JSON inserito non è valido.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Il JSON inserito non è valido.',
+        });
         return;
       }
     } else {
@@ -66,7 +98,6 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
     this.jsonService.importMachineType(machineTypesToSubmitWithId).subscribe({
       next: (response: string) => {
-        console.log('Response:', response);
         Swal.fire({
           icon: 'success',
           title: 'Elemento importato con successo',
@@ -74,10 +105,17 @@ export class CreateImportMachineTypeComponent implements OnInit {
           timer: 1000
         });
         this.resetForm();
+        if (form) {
+          form.resetForm();
+        }
       },
       error: (error) => {
         console.error("Errore durante l'importazione dei Machine Types:", error);
-        alert("Errore durante l'importazione dei Machine Types: " + JSON.stringify(error));
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: "Errore durante l'importazione dei Machine Types: " + JSON.stringify(error),
+        });
       },
     });
   }
@@ -87,5 +125,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
       name: '',
       description: ''
     };
+    this.jsonInputContent = this.jsonExample;
+    this.jsonError = '';
   }
 }

@@ -1,4 +1,3 @@
-// show-job.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JobService } from '../../services/job.service';
 import Swal from 'sweetalert2';

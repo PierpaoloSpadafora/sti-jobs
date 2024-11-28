@@ -45,7 +45,6 @@ export class ScheduleComponent implements OnInit {
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
-        // After jobs are fetched, get schedules
         this.getAllSchedules();
       },
       error: (error: any) => {

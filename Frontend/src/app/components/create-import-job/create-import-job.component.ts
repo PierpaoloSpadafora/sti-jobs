@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
-import { JobDTO } from '../../generated-api';
-import { MachineTypeDTO } from '../../generated-api';
+import { JobDTO, MachineTypeDTO } from '../../generated-api';
 import { MachineTypeControllerService } from '../../generated-api';
 import Swal from 'sweetalert2';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-create-import-job',
@@ -76,18 +76,26 @@ export class CreateImportJobComponent implements OnInit {
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
     this.jsonError = '';
+    if (!this.showJsonInput) {
+      this.resetForm();
+    }
   }
 
   validateJsonInput() {
     try {
-      JSON.parse(this.jsonInputContent);
-      this.jsonError = '';
+      const parsed = JSON.parse(this.jsonInputContent);
+      if (!Array.isArray(parsed)) {
+        this.jsonError = 'Il JSON inserito deve essere un array di Job.';
+      } else {
+        // Optional: further validation of each job object
+        this.jsonError = '';
+      }
     } catch (e) {
       this.jsonError = 'Il JSON inserito non è valido.';
     }
   }
 
-  submitJob() {
+  submitJob(form?: NgForm) {
     let jobsToSubmit: JobDTO[] = [];
     const email = localStorage.getItem('user-email');
 
@@ -104,9 +112,26 @@ export class CreateImportJobComponent implements OnInit {
           return;
         }
 
-        jobsToSubmit.forEach(job => {
+        for (const job of jobsToSubmit) {
+          if (
+            !job.title ||
+            !job.status ||
+            !job.priority ||
+            job.duration === undefined ||
+            job.duration < 0 ||
+            !job.requiredMachineType ||
+            !job.requiredMachineType.id
+          ) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Errore',
+              text: 'Uno o più Job nel JSON non sono validi. Assicurati che tutti i campi obbligatori siano presenti e validi.',
+            });
+            return;
+          }
+
           job.assignee = { email: email || 'default@example.com' };
-        });
+        }
 
       } catch (error) {
         Swal.fire({
@@ -117,25 +142,33 @@ export class CreateImportJobComponent implements OnInit {
         return;
       }
     } else {
+      if (form) {
+        if (!form.valid) {
+          Object.keys(form.controls).forEach(field => {
+            const control = form.controls[field];
+            control.markAsTouched({ onlySelf: true });
+          });
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Errore',
+            text: 'Per favore, compila tutti i campi obbligatori.',
+          });
+          return;
+        }
+      }
+
+      // Calculate duration in seconds
       this.job.duration =
         (this.durationHours * 3600) +
         (this.durationMinutes * 60) +
         this.durationSeconds;
 
-      if (!this.job.title) {
+      if (isNaN(this.job.duration!) || this.job.duration! <= 0) {
         Swal.fire({
           icon: 'error',
           title: 'Errore',
-          text: 'Il campo Titolo è obbligatorio.',
-        });
-        return;
-      }
-
-      if (isNaN(this.job.duration!) || this.job.duration! < 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: 'La durata deve essere un valore positivo.',
+          text: 'La durata deve essere un valore positivo e maggiore di zero.',
         });
         return;
       }
@@ -163,9 +196,10 @@ export class CreateImportJobComponent implements OnInit {
       jobsToSubmit = [this.job];
     }
 
+    // Assign a default id or handle as per backend requirements
     const jobsToSubmitWithId: JobDTO[] = jobsToSubmit.map(job => ({
       ...job,
-      id: 0,
+      id: 0, // Assuming 0 or backend will assign the correct ID
     }));
 
     this.jsonService.importJob(jobsToSubmitWithId).subscribe({
@@ -177,6 +211,9 @@ export class CreateImportJobComponent implements OnInit {
           timer: 1500
         });
         this.resetForm();
+        if (form) {
+          form.resetForm();
+        }
       },
       error: (error) => {
         console.error("Errore durante l'importazione dei Job:", error);
@@ -202,6 +239,7 @@ export class CreateImportJobComponent implements OnInit {
     this.durationHours = 0;
     this.durationMinutes = 0;
     this.durationSeconds = 0;
+    this.jsonInputContent = this.jsonExample;
     this.jsonError = '';
   }
 }

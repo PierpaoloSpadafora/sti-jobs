@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { JsonService } from '../../services/json.service';
-import { MachineDTO } from '../../generated-api';
-import Swal from 'sweetalert2';
-import { MachineTypeDTO } from '../../generated-api';
+import { MachineDTO, MachineTypeDTO } from '../../generated-api';
 import { MachineTypeControllerService } from '../../generated-api';
+import Swal from 'sweetalert2';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-create-import-machine',
@@ -65,6 +65,9 @@ export class CreateImportMachineComponent implements OnInit {
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
     this.jsonError = '';
+    if (!this.showJsonInput) {
+      this.resetForm();
+    }
   }
 
   validateJsonInput() {
@@ -76,7 +79,26 @@ export class CreateImportMachineComponent implements OnInit {
     }
   }
 
-  submitMachine() {
+  submitMachine(form?: NgForm) {
+    console.log('submitMachine called');
+
+    if (!this.showJsonInput && form) {
+      if (!form.valid) {
+        // Marca tutti i campi come touched per mostrare gli errori
+        Object.keys(form.controls).forEach(field => {
+          const control = form.controls[field];
+          control.markAsTouched({ onlySelf: true });
+        });
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Per favore, compila tutti i campi obbligatori.'
+        });
+        return;
+      }
+    }
+
     let machinesToSubmit: Array<Omit<MachineDTO, 'id'>>;
 
     if (this.showJsonInput) {
@@ -91,6 +113,9 @@ export class CreateImportMachineComponent implements OnInit {
           });
           return;
         }
+
+        // Opzionale: Validazione aggiuntiva degli oggetti Machine
+
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -100,23 +125,6 @@ export class CreateImportMachineComponent implements OnInit {
         return;
       }
     } else {
-      if (!this.machine.name) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: 'Il campo Nome è obbligatorio.',
-        });
-        return;
-      }
-
-      if (!this.machine.typeId) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: 'Seleziona un Tipo Macchina.',
-        });
-        return;
-      }
       machinesToSubmit = [this.machine];
     }
 
@@ -134,6 +142,9 @@ export class CreateImportMachineComponent implements OnInit {
           timer: 1000
         });
         this.resetForm();
+        if (form) {
+          form.resetForm();
+        }
       },
       error: (error) => {
         console.error("Errore durante l'importazione delle Machines:", error);
@@ -154,6 +165,7 @@ export class CreateImportMachineComponent implements OnInit {
       typeId: undefined,
       typeName: '',
     };
+    this.jsonInputContent = this.jsonExample;
     this.jsonError = '';
   }
 }

@@ -24,7 +24,7 @@
         </button>
       </div>
 
-      <form *ngIf="!showJsonInput" (ngSubmit)="submitMachineType()">
+      <form *ngIf="!showJsonInput" #machineTypeForm="ngForm" (ngSubmit)="submitMachineType(machineTypeForm)">
         <div class="mb-3">
           <label for="name" class="form-label">Nome</label>
           <input
@@ -33,7 +33,12 @@
             [(ngModel)]="machineType.name"
             name="name"
             required
+            #name="ngModel"
+            [ngClass]="{'is-invalid': name.invalid && (name.dirty || name.touched)}"
           />
+          <div class="invalid-feedback" *ngIf="name.invalid && (name.dirty || name.touched)">
+            Il campo Nome è obbligatorio.
+          </div>
         </div>
 
         <div class="mb-3">
@@ -43,6 +48,7 @@
             class="form-control"
             [(ngModel)]="machineType.description"
             name="description"
+            #description="ngModel"
           ></textarea>
         </div>
 
@@ -50,19 +56,27 @@
       </form>
 
       <div *ngIf="showJsonInput">
-        <label for="jsonInput" class="form-label"
-        >Inserisci il JSON dei Machine Types</label
-        >
+        <label for="jsonInput" class="form-label">Inserisci il JSON dei Machine Types</label>
         <textarea
           id="jsonInput"
           class="form-control mb-3"
           [(ngModel)]="jsonInputContent"
           rows="15"
           name="jsonInput"
+          required
+          #jsonInput="ngModel"
+          [ngClass]="{'is-invalid': jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)}"
         ></textarea>
+        <div class="invalid-feedback" *ngIf="jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)">
+          Il campo JSON è obbligatorio.
+        </div>
         <small class="text-muted">Esempio di JSON atteso:</small>
         <pre class="bg-light p-2">{{ jsonExample }}</pre>
-        <button (click)="submitMachineType()" class="btn btn-primary w-100">
+        <button
+          (click)="submitMachineType()"
+          class="btn btn-primary w-100"
+          [disabled]="!jsonInputContent || jsonError"
+        >
           Invia JSON
         </button>
       </div>
