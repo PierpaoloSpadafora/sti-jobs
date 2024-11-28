@@ -18,8 +18,6 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 import { JobDTO } from '../model/jobDTO';
-import { MachineDTO } from '../model/machineDTO';
-import { MachineTypeDTO } from '../model/machineTypeDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -94,91 +92,29 @@ export class JsonControllerService {
     }
 
     /**
-     * Export Machine data to JSON
-     * Export all Machine data to JSON.
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public exportMachine(observe?: 'body', reportProgress?: boolean): Observable<Array<MachineDTO>>;
-    public exportMachine(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<MachineDTO>>>;
-    public exportMachine(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<MachineDTO>>>;
-    public exportMachine(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.request<Array<MachineDTO>>('get',`${this.basePath}/api/v1/json/exportMachine`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * Export MachineType data to JSON
-     * Export all MachineType data to JSON.
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public exportMachineType(observe?: 'body', reportProgress?: boolean): Observable<Array<MachineTypeDTO>>;
-    public exportMachineType(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<MachineTypeDTO>>>;
-    public exportMachineType(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<MachineTypeDTO>>>;
-    public exportMachineType(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.request<Array<MachineTypeDTO>>('get',`${this.basePath}/api/v1/json/exportMachineType`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
      * Import Job data from JSON
      * Import Job data into the system from JSON content.
      * @param body 
+     * @param assigneeEmail 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public importJob(body: Array<JobDTO>, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importJob(body: Array<JobDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importJob(body: Array<JobDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
-    public importJob(body: Array<JobDTO>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'body', reportProgress?: boolean): Observable<string>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
             throw new Error('Required parameter body was null or undefined when calling importJob.');
+        }
+
+        if (assigneeEmail === null || assigneeEmail === undefined) {
+            throw new Error('Required parameter assigneeEmail was null or undefined when calling importJob.');
+        }
+
+        let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
+        if (assigneeEmail !== undefined && assigneeEmail !== null) {
+            queryParameters = queryParameters.set('assigneeEmail', <any>assigneeEmail);
         }
 
         let headers = this.defaultHeaders;
@@ -204,100 +140,7 @@ export class JsonControllerService {
         return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importJob`,
             {
                 body: body,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * Import Machine data from JSON
-     * Import Machine data into the system from JSON content.
-     * @param body 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public importMachine(body: Array<MachineDTO>, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importMachine(body: Array<MachineDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importMachine(body: Array<MachineDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
-    public importMachine(body: Array<MachineDTO>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling importMachine.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set('Content-Type', httpContentTypeSelected);
-        }
-
-        return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importMachine`,
-            {
-                body: body,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * Import MachineType data from JSON
-     * Import MachineType data into the system from JSON content.
-     * @param body 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
-    public importMachineType(body: Array<MachineTypeDTO>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (body === null || body === undefined) {
-            throw new Error('Required parameter body was null or undefined when calling importMachineType.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
-        if (httpContentTypeSelected != undefined) {
-            headers = headers.set('Content-Type', httpContentTypeSelected);
-        }
-
-        return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importMachineType`,
-            {
-                body: body,
+                params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,

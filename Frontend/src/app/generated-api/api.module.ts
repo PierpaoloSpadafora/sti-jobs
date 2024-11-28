@@ -2,23 +2,26 @@ import { NgModule, ModuleWithProviders, SkipSelf, Optional } from '@angular/core
 import { Configuration } from './configuration';
 import { HttpClient } from '@angular/common/http';
 
+
 import { JobControllerService } from './api/jobController.service';
 import { JsonControllerService } from './api/jsonController.service';
 import { MachineControllerService } from './api/machineController.service';
 import { MachineTypeControllerService } from './api/machineTypeController.service';
 import { ScheduleControllerService } from './api/scheduleController.service';
+import { SchedulerService } from './api/scheduler.service';
 import { UserControllerService } from './api/userController.service';
 
 @NgModule({
+  imports:      [],
   declarations: [],
-  imports: [],
-  exports: [],
+  exports:      [],
   providers: [
     JobControllerService,
     JsonControllerService,
     MachineControllerService,
     MachineTypeControllerService,
     ScheduleControllerService,
+    SchedulerService,
     UserControllerService ]
 })
 export class ApiModule {

@@ -10,25 +10,17 @@
  * Do not edit the class manually.
  */
 
-export interface JobDTO { 
+export interface ScheduleViewDTO { 
     id?: number;
-    title: string;
-    description?: string;
-    status: JobDTO.StatusEnum;
-    priority: JobDTO.PriorityEnum;
+    jobId?: number;
+    jobName?: string;
+    machineType?: string;
+    startTime?: Date;
+    endTime?: Date;
     duration?: number;
-    idMachineType: number;
-    assigneeEmail?: string;
+    priority?: ScheduleViewDTO.PriorityEnum;
 }
-export namespace JobDTO {
-    export type StatusEnum = 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-    export const StatusEnum = {
-        PENDING: 'PENDING' as StatusEnum,
-        SCHEDULED: 'SCHEDULED' as StatusEnum,
-        INPROGRESS: 'IN_PROGRESS' as StatusEnum,
-        COMPLETED: 'COMPLETED' as StatusEnum,
-        CANCELLED: 'CANCELLED' as StatusEnum
-    };
+export namespace ScheduleViewDTO {
     export type PriorityEnum = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
     export const PriorityEnum = {
         LOW: 'LOW' as PriorityEnum,

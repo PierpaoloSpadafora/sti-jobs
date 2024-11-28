@@ -58,19 +58,19 @@ export class ScheduleControllerService {
     /**
      * 
      * 
-     * @param machineId 
+     * @param machineType 
      * @param startTime 
      * @param endTime 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public checkTimeSlotAvailability(machineId: number, startTime: Date, endTime: Date, observe?: 'body', reportProgress?: boolean): Observable<boolean>;
-    public checkTimeSlotAvailability(machineId: number, startTime: Date, endTime: Date, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<boolean>>;
-    public checkTimeSlotAvailability(machineId: number, startTime: Date, endTime: Date, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<boolean>>;
-    public checkTimeSlotAvailability(machineId: number, startTime: Date, endTime: Date, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public checkTimeSlotAvailability(machineType: string, startTime: Date, endTime: Date, observe?: 'body', reportProgress?: boolean): Observable<boolean>;
+    public checkTimeSlotAvailability(machineType: string, startTime: Date, endTime: Date, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<boolean>>;
+    public checkTimeSlotAvailability(machineType: string, startTime: Date, endTime: Date, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<boolean>>;
+    public checkTimeSlotAvailability(machineType: string, startTime: Date, endTime: Date, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (machineId === null || machineId === undefined) {
-            throw new Error('Required parameter machineId was null or undefined when calling checkTimeSlotAvailability.');
+        if (machineType === null || machineType === undefined) {
+            throw new Error('Required parameter machineType was null or undefined when calling checkTimeSlotAvailability.');
         }
 
         if (startTime === null || startTime === undefined) {
@@ -82,8 +82,8 @@ export class ScheduleControllerService {
         }
 
         let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
-        if (machineId !== undefined && machineId !== null) {
-            queryParameters = queryParameters.set('machineId', <any>machineId);
+        if (machineType !== undefined && machineType !== null) {
+            queryParameters = queryParameters.set('machineType', <any>machineType);
         }
         if (startTime !== undefined && startTime !== null) {
             queryParameters = queryParameters.set('startTime', <any>startTime.toISOString());
@@ -154,7 +154,7 @@ export class ScheduleControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<ScheduleDTO>('post',`${this.basePath}/api/v1/schedules`,
+        return this.httpClient.request<ScheduleDTO>('post',`${this.basePath}/api/v1/schedules/create-schedule`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -231,7 +231,7 @@ export class ScheduleControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules`,
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules/get-all-schedules`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -288,6 +288,47 @@ export class ScheduleControllerService {
     /**
      * 
      * 
+     * @param id 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getScheduleById(id: number, observe?: 'body', reportProgress?: boolean): Observable<ScheduleDTO>;
+    public getScheduleById(id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScheduleDTO>>;
+    public getScheduleById(id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScheduleDTO>>;
+    public getScheduleById(id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (id === null || id === undefined) {
+            throw new Error('Required parameter id was null or undefined when calling getScheduleById.');
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<ScheduleDTO>('get',`${this.basePath}/api/v1/schedules/${encodeURIComponent(String(id))}`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * 
+     * 
      * @param jobId 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -329,17 +370,17 @@ export class ScheduleControllerService {
     /**
      * 
      * 
-     * @param machineId 
+     * @param machineType 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getSchedulesByMachineId(machineId: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
-    public getSchedulesByMachineId(machineId: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
-    public getSchedulesByMachineId(machineId: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
-    public getSchedulesByMachineId(machineId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    public getSchedulesByMachineType(machineType: string, observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public getSchedulesByMachineType(machineType: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public getSchedulesByMachineType(machineType: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public getSchedulesByMachineType(machineType: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
-        if (machineId === null || machineId === undefined) {
-            throw new Error('Required parameter machineId was null or undefined when calling getSchedulesByMachineId.');
+        if (machineType === null || machineType === undefined) {
+            throw new Error('Required parameter machineType was null or undefined when calling getSchedulesByMachineType.');
         }
 
         let headers = this.defaultHeaders;
@@ -357,7 +398,7 @@ export class ScheduleControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules/machine/${encodeURIComponent(String(machineId))}`,
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules/machine/${encodeURIComponent(String(machineType))}`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -515,9 +556,9 @@ export class ScheduleControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'body', reportProgress?: boolean): Observable<ScheduleDTO>;
-    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ScheduleDTO>>;
-    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ScheduleDTO>>;
+    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public updateSchedule(body: ScheduleDTO, id: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
     public updateSchedule(body: ScheduleDTO, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
@@ -548,7 +589,7 @@ export class ScheduleControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<ScheduleDTO>('put',`${this.basePath}/api/v1/schedules/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<any>('put',`${this.basePath}/api/v1/schedules/${encodeURIComponent(String(id))}`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -600,7 +641,7 @@ export class ScheduleControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<ScheduleDTO>('get',`${this.basePath}/api/v1/schedules/${encodeURIComponent(String(id))}`,
+        return this.httpClient.request<ScheduleDTO>('patch',`${this.basePath}/api/v1/schedules/${encodeURIComponent(String(id))}/status`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,

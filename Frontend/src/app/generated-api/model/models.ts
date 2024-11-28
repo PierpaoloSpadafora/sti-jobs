@@ -5,5 +5,6 @@ export * from './machineDTO';
 export * from './machineType';
 export * from './machineTypeDTO';
 export * from './scheduleDTO';
+export * from './scheduleViewDTO';
 export * from './user';
 export * from './userDTO';
