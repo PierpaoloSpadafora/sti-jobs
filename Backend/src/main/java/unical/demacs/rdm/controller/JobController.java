@@ -18,8 +18,6 @@ import unical.demacs.rdm.persistence.service.implementation.JobServiceImpl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/v1/job", produces = "application/json")
@@ -40,9 +38,8 @@ public class JobController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PostMapping(value = "/create-job", produces = "application/json")
-    public ResponseEntity<JobDTO> createJob(@Valid @RequestBody JobDTO jobDTO) {
-        JobDTO createdJob = jobServiceImpl.createJob(jobDTO);
-        return ResponseEntity.ok(createdJob);
+    public ResponseEntity<JobDTO> createJob(@Valid @RequestBody JobDTO jobDTO, @RequestParam("assigneeEmail") String assigneeEmail) {
+        return ResponseEntity.ok(jobServiceImpl.createJob(assigneeEmail, jobDTO));
     }
 
     @Operation(summary = "Update a job", description = "Update a job using the provided job object.",

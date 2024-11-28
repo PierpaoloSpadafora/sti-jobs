@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class JobServiceImpl implements IJobService {
 
     private final JobRepository jobRepository;
+    private final UserServiceImpl userServiceImpl;
 
     @Override
     public List<JobDTO> getAllJobs() {
@@ -49,6 +50,19 @@ public class JobServiceImpl implements IJobService {
         Job job = convertToEntity(jobDTO);
         Job savedJob = jobRepository.save(job);
         return convertToDTO(savedJob);
+    }
+
+    @Override
+    public JobDTO createJob(String email, JobDTO jobDTO) {
+        if(email == null) {
+            throw new UserException("Email is required");
+        }
+        Optional<User> userDTO = userServiceImpl.getUserByEmail(email);
+        if(userDTO.isEmpty()) {
+            throw new UserException("User not found");
+        }
+        jobDTO.setAssignee(new UserDTO(userDTO.get().getId(), userDTO.get().getEmail()));
+        return createJob(jobDTO);
     }
 
     @Override

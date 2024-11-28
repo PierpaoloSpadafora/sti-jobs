@@ -10,6 +10,7 @@ public interface IJobService {
     Optional<JobDTO> getJobById(Long id);
     Optional<List<JobDTO>> getJobByAssigneeEmail(String email);
     JobDTO createJob(JobDTO jobDTO);
+    JobDTO createJob(String email,JobDTO jobDTO);
     JobDTO updateJob(Long id, JobDTO jobDTO);
     void deleteJob(Long id);
 
