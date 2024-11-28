@@ -4,6 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { SchedulerService } from '../../services/scheduler.service';
 import { JobService } from "../../services/job.service";
+import Swal from "sweetalert2";
 
 @Component({
   selector: 'app-schedule',
@@ -116,6 +117,23 @@ export class ScheduleComponent implements OnInit {
     }
   }
 
+  confirmDeleteSchedule(schedule: ScheduleDTO): void {
+    Swal.fire({
+      title: 'Sei sicuro?',
+      text: `Vuoi eliminare il job schedulato con ID "${schedule.jobId}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sì, elimina!',
+      cancelButtonText: 'Annulla'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deleteSchedule(schedule);
+      }
+    });
+  }
+
   deleteSchedule(schedule: ScheduleDTO) {
     if (!schedule.id) {
       console.error('Schedule ID is undefined');
@@ -126,9 +144,19 @@ export class ScheduleComponent implements OnInit {
       next: () => {
         console.log('Schedule deleted successfully');
         this.getAllSchedules();
+        Swal.fire(
+          'Eliminato!',
+          `Il job schedulato con ID "${schedule.jobId}" è stato eliminato.`,
+          'success'
+        );
       },
       error: (error) => {
         console.error('Error deleting schedule:', error);
+        Swal.fire(
+          'Errore!',
+          'Non è stato possibile eliminare il job schedulato. Per favore, riprova più tardi.',
+          'error'
+        );
       }
     });
   }
@@ -172,9 +200,19 @@ export class ScheduleComponent implements OnInit {
           console.log('Schedule updated successfully:', response);
           this.dialogRef.close();
           this.getAllSchedules();
+          Swal.fire(
+            'Aggiornato!',
+            `Il job schedulato con ID "${scheduleData.jobId}" è stato aggiornato.`,
+            'success'
+          );
         },
         error: (error) => {
           console.error('Error updating schedule:', error);
+          Swal.fire(
+            'Errore!',
+            'Non è stato possibile aggiornare il job schedulato. Per favore, riprova più tardi.',
+            'error'
+          );
         }
       });
     } else {
@@ -183,9 +221,19 @@ export class ScheduleComponent implements OnInit {
           console.log('Schedule created successfully:', response);
           this.dialogRef.close();
           this.getAllSchedules();
+          Swal.fire(
+            'Creato!',
+            `Il job schedulato con ID "${scheduleData.jobId}" è stato creato.`,
+            'success'
+          );
         },
         error: (error) => {
           console.error('Error creating schedule:', error);
+          Swal.fire(
+            'Errore!',
+            'Non è stato possibile creare il job schedulato. Per favore, riprova più tardi.',
+            'error'
+          );
         }
       });
     }

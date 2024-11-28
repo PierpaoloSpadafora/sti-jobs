@@ -17,7 +17,9 @@
           <td>{{ job.description }}</td>
           <td>{{ secondsToDuration(Number(job.duration)) }}</td>
           <td class="actions-cell">
-            <button class="action-button" (click)="openScheduleDialog(job)">Schedula</button>
+            <button class="action-button edit" title="Schedula" (click)="openScheduleDialog(job)">
+              <i class="fas fa-calendar-plus"></i>
+            </button>
           </td>
         </tr>
         </tbody>
@@ -49,8 +51,12 @@
           <td>{{ secondsToDuration(schedule.duration) }}</td>
           <td>{{ schedule.status }}</td>
           <td class="actions-cell">
-            <button class="action-button" (click)="openEditScheduleDialog(schedule)">Modifica</button>
-            <button class="action-button" (click)="deleteSchedule(schedule)">Elimina</button>
+            <button class="action-button edit" title="Modifica" (click)="openEditScheduleDialog(schedule)">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-button delete" title="Elimina" (click)="confirmDeleteSchedule(schedule)">
+              <i class="fas fa-trash"></i>
+            </button>
           </td>
         </tr>
         </tbody>
