@@ -3,6 +3,7 @@ package unical.demacs.rdm.persistence.service.implementation;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -138,5 +139,11 @@ public class JobServiceImpl implements IJobService {
         mt.setDescription(jobDTO.getRequiredMachineType().getDescription());
         job.setRequiredMachineType(mt);
         return job;
+    }
+
+    @Override
+    @Transactional
+    public void deleteJobByMachineType(Long machineTypeId) {
+        jobRepository.deleteByRequiredMachineType_Id(machineTypeId);
     }
 }

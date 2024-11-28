@@ -23,4 +23,5 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByDurationBetween(java.time.Duration minDuration, java.time.Duration maxDuration);
     List<Job> findByAssignee_IdAndPriority(String assigneeId, JobPriority priority);
     List<Job> findByStatusAndRequiredMachineType_IdAndAssignee_Id(JobStatus status, Long machineTypeId, String assigneeId);
+    void deleteByRequiredMachineType_Id(Long machineTypeId);
 }

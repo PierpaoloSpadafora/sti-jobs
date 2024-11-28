@@ -10,6 +10,7 @@ public interface IMachineService {
     MachineDTO getMachineById(Long id);
     MachineDTO updateMachine(Long id, MachineDTO machineDTO);
     void deleteMachine(Long id);
+    void deleteMachineByType(Long machineTypeId);
     List<MachineDTO> getAllMachines();
 
     Optional<MachineDTO> findById(Long id);

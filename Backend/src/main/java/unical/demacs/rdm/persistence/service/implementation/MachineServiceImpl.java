@@ -1,6 +1,7 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
@@ -119,5 +120,11 @@ public class MachineServiceImpl implements IMachineService {
         }
 
         return machine;
+    }
+
+    @Override
+    @Transactional
+    public void deleteMachineByType(Long machineTypeId) {
+        machineRepository.deleteByTypeId(machineTypeId);
     }
 }

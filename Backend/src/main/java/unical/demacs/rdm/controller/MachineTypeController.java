@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
+import unical.demacs.rdm.persistence.service.implementation.JobServiceImpl;
+import unical.demacs.rdm.persistence.service.implementation.MachineServiceImpl;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 
 import java.util.List;
@@ -26,6 +28,8 @@ import java.util.List;
 public class MachineTypeController {
 
     private final MachineTypeServiceImpl machineTypeServiceImpl;
+    private final JobServiceImpl jobServiceImpl;
+    private final MachineServiceImpl machineServiceImpl;
 
     @Operation(summary = "Create machine type", description = "Create a new machine type.",
             tags = {"machine-type-controller"})
@@ -96,6 +100,8 @@ public class MachineTypeController {
     })
     @DeleteMapping(path="/{id}")
     public ResponseEntity<Void> deleteMachineType(@PathVariable("id") Long id) {
+        machineServiceImpl.deleteMachineByType(id);
+        jobServiceImpl.deleteJobByMachineType(id);
         machineTypeServiceImpl.deleteMachineType(id);
         return ResponseEntity.noContent().build();
     }

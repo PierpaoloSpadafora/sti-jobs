@@ -13,6 +13,7 @@ public interface IJobService {
     JobDTO createJob(String email,JobDTO jobDTO);
     JobDTO updateJob(Long id, JobDTO jobDTO);
     void deleteJob(Long id);
+    void deleteJobByMachineType(Long machineTypeId);
 
     Optional<JobDTO> findById(Long id);
     void saveJob(JobDTO jobDTO);
