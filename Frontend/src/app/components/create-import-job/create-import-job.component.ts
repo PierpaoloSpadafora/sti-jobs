@@ -87,7 +87,6 @@ export class CreateImportJobComponent implements OnInit {
       if (!Array.isArray(parsed)) {
         this.jsonError = 'Il JSON inserito deve essere un array di Job.';
       } else {
-        // Optional: further validation of each job object
         this.jsonError = '';
       }
     } catch (e) {
@@ -118,7 +117,7 @@ export class CreateImportJobComponent implements OnInit {
             !job.status ||
             !job.priority ||
             job.duration === undefined ||
-            job.duration < 0 ||
+            job.duration <= 0 ||
             !job.requiredMachineType ||
             !job.requiredMachineType.id
           ) {
@@ -158,7 +157,6 @@ export class CreateImportJobComponent implements OnInit {
         }
       }
 
-      // Calculate duration in seconds
       this.job.duration =
         (this.durationHours * 3600) +
         (this.durationMinutes * 60) +
@@ -196,10 +194,9 @@ export class CreateImportJobComponent implements OnInit {
       jobsToSubmit = [this.job];
     }
 
-    // Assign a default id or handle as per backend requirements
     const jobsToSubmitWithId: JobDTO[] = jobsToSubmit.map(job => ({
       ...job,
-      id: 0, // Assuming 0 or backend will assign the correct ID
+      id: 0,
     }));
 
     this.jsonService.importJob(jobsToSubmitWithId).subscribe({
