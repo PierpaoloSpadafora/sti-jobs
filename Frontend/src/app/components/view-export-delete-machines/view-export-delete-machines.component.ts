@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { JsonService } from '../../services/json.service';
 import { MachineService } from '../../services/machine.service';
 import { Machine, MachineDTO, MachineTypeDTO, MachineType } from '../../interfaces/interfaces';
@@ -7,13 +7,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import Swal from "sweetalert2";
 
 @Component({
   selector: 'app-view-export-delete-machines',
   templateUrl: './view-export-delete-machines.component.html',
-  styleUrl: './view-export-delete-machines.component.css'
+  styleUrls: ['./view-export-delete-machines.component.css']
 })
-export class ViewExportDeleteMachinesComponent {
+export class ViewExportDeleteMachinesComponent implements OnInit {
   machines: Machine[] = [];
   isLoading = false;
   machineTypes: MachineType[] = [];
@@ -25,7 +26,11 @@ export class ViewExportDeleteMachinesComponent {
     private snackBar: MatSnackBar
   ) {}
 
- ngOnInit(): void {
+  ngOnInit(): void {
+    this.loadMachines();
+  }
+
+  loadMachines(): void {
     this.isLoading = true;
     forkJoin({
       machines: this.jsonService.exportMachine(),
@@ -34,23 +39,22 @@ export class ViewExportDeleteMachinesComponent {
       next: (response) => {
         this.machineTypes = this.transformMachineTypes(response.types);
         this.machines = this.transformMachines(
-          Array.isArray(response.machines) ? response.machines : [response.machines]
+          Array.isArray(response.machines) ? response.machines as Machine[] : []
         );
-        console.log("Data retrieved:", { machines: this.machines, types: this.machineTypes });
         this.isLoading = false;
       },
       error: (error) => {
         console.error("Error while retrieving data:", error);
         this.isLoading = false;
-        this.showMessage('Error loading data. Please try again later.');
+        this.showMessage('Error loading machines. Please try again later.');
       }
     });
   }
 
   private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
-    return dtos.filter(dto => 
-      dto.id != null && 
-      dto.name != null && 
+    return dtos.filter(dto =>
+      dto.id != null &&
+      dto.name != null &&
       dto.description != null
     ).map(dto => ({
       id: dto.id!,
@@ -60,10 +64,10 @@ export class ViewExportDeleteMachinesComponent {
   }
 
   private transformMachines(dtos: MachineDTO[]): Machine[] {
-    const transformedMachines = dtos.filter(dto => 
-      dto.id != null && 
-      dto.name != null && 
-      dto.status != null && 
+    return dtos.filter(dto =>
+      dto.id != null &&
+      dto.name != null &&
+      dto.status != null &&
       dto.typeId != null
     ).map(dto => ({
       id: dto.id!,
@@ -74,7 +78,6 @@ export class ViewExportDeleteMachinesComponent {
       createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : new Date()
     }));
-    return transformedMachines;
   }
 
   getMachineTypeName(typeId: number): string {
@@ -84,9 +87,9 @@ export class ViewExportDeleteMachinesComponent {
 
   getStatusClass(status: string): string {
     switch (status.toLowerCase()) {
-      case 'active':
+      case 'available':
         return 'status-active';
-      case 'inactive':
+      case 'busy':
         return 'status-inactive';
       case 'maintenance':
         return 'status-maintenance';
@@ -96,21 +99,54 @@ export class ViewExportDeleteMachinesComponent {
   }
 
   delete(id: number): void {
-    if (confirm('Are you sure you want to delete this machine?')) {
-      this.isLoading = true;
-      this.machineService.delete(id).subscribe({
-        next: () => {
-          this.machines = this.machines.filter(machine => machine.id !== id);
-          this.showMessage('Machine deleted successfully');
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error deleting machine:', error);
-          this.isLoading = false;
-          this.showMessage('Error deleting machine. Please try again later.');
-        }
-      });
+    const machine = this.machines.find(m => m.id === id);
+    if (!machine) {
+      this.showMessage('Machine not found.');
+      return;
     }
+
+    Swal.fire({
+      title: 'Sei sicuro?',
+      text: `Vuoi eliminare la macchina "${machine.name}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sì, elimina!',
+      cancelButtonText: 'Annulla'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.machineService.delete(id).subscribe({
+          next: () => {
+            this.machines = this.machines.filter(m => m.id !== id);
+            Swal.fire(
+              'Eliminato!',
+              `La macchina "${machine.name}" è stata eliminata.`,
+              'success'
+            );
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error deleting machine:', error);
+            this.isLoading = false;
+            if (error.status === 404) {
+              Swal.fire(
+                'Errore!',
+                'Macchina non trovata. Potrebbe essere già stata eliminata.',
+                'error'
+              );
+            } else {
+              Swal.fire(
+                'Errore!',
+                'Non è stato possibile eliminare la macchina. Per favore, riprova più tardi.',
+                'error'
+              );
+            }
+          }
+        });
+      }
+    });
   }
 
   openEditDialog(machine: Machine): void {
@@ -124,7 +160,7 @@ export class ViewExportDeleteMachinesComponent {
         this.isLoading = true;
         this.machineService.update(result).subscribe({
           next: (updated) => {
-            const index = this.machines.findIndex(machine => machine.id === updated.id);
+            const index = this.machines.findIndex(m => m.id === updated.id);
             if (index !== -1) {
               this.machines[index] = updated;
               this.machines = [...this.machines];

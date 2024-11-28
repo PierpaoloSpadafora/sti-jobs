@@ -50,6 +50,7 @@ import {
 } from "@angular/material/datepicker";
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatTableModule} from "@angular/material/table";
+import {ShowJobComponent} from "./components/show-job/show-job.component";
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import {MatTableModule} from "@angular/material/table";
     ViewExportDeleteJobsComponent,
     ViewExportDeleteMachinesComponent,
     ViewExportDeleteMachineTypesComponent,
+    ShowJobComponent,
     EditJobDialogComponent,
     EditMachineTypesDialogComponent,
     EditMachineDialogComponent,

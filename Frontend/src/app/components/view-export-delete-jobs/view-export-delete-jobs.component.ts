@@ -6,11 +6,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditJobDialogComponent } from '../edit-job-dialog/edit-job-dialog.component';
 import { forkJoin } from 'rxjs';
 import { JsonService } from '../../services/json.service';
+import Swal from "sweetalert2";
 
 @Component({
   selector: 'app-view-export-delete-jobs',
   templateUrl: './view-export-delete-jobs.component.html',
-  styleUrl: './view-export-delete-jobs.component.css'
+  styleUrls: ['./view-export-delete-jobs.component.css']
 })
 export class ViewExportDeleteJobsComponent implements OnInit {
   jobs: Job[] = [];
@@ -35,16 +36,8 @@ export class ViewExportDeleteJobsComponent implements OnInit {
       types: this.jsonService.exportMachineType()
     }).subscribe({
       next: (response) => {
-        this.jobs = Array.isArray(response.jobs) && response.jobs.every(job => typeof job === 'object')
-          ? response.jobs as Job[]
-          : [];
+        this.jobs = Array.isArray(response.jobs) ? response.jobs as unknown as Job[] : [];
         this.machineTypes = this.transformMachineTypes(response.types);
-
-        console.log("Jobs structure:", this.jobs.map(job => ({
-          jobId: job.id,
-          requiredMachineType: job.requiredMachineType
-        })));
-
         this.isLoading = false;
       },
       error: (error) => {
@@ -84,21 +77,54 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   }
 
   deleteJob(id: number): void {
-    if (confirm('Are you sure you want to delete this job?')) {
-      this.isLoading = true;
-      this.jobService.deleteJob(id).subscribe({
-        next: () => {
-          this.jobs = this.jobs.filter(job => job.id !== id);
-          this.showMessage('Job deleted successfully');
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error deleting job:', error);
-          this.isLoading = false;
-          this.showMessage('Error deleting job. Please try again later.');
-        }
-      });
+    const job = this.jobs.find(j => j.id === id);
+    if (!job) {
+      this.showMessage('Job not found.');
+      return;
     }
+
+    Swal.fire({
+      title: 'Sei sicuro?',
+      text: `Vuoi eliminare il job "${job.title}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sì, elimina!',
+      cancelButtonText: 'Annulla'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.jobService.deleteJob(id).subscribe({
+          next: () => {
+            this.jobs = this.jobs.filter(job => job.id !== id);
+            Swal.fire(
+              'Eliminato!',
+              `Il job "${job.title}" è stato eliminato.`,
+              'success'
+            );
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error deleting job:', error);
+            this.isLoading = false;
+            if (error.status === 404) {
+              Swal.fire(
+                'Errore!',
+                'Job non trovato. Potrebbe essere già stato eliminato.',
+                'error'
+              );
+            } else {
+              Swal.fire(
+                'Errore!',
+                'Non è stato possibile eliminare il job. Per favore, riprova più tardi.',
+                'error'
+              );
+            }
+          }
+        });
+      }
+    });
   }
 
   openEditDialog(job: Job): void {
@@ -159,6 +185,7 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     switch (status.toLowerCase()) {
       case 'pending':
         return 'status-pending';
+      case 'in_progress':
       case 'in progress':
         return 'status-progress';
       case 'completed':
