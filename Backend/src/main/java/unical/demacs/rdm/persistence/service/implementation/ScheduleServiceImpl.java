@@ -125,7 +125,7 @@ public class ScheduleServiceImpl implements IScheduleService {
                     LocalDateTime scheduleEndTime = scheduleStartTime.plusMinutes(schedule.getDuration());
                     return !(scheduleEndTime.isBefore(startTime) || scheduleStartTime.isAfter(endTime));
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return conflictingSchedules.isEmpty();
     }
