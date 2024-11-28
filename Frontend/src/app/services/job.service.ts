@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {JobDTO} from "../generated-api";
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,11 @@ export class JobService {
   updateJob(job: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/${job.id}`, job);
   }
+
+  getJobById(id: number): Observable<JobDTO> {
+    return this.http.get<JobDTO>(`${this.baseUrl}/jobs-by-id/${id}`);
+  }
+
 
 
 }

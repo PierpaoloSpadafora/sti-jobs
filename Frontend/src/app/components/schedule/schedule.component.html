@@ -20,15 +20,6 @@
             <button class="action-button" (click)="openScheduleDialog(job)">Schedula</button>
           </td>
         </tr>
-        <tr *ngFor="let schedule of schedules">
-          <td>{{ schedule.id}}</td>
-          <td>{{ schedule.machineType}}</td>
-          <td>{{ schedule.startTime | date: 'short' }}</td>
-          <td class="actions-cell">
-            <button class="action-button" (click)="openEditScheduleDialog(schedule)">Modifica</button>
-            <button class="action-button" (click)="deleteSchedule(schedule)">Elimina</button>
-          </td>
-        </tr>
         </tbody>
       </table>
     </div>
@@ -46,6 +37,7 @@
           <th>Data di Scadenza</th>
           <th>Durata</th>
           <th>Stato</th>
+          <th>Azioni</th>
         </tr>
         </thead>
         <tbody>
@@ -56,6 +48,10 @@
           <td>{{ schedule.dueDate | date: 'short' }}</td>
           <td>{{ secondsToDuration(schedule.duration) }}</td>
           <td>{{ schedule.status }}</td>
+          <td class="actions-cell">
+            <button class="action-button" (click)="openEditScheduleDialog(schedule)">Modifica</button>
+            <button class="action-button" (click)="deleteSchedule(schedule)">Elimina</button>
+          </td>
         </tr>
         </tbody>
       </table>

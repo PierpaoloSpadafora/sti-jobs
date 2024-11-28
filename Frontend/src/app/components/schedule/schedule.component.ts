@@ -38,7 +38,6 @@ export class ScheduleComponent implements OnInit {
 
   ngOnInit() {
     this.getJobs();
-    this.getAllSchedules();
   }
 
   getJobs() {
@@ -46,6 +45,8 @@ export class ScheduleComponent implements OnInit {
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
+        // After jobs are fetched, get schedules
+        this.getAllSchedules();
       },
       error: (error: any) => {
         console.error('Error while retrieving jobs:', error);
@@ -58,6 +59,17 @@ export class ScheduleComponent implements OnInit {
       next: (response: ScheduleDTO[]) => {
         this.schedules = response;
         console.log('Schedules retrieved:', this.schedules);
+
+        this.schedules.forEach(schedule => {
+          if (schedule.jobId) {
+            const job = this.jobs.find(j => j.id === schedule.jobId);
+            if (job) {
+              schedule.job = job;
+            } else {
+              console.warn(`Job with ID ${schedule.jobId} not found.`);
+            }
+          }
+        });
       },
       error: (error: any) => {
         console.error('Error while retrieving schedules:', error);
@@ -93,10 +105,13 @@ export class ScheduleComponent implements OnInit {
   }
 
   onStartTimeChange() {
-    if (this.scheduleForm.value.startTime && this.selectedJob.duration) {
-      const startTime = new Date(this.scheduleForm.value.startTime);
-      const durationInMinutes = this.selectedJob.duration / 60;
-      this.calculatedEndTime = new Date(startTime.getTime() + durationInMinutes * 60000);
+    const startTime = this.scheduleForm.value.startTime;
+    const jobDuration = this.selectedJob.duration ?? 0;
+
+    if (startTime && jobDuration) {
+      const start = new Date(startTime);
+      const durationInMinutes = jobDuration / 60;
+      this.calculatedEndTime = new Date(start.getTime() + durationInMinutes * 60000);
     } else {
       this.calculatedEndTime = null;
     }
@@ -125,7 +140,11 @@ export class ScheduleComponent implements OnInit {
       startTime: new Date(schedule.startTime),
       dueDate: new Date(schedule.dueDate)
     });
-    this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
+    if (schedule.duration) {
+      this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
+    } else {
+      this.calculatedEndTime = null;
+    }
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
       width: '600px',
       data: { job: this.jobs.find(job => job.id === schedule.jobId) }
@@ -137,13 +156,15 @@ export class ScheduleComponent implements OnInit {
     const startTime = new Date(this.scheduleForm.value.startTime);
     const dueDate = new Date(this.scheduleForm.value.dueDate);
 
+    const jobDuration = this.selectedJob.duration ?? 0;
+
     const scheduleData: ScheduleDTO = {
       id: this.selectedSchedule?.id,
       jobId: this.selectedJob.id,
       machineType: this.selectedJob.requiredMachineType?.name || '',
       dueDate: dueDate.toISOString(),
       startTime: startTime.toISOString(),
-      duration: this.selectedJob.duration,
+      duration: jobDuration,
       status: 'SCHEDULED'
     };
 
@@ -172,7 +193,10 @@ export class ScheduleComponent implements OnInit {
     }
   }
 
-  secondsToDuration(seconds: number) {
+  secondsToDuration(seconds?: number): string {
+    if (!seconds) {
+      return '0m';
+    }
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     if (hours === 0) {
@@ -182,6 +206,7 @@ export class ScheduleComponent implements OnInit {
     }
     return `${hours}h ${minutes}m`;
   }
+
 
   protected readonly Number = Number;
 }
