@@ -62,27 +62,32 @@
 <ng-template #scheduleDialog let-data>
   <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
   <mat-dialog-content [formGroup]="scheduleForm">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Ora di Inizio</mat-label>
-      <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required>
-        <mat-option *ngFor="let time of availableStartTimes" [value]="time">
-          {{ time | date: 'shortTime' }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="form-field">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Ora di Inizio</mat-label>
+        <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required>
+          <mat-option *ngFor="let time of availableStartTimes" [value]="time">
+            {{ time | date: 'shortTime' }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Ora di Fine</mat-label>
-      <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
-    </mat-form-field>
+    <div class="form-field">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Ora di Fine</mat-label>
+        <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Data di Scadenza</mat-label>
-      <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" required>
-      <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
-      <mat-datepicker #dueDatePicker></mat-datepicker>
-    </mat-form-field>
-
+    <div class="form-field">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Data di Scadenza</mat-label>
+        <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" required>
+        <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #dueDatePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button (click)="dialogRef.close()">Cancella</button>

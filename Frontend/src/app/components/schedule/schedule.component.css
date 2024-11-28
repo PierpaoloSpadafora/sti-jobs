@@ -113,3 +113,7 @@
 .schedules-table tr:hover {
   background-color: #f8f9fa;
 }
+
+.form-field {
+  margin-bottom: 16px;
+}

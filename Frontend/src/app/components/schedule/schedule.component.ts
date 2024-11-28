@@ -21,7 +21,6 @@ export class ScheduleComponent implements OnInit {
   availableStartTimes: Date[] = [];
   selectedSchedule?: ScheduleDTO;
 
-
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
   constructor(
@@ -31,7 +30,8 @@ export class ScheduleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.scheduleForm = this.fb.group({
-      startTime: [null, Validators.required]
+      startTime: [null, Validators.required],
+      dueDate: [null, Validators.required]
     });
     this.generateAvailableStartTimes();
   }
@@ -109,8 +109,8 @@ export class ScheduleComponent implements OnInit {
 
     if (startTime && jobDuration) {
       const start = new Date(startTime);
-      const durationInMinutes = jobDuration / 60;
-      this.calculatedEndTime = new Date(start.getTime() + durationInMinutes * 60000);
+      const durationInMilliseconds = jobDuration * 1000;
+      this.calculatedEndTime = new Date(start.getTime() + durationInMilliseconds);
     } else {
       this.calculatedEndTime = null;
     }
@@ -151,9 +151,8 @@ export class ScheduleComponent implements OnInit {
   }
 
   scheduleJob() {
-
-    const startTime = new Date(this.scheduleForm.value.startTime);
-    const dueDate = new Date(this.scheduleForm.value.dueDate);
+    const startTime = this.scheduleForm.value.startTime;
+    const dueDate = this.scheduleForm.value.dueDate;
 
     const jobDuration = this.selectedJob.duration ?? 0;
 
@@ -205,7 +204,6 @@ export class ScheduleComponent implements OnInit {
     }
     return `${hours}h ${minutes}m`;
   }
-
 
   protected readonly Number = Number;
 }
