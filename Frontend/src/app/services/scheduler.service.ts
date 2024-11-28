@@ -20,4 +20,14 @@ export class SchedulerService {
   getAllSchedules(): Observable<ScheduleDTO[]> {
     return this.http.get<ScheduleDTO[]>(`${this.baseUrl}/get-all-schedules`);
   }
+
+  deleteSchedule(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
+  }
+
+  updateSchedule(id: number, scheduleData: ScheduleDTO): Observable<ScheduleDTO> {
+    return this.http.put<ScheduleDTO>(`${this.baseUrl}/${id}`, scheduleData);
+  }
+
+
 }

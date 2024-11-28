@@ -19,6 +19,8 @@ export class ScheduleComponent implements OnInit {
   selectedJob!: JobDTO;
   calculatedEndTime!: Date | null;
   availableStartTimes: Date[] = [];
+  selectedSchedule?: ScheduleDTO;
+
 
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
@@ -100,50 +102,74 @@ export class ScheduleComponent implements OnInit {
     }
   }
 
-  scheduleJob() {
-    if (!this.selectedJob.id) {
-      console.error('Job ID is undefined');
+  deleteSchedule(schedule: ScheduleDTO) {
+    if (!schedule.id) {
+      console.error('Schedule ID is undefined');
       return;
     }
+
+    this.scheduleService.deleteSchedule(schedule.id).subscribe({
+      next: () => {
+        console.log('Schedule deleted successfully');
+        this.getAllSchedules();
+      },
+      error: (error) => {
+        console.error('Error deleting schedule:', error);
+      }
+    });
+  }
+
+  openEditScheduleDialog(schedule: ScheduleDTO) {
+    this.selectedSchedule = schedule;
+    this.scheduleForm.patchValue({
+      startTime: new Date(schedule.startTime),
+      dueDate: new Date(schedule.dueDate)
+    });
+    this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
+    this.dialogRef = this.dialog.open(this.scheduleDialog, {
+      width: '600px',
+      data: { job: this.jobs.find(job => job.id === schedule.jobId) }
+    });
+  }
+
+  scheduleJob() {
 
     const startTime = new Date(this.scheduleForm.value.startTime);
-    if (!startTime) {
-      console.error('Start time is invalid');
-      return;
-    }
-
-    if (!this.selectedJob.duration) {
-      console.error('Job duration is undefined');
-      return;
-    }
-
-    console.log('this.selectedJob.requiredMachineType:', this.selectedJob.requiredMachineType);
-
-    // @ts-ignore
-    const machineTypeString = this.selectedJob.requiredMachineType.name; // Adjust if needed
+    const dueDate = new Date(this.scheduleForm.value.dueDate);
 
     const scheduleData: ScheduleDTO = {
+      id: this.selectedSchedule?.id,
       jobId: this.selectedJob.id,
-      // @ts-ignore
-      machineType: machineTypeString,
-      dueDate: startTime.toISOString(),
+      machineType: this.selectedJob.requiredMachineType?.name || '',
+      dueDate: dueDate.toISOString(),
       startTime: startTime.toISOString(),
       duration: this.selectedJob.duration,
       status: 'SCHEDULED'
     };
 
-    console.log('scheduleData:', scheduleData);
-
-    this.scheduleService.createSchedule(scheduleData).subscribe({
-      next: (response) => {
-        console.log('Schedule created successfully:', response);
-        this.dialogRef.close();
-        this.getAllSchedules();
-      },
-      error: (error) => {
-        console.error('Error creating schedule:', error);
-      }
-    });
+    if (this.selectedSchedule) {
+      this.scheduleService.updateSchedule(this.selectedSchedule.id!, scheduleData).subscribe({
+        next: (response) => {
+          console.log('Schedule updated successfully:', response);
+          this.dialogRef.close();
+          this.getAllSchedules();
+        },
+        error: (error) => {
+          console.error('Error updating schedule:', error);
+        }
+      });
+    } else {
+      this.scheduleService.createSchedule(scheduleData).subscribe({
+        next: (response) => {
+          console.log('Schedule created successfully:', response);
+          this.dialogRef.close();
+          this.getAllSchedules();
+        },
+        error: (error) => {
+          console.error('Error creating schedule:', error);
+        }
+      });
+    }
   }
 
   secondsToDuration(seconds: number) {
