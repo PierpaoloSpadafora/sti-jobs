@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import unical.demacs.rdm.config.ModelMapperExtended;
+import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.dto.ScheduleViewDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 import unical.demacs.rdm.persistence.repository.JobRepository;
+import unical.demacs.rdm.persistence.service.implementation.ScheduleServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,124 +22,57 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class Scheduler {
     private final ScheduleRepository scheduleRepository;
+    private final ModelMapperExtended modelMapperExtended;
     private final JobRepository jobRepository;
+    private final ScheduleServiceImpl scheduleServiceImpl;
 
-    @Transactional
-    public List<ScheduleViewDTO> scheduleByPriority(Long machineType) {
-        List<Schedule> pendingSchedules = scheduleRepository.findByMachineType_IdAndStatus(
-                machineType,
-                ScheduleStatus.PENDING
-        );
+    //---------------------- WORK IN PROGRESS ---------------------------------------
 
-        if (pendingSchedules.isEmpty()) {
-            return getScheduleTimeline(machineType);
-        }
-
-        List<Schedule> existingSchedules = scheduleRepository.findByMachineType_IdAndStatus(
-                machineType,
-                ScheduleStatus.SCHEDULED
-        );
-
-        List<TimeWindow> availableWindows = findAvailableTimeWindows(existingSchedules);
-        LocalDateTime currentTime = LocalDateTime.now();
-
-        if (availableWindows.isEmpty()) {
-            availableWindows.add(new TimeWindow(currentTime, null));
-        }
-
-        List<Schedule> sortedPendingSchedules = pendingSchedules.stream()
-                .sorted(Comparator.comparing((Schedule s) -> s.getJob().getPriority()).reversed())
-                .collect(Collectors.toList());
-
-        for (Schedule schedule : sortedPendingSchedules) {
-            Long durationMinutes = schedule.getDuration();
-            boolean scheduled = false;
-
-            for (TimeWindow window : availableWindows) {
-                LocalDateTime windowStart = window.getStart();
-                LocalDateTime windowEnd = window.getEnd();
-
-                if (windowStart.isBefore(currentTime)) {
-                    windowStart = currentTime;
-                }
-
-                if (windowEnd == null || windowStart.plusSeconds(durationMinutes).isBefore(windowEnd)) {
-                    schedule.setStartTime(windowStart);
-                    schedule.setStatus(ScheduleStatus.SCHEDULED);
-                    scheduleRepository.save(schedule);
-
-                    window.setStart(windowStart.plusSeconds(durationMinutes));
-                    scheduled = true;
-                    break;
-                }
-            }
-
-            if (!scheduled && !availableWindows.isEmpty()) {
-                TimeWindow lastWindow = availableWindows.get(availableWindows.size() - 1);
-                LocalDateTime startTime = lastWindow.getEnd() != null ?
-                        lastWindow.getEnd() : lastWindow.getStart();
-
-                schedule.setStartTime(startTime);
-                schedule.setStatus(ScheduleStatus.SCHEDULED);
-                scheduleRepository.save(schedule);
-            }
-        }
-
-        return getScheduleTimeline(machineType);
-    }
-
-    @Data
-    @AllArgsConstructor
-    private static class TimeWindow {
-        private LocalDateTime start;
-        private LocalDateTime end;
-    }
-
-    private List<TimeWindow> findAvailableTimeWindows(List<Schedule> existingSchedules) {
-        List<TimeWindow> windows = new ArrayList<>();
-        if (existingSchedules.isEmpty()) {
-            return windows;
-        }
-
-        existingSchedules.sort(Comparator.comparing(Schedule::getStartTime));
-
-        LocalDateTime lastEndTime = null;
-        for (Schedule schedule : existingSchedules) {
-            LocalDateTime scheduleStart = schedule.getStartTime();
-            LocalDateTime scheduleEnd = schedule.getStartTime().plusSeconds(schedule.getDuration());
-
-            if (lastEndTime != null && scheduleStart.isAfter(lastEndTime)) {
-                windows.add(new TimeWindow(lastEndTime, scheduleStart));
-            }
-
-            lastEndTime = scheduleEnd;
-        }
-
-        if (lastEndTime != null) {
-            windows.add(new TimeWindow(lastEndTime, null));
-        }
-
-        return windows;
-    }
-
-    private List<ScheduleViewDTO> getScheduleTimeline(Long machineType) {
-        List<Schedule> allSchedules = scheduleRepository.findByMachineType_Id(machineType);
-
-        return allSchedules.stream()
-                .map(schedule -> {
-                    ScheduleViewDTO viewDTO = new ScheduleViewDTO();
-                    viewDTO.setId(schedule.getId());
-                    viewDTO.setJobId(schedule.getJob().getId());
-                    viewDTO.setJobName(schedule.getJob().getTitle());
-                    viewDTO.setMachineType(schedule.getMachineType().getName());
-                    viewDTO.setStartTime(schedule.getStartTime());
-                    viewDTO.setEndTime(schedule.getStartTime().plusSeconds(schedule.getDuration()));
-                    viewDTO.setDuration(schedule.getDuration());
-                    viewDTO.setPriority(schedule.getJob().getPriority());
-                    return viewDTO;
-                })
-                .sorted(Comparator.comparing(ScheduleViewDTO::getPriority).reversed()
-                        .thenComparing(ScheduleViewDTO::getStartTime))
+    private List<ScheduleDTO> getSchedulesDueBefore(LocalDateTime date) {
+        List<Schedule> schedules = scheduleServiceImpl.getSchedulesDueAfter(date);
+        return schedules.stream()
+                .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
                 .collect(Collectors.toList());
     }
+
+    // metodo che, partendo da una lista di Schedule ne salva il contenuto in formato ScheduleDTO e json in un file in ./data/jobScheduled+{type}+.json
+    public void saveSchedulesToFile(List<Schedule> schedules, String type) {
+        List<ScheduleDTO> scheduleDTOs = schedules.stream()
+                .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
+                .toList();
+        String fileName = "./data/jobScheduled" + type + ".json";
+
+    }
+
+    public void scheduleTesting(String type) {
+        if(type.equals("priority")) {
+            testSchedulingByPriority();
+        }
+        else if (type.equals("dueDate")) {
+            testSchedulingByDueDate();
+        }
+    }
+
+    /*
+    ogni schedule ha un job, un machineType, un startTime, una durata (end time è implicito), una due date, una priorità e uno status
+    possiamo avere più macchine dello stesso tipo, se abbiamo più job con lo stesso machine type ma più macchine dello stesso tipo quei job potranno
+    essere eseguiti in parallelo.
+
+    Se abbiamo più job con lo stesso machine type e la stessa priorità, il job che arriva prima viene eseguito prima.
+    Se abbiamo più job con lo stesso machine type e priorità diversa, il job con priorità maggiore viene eseguito prima.
+    Se abbiamo più job con lo stesso machine type e priorità uguale, il job che arriva prima viene eseguito prima.
+    Se abbiamo più job con lo stesso machine type e priorità uguale e stessa data di scadenza, il job che arriva prima viene eseguito prima.
+    */
+    public void testSchedulingByPriority() {
+
+    }
+
+    public void testSchedulingByDueDate() {
+
+    }
+
+
+
+
+
 }

@@ -6,21 +6,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unical.demacs.rdm.config.ExtendedModelMapper;
-import unical.demacs.rdm.config.ModelMapperConfig;
+import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.dto.UserDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
-import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
-import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
-import unical.demacs.rdm.persistence.service.interfaces.IUserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +28,7 @@ import java.util.Optional;
 public class JsonController {
 
     private final IJobService jobService;
-    private final ExtendedModelMapper extendedModelMapper;
+    private final ModelMapperExtended modelMapperExtended;
     private final MachineTypeServiceImpl machineTypeService;
     private final IMachineService machineService;
 
@@ -59,7 +54,7 @@ public class JsonController {
     @GetMapping(value = "/exportJob", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<JobDTO>> exportJob() {
         List<Job> jobs = jobService.getAllJobs();
-        return ResponseEntity.ok(extendedModelMapper.mapList(jobs, JobDTO.class));
+        return ResponseEntity.ok(modelMapperExtended.mapList(jobs, JobDTO.class));
     }
 
 
@@ -80,7 +75,7 @@ public class JsonController {
     @GetMapping(value = "/exportMachineType", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineTypeDTO>> exportMachineType() {
         List<MachineType> machineTypes = machineTypeService.getAllMachineTypes();
-        return ResponseEntity.ok(extendedModelMapper.mapList(machineTypes, MachineTypeDTO.class));
+        return ResponseEntity.ok(modelMapperExtended.mapList(machineTypes, MachineTypeDTO.class));
     }
 
     @Operation(summary = "Import Machine data from JSON", description = "Import Machine data into the system from JSON content.",
@@ -100,7 +95,7 @@ public class JsonController {
     @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineDTO>> exportMachine() {
         List<Machine> machines = machineService.getAllMachines();
-        return ResponseEntity.ok(extendedModelMapper.mapList(machines, MachineDTO.class));
+        return ResponseEntity.ok(modelMapperExtended.mapList(machines, MachineDTO.class));
     }
 
 }

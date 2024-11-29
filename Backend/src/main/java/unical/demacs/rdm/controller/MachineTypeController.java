@@ -11,8 +11,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unical.demacs.rdm.config.ExtendedModelMapper;
-import unical.demacs.rdm.config.exception.MachineException;
+import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
@@ -28,7 +27,7 @@ public class MachineTypeController {
 
     private final MachineTypeServiceImpl machineTypeServiceImpl;
     private final ModelMapper modelMapper;
-    private final ExtendedModelMapper extendedModelMapper;
+    private final ModelMapperExtended modelMapperExtended;
 
     @Operation(summary = "Create machine type", description = "Create a new machine type.",
             tags = {"machine-type-controller"})
@@ -72,7 +71,7 @@ public class MachineTypeController {
     })
     @GetMapping(path="/get-all")
     public ResponseEntity<List<MachineTypeDTO>> getAllMachineTypes() {
-        return ResponseEntity.ok(extendedModelMapper.mapList(machineTypeServiceImpl.getAllMachineTypes(), MachineTypeDTO.class));
+        return ResponseEntity.ok(modelMapperExtended.mapList(machineTypeServiceImpl.getAllMachineTypes(), MachineTypeDTO.class));
     }
 
     @Operation(summary = "Update machine type", description = "Update a machine type using its id.",

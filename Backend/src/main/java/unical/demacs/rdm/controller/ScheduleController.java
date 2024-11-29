@@ -10,11 +10,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unical.demacs.rdm.config.ExtendedModelMapper;
+import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.service.interfaces.IScheduleService;
+import unical.demacs.rdm.utils.Scheduler;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,8 @@ public class ScheduleController {
 
     private final IScheduleService scheduleService;
     private final ModelMapper modelMapper;
-    private final ExtendedModelMapper modelMapperExtended;
+    private final Scheduler scheduler;
+    private final ModelMapperExtended modelMapperExtended;
 
     @PostMapping("/create-schedule")
     public ResponseEntity<ScheduleDTO> createSchedule(@Valid @RequestBody ScheduleDTO scheduleDTO) {
@@ -138,6 +140,13 @@ public class ScheduleController {
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime date) {
         List<Schedule> schedules = scheduleService.getSchedulesDueAfter(date);
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        scheduler.scheduleTesting("priority");
+        return new ResponseEntity<>("Test success", HttpStatus.OK);
     }
 
 

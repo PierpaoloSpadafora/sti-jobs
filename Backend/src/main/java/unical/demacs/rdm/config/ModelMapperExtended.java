@@ -4,7 +4,7 @@ import org.modelmapper.ModelMapper;
 
 import java.util.List;
 
-public class ExtendedModelMapper extends ModelMapper {
+public class ModelMapperExtended extends ModelMapper {
 
     public <S, T> List<T> mapList(List<S> source, Class<T> targetClass) {
         return source.stream()

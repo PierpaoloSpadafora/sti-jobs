@@ -11,9 +11,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import unical.demacs.rdm.config.ExtendedModelMapper;
+import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
-import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
@@ -38,7 +37,7 @@ public class MachineTypeControllerTest {
     private ModelMapper modelMapper;
 
     @Mock
-    private ExtendedModelMapper extendedModelMapper;
+    private ModelMapperExtended modelMapperExtended;
 
     @InjectMocks
     private MachineTypeController machineTypeController;
@@ -107,7 +106,7 @@ public class MachineTypeControllerTest {
         List<MachineTypeDTO> machineTypeDTOs = Arrays.asList(machineTypeDTO);
 
         when(machineTypeService.getAllMachineTypes()).thenReturn(machineTypes);
-        when(extendedModelMapper.mapList(eq(machineTypes), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTOs);
+        when(modelMapperExtended.mapList(eq(machineTypes), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTOs);
 
         mockMvc.perform(get("/api/v1/machine-type/get-all"))
                 .andExpect(status().isOk())

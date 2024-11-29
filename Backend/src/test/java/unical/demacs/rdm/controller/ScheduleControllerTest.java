@@ -11,7 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import unical.demacs.rdm.config.ExtendedModelMapper;
+import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
@@ -41,7 +41,7 @@ public class ScheduleControllerTest {
     private ModelMapper modelMapper;
 
     @Mock
-    private ExtendedModelMapper extendedModelMapper;
+    private ModelMapperExtended modelMapperExtended;
 
     @InjectMocks
     private ScheduleController scheduleController;
@@ -139,7 +139,7 @@ public class ScheduleControllerTest {
         List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
 
         when(scheduleService.getAllSchedules()).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/get-all-schedules"))
                 .andExpect(status().isOk())
@@ -154,7 +154,7 @@ public class ScheduleControllerTest {
         List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
 
         when(scheduleService.getSchedulesByStatus(eq(ScheduleStatus.PENDING))).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/status/PENDING"))
                 .andExpect(status().isOk())
@@ -169,7 +169,7 @@ public class ScheduleControllerTest {
         List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
 
         when(scheduleService.getSchedulesByJobId(TEST_JOB_ID)).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/job/" + TEST_JOB_ID))
                 .andExpect(status().isOk())
@@ -186,7 +186,7 @@ public class ScheduleControllerTest {
         LocalDateTime endTime = LocalDateTime.now().plusDays(1);
 
         when(scheduleService.getSchedulesInTimeRange(any(), any())).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/timeRange")
                         .param("startTime", startTime.toString())
@@ -222,7 +222,7 @@ public class ScheduleControllerTest {
         LocalDateTime from = LocalDateTime.now();
 
         when(scheduleService.getUpcomingSchedules(any())).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/upcoming")
                         .param("from", from.toString()))
@@ -239,7 +239,7 @@ public class ScheduleControllerTest {
         LocalDateTime until = LocalDateTime.now();
 
         when(scheduleService.getPastSchedules(any())).thenReturn(schedules);
-        when(extendedModelMapper.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
+        when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
 
         mockMvc.perform(get("/api/v1/schedules/past")
                         .param("until", until.toString()))
