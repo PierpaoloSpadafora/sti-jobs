@@ -5,7 +5,10 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import unical.demacs.rdm.controller.UserControllerTest;
+import unical.demacs.rdm.controller.*;
+import unical.demacs.rdm.service.JobServiceImplTest;
+import unical.demacs.rdm.service.MachineServiceImplTest;
+import unical.demacs.rdm.service.MachineTypeServiceImplTest;
 import unical.demacs.rdm.service.UserServiceImplTest;
 
 @Suite
@@ -13,11 +16,13 @@ import unical.demacs.rdm.service.UserServiceImplTest;
 		JobControllerTest.class,
 		MachineControllerTest.class,
 		ScheduleControllerTest.class,
+		MachineTypeControllerTest.class,
 		UserControllerTest.class,
 
 		JobServiceImplTest.class,
 		MachineServiceImplTest.class,
-		ScheduleServiceImplTest.class,
+		MachineTypeServiceImplTest.class,
+		//ScheduleServiceImplTest.class,
 		UserServiceImplTest.class
 })
 @SpringBootTest

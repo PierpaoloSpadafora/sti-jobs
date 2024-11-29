@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.config.exception.TooManyRequestsException;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.entities.Machine;
@@ -14,7 +15,6 @@ import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 
 import java.util.List;
 import java.util.Optional;
-
 
 @Service
 @AllArgsConstructor
@@ -34,23 +34,25 @@ public class MachineServiceImpl implements IMachineService {
                 logger.warn("Rate limit exceeded for createMachine");
                 throw new TooManyRequestsException();
             }
-            if(machineTypeRepository.findById(machineDTO.getTypeId()).isEmpty()){
-                logger.error("Machine type with id {} not found", machineDTO.getTypeId());
-                throw new RuntimeException("Machine type not found");
-            }
+
+            var machineType = machineTypeRepository.findById(machineDTO.getTypeId())
+                    .orElseThrow(() -> new MachineException("Machine type not found"));
+
             Machine machine = Machine.machineBuilder()
                     .name(machineDTO.getName())
                     .description(machineDTO.getDescription())
-                    .type(machineTypeRepository.findById(machineDTO.getTypeId()).orElse(null))
+                    .type(machineType)
                     .build();
-            machineRepository.save(machine);
+
+            machine = machineRepository.save(machine);
             logger.info("Machine with name {} created successfully", machineDTO.getName());
             return machine;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error creating machine with name: {}", machineDTO.getName(), e);
-            throw new RuntimeException("Error creating machine");
-        }
-        finally {
+            throw new MachineException("Error creating machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -58,24 +60,21 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public Machine getMachineById(Long id) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Getting machine by id: " + id);
+        logger.info("Getting machine by id: {}", id);
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for getMachineById");
                 throw new TooManyRequestsException();
             }
-            Optional<Machine> machine = machineRepository.findById(id);
-            if (machine.isEmpty()) {
-                logger.error("Machine with id {} not found", id);
-                throw new RuntimeException("Machine not found");
-            }
-            logger.info("Machine with id {} found", id);
-            return machine.get();
+
+            return machineRepository.findById(id)
+                    .orElseThrow(() -> new MachineException("Machine not found"));
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error getting machine by id: {}", id, e);
-            throw new RuntimeException("Error getting machine");
-        }
-        finally {
+            throw new MachineException("Error getting machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -83,32 +82,32 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public Machine updateMachine(Long id, MachineDTO machineDTO) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Updating machine with id: " + id);
+        logger.info("Updating machine with id: {}", id);
         try {
             if (!rateLimiter.tryAcquire()) {
-                logger.warn("Rate limit exceeded for getUserByEmail");
+                logger.warn("Rate limit exceeded for updateMachine");
                 throw new TooManyRequestsException();
             }
-            Optional<Machine> machine = machineRepository.findById(id);
-            if (machine.isEmpty()) {
-                logger.error("Machine with id {} not found", id);
-                throw new RuntimeException("Machine not found");
-            }
-            if(machineTypeRepository.findById(machineDTO.getTypeId()).isEmpty()){
-                logger.error("Machine type with id {} not found", machineDTO.getTypeId());
-                throw new RuntimeException("Machine type not found");
-            }
-            machine.get().setName(machineDTO.getName());
-            machine.get().setDescription(machineDTO.getDescription());
-            machine.get().setType(machineTypeRepository.findById(machineDTO.getTypeId()).orElse(null));
-            machineRepository.save(machine.get());
+
+            Machine machine = machineRepository.findById(id)
+                    .orElseThrow(() -> new MachineException("Machine not found"));
+
+            var machineType = machineTypeRepository.findById(machineDTO.getTypeId())
+                    .orElseThrow(() -> new MachineException("Machine type not found"));
+
+            machine.setName(machineDTO.getName());
+            machine.setDescription(machineDTO.getDescription());
+            machine.setType(machineType);
+
+            machine = machineRepository.save(machine);
             logger.info("Machine with id {} updated successfully", id);
-            return machine.get();
+            return machine;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error updating machine with id: {}", id, e);
-            throw new RuntimeException("Error updating machine");
-        }
-        finally {
+            throw new MachineException("Error updating machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -116,25 +115,25 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public Boolean deleteMachine(Long id) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Deleting machine with id: " + id);
+        logger.info("Deleting machine with id: {}", id);
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for deleteMachine");
                 throw new TooManyRequestsException();
             }
-            Optional<Machine> machine = machineRepository.findById(id);
-            if (machine.isEmpty()) {
-                logger.error("Machine with id {} not found", id);
-                throw new RuntimeException("Machine not found");
-            }
-            machineRepository.delete(machine.get());
+
+            Machine machine = machineRepository.findById(id)
+                    .orElseThrow(() -> new MachineException("Machine not found"));
+
+            machineRepository.delete(machine);
             logger.info("Machine with id {} deleted successfully", id);
             return true;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error deleting machine with id: {}", id, e);
-            throw new RuntimeException("Error deleting machine");
-        }
-        finally {
+            throw new MachineException("Error deleting machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -148,14 +147,16 @@ public class MachineServiceImpl implements IMachineService {
                 logger.warn("Rate limit exceeded for getAllMachines");
                 throw new TooManyRequestsException();
             }
+
             List<Machine> machines = machineRepository.findAll();
-            logger.info("All machines found");
+            logger.info("Found {} machines", machines.size());
             return machines;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error getting all machines", e);
-            throw new RuntimeException("Error getting all machines");
-        }
-        finally {
+            throw new MachineException("Error getting all machines");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -163,24 +164,26 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public Optional<Machine> findById(Long id) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Getting machine by id: " + id);
+        logger.info("Getting machine by id: {}", id);
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for findById");
                 throw new TooManyRequestsException();
             }
+
             Optional<Machine> machine = machineRepository.findById(id);
             if (machine.isEmpty()) {
-                logger.error("Machine with id {} not found", id);
-                throw new RuntimeException("Machine not found");
+                logger.info("Machine with id {} not found", id);
+            } else {
+                logger.info("Machine with id {} found", id);
             }
-            logger.info("Machine with id {} found", id);
             return machine;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error getting machine by id: {}", id, e);
-            throw new RuntimeException("Error getting machine");
-        }
-        finally {
+            throw new MachineException("Error getting machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -188,27 +191,27 @@ public class MachineServiceImpl implements IMachineService {
     @Override
     public Optional<Machine> findByIdOrName(Long id, String name) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Getting machine by id: " + id + " or name: " + name);
+        logger.info("Getting machine by id: {} or name: {}", id, name);
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for findByIdOrName");
                 throw new TooManyRequestsException();
             }
+
             Optional<Machine> machine = machineRepository.findByIdOrName(id, name);
             if (machine.isEmpty()) {
-                logger.error("Machine with id {} or name {} not found", id, name);
-                throw new RuntimeException("Machine not found");
+                logger.info("Machine with id {} or name {} not found", id, name);
+            } else {
+                logger.info("Machine with id {} or name {} found", id, name);
             }
-            logger.info("Machine with id {} or name {} found", id, name);
             return machine;
+        } catch (TooManyRequestsException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Error getting machine by id: {} or name: {}", id, name, e);
-            throw new RuntimeException("Error getting machine");
-        }
-        finally {
+            throw new MachineException("Error getting machine");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
-
-
 }
