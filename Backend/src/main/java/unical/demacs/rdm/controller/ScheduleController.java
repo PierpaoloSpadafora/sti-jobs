@@ -30,7 +30,6 @@ public class ScheduleController {
 
     private final IScheduleService scheduleService;
     private final ModelMapper modelMapper;
-    private final Scheduler scheduler;
     private final ModelMapperExtended modelMapperExtended;
 
     @PostMapping("/create-schedule")
@@ -122,8 +121,8 @@ public class ScheduleController {
     }
 
 
-    @GetMapping("/duedate/before")
-    @Operation(summary = "Get schedules with dueDate before a specified date")
+    @GetMapping("/due-date/before")
+    @Operation(summary = "Get schedules with due-date before a specified date")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesDueBefore(
             @RequestParam
@@ -132,8 +131,8 @@ public class ScheduleController {
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
-    @GetMapping("/duedate/after")
-    @Operation(summary = "Get schedules with dueDate after a specified date")
+    @GetMapping("/due-date/after")
+    @Operation(summary = "Get schedules with due-date after a specified date")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesDueAfter(
             @RequestParam("date")
@@ -141,14 +140,5 @@ public class ScheduleController {
         List<Schedule> schedules = scheduleService.getSchedulesDueAfter(date);
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
-
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        scheduler.scheduleTesting("priority");
-        scheduler.scheduleTesting("dueDate");
-        return new ResponseEntity<>("Test success", HttpStatus.OK);
-    }
-
 
 }

@@ -14,7 +14,6 @@ import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.repository.MachineRepository;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
-import unical.demacs.rdm.persistence.service.implementation.ScheduleServiceImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,163 +24,167 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class Scheduler {
+
     private final ScheduleRepository scheduleRepository;
     private final ModelMapperExtended modelMapperExtended;
     private final JobRepository jobRepository;
-    private final ScheduleServiceImpl scheduleServiceImpl;
     private final MachineRepository machineRepository;
     private final ObjectMapper objectMapper;
 
-    //---------------------- WORK IN PROGRESS ---------------------------------------
-
-    public void saveSchedulesToFile(List<Schedule> schedules, String type) {
-        List<ScheduleDTO> scheduleDTOs = schedules.stream()
-                .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
-                .collect(Collectors.toList());
-        String fileName = "./data/jobScheduled_" + type + ".json";
-
-        try {
-            new File("./data").mkdirs();
-            objectMapper.writeValue(new File(fileName), scheduleDTOs);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void scheduleTesting(String type) {
-        if (type.equals("priority")) {
-            testSchedulingByPriority();
-        } else if (type.equals("dueDate")) {
-            testSchedulingByDueDate();
+        switch (type) {
+            case "priority":
+                scheduleByPriority();
+                break;
+            case "due-date":
+                scheduleByDueDate();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown scheduling type: " + type);
         }
     }
 
-    /*
-    Each schedule has a job, a machineType, a startTime, a duration (end time is implicit),
-    a due date, a priority, and a status.
-    We can have multiple machines of the same type. If we have multiple jobs with the same
-    machine type but multiple machines of the same type, those jobs can be executed in parallel.
-
-    - If we have multiple jobs with the same machine type and the same priority,
-      the job that arrives first is executed first.
-    - If we have multiple jobs with the same machine type and different priorities,
-      the job with higher priority is executed first.
-    - If we have multiple jobs with the same machine type and equal priority,
-      the job that arrives first is executed first.
-    - If we have multiple jobs with the same machine type, equal priority, and the same due date,
-      the job that arrives first is executed first.
-    */
-    public void testSchedulingByPriority() {
+    private void scheduleByPriority() {
         List<Job> pendingJobs = jobRepository.findByStatus(JobStatus.PENDING);
-        Map<MachineType, List<Job>> jobsByMachineType = pendingJobs.stream()
-                .collect(Collectors.groupingBy(Job::getRequiredMachineType));
+        Map<MachineType, List<Job>> jobsByMachineType = groupJobsByMachineType(pendingJobs);
+
         for (Map.Entry<MachineType, List<Job>> entry : jobsByMachineType.entrySet()) {
             MachineType machineType = entry.getKey();
             List<Job> jobsForMachineType = entry.getValue();
+
             List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
             if (machines.isEmpty()) {
                 continue;
             }
+
             jobsForMachineType.sort(Comparator
                     .comparing((Job job) -> job.getPriority().ordinal()).reversed()
                     .thenComparing(Job::getId));
-            Map<Machine, LocalDateTime> machineAvailability = new HashMap<>();
-            for (Machine machine : machines) {
-                machineAvailability.put(machine, LocalDateTime.now());
-            }
-            for (Job job : jobsForMachineType) {
-                Machine earliestAvailableMachine = machines.get(0);
-                LocalDateTime earliestAvailableTime = machineAvailability.get(earliestAvailableMachine);
-                for (Machine machine : machines) {
-                    LocalDateTime availableTime = machineAvailability.get(machine);
-                    if (availableTime.isBefore(earliestAvailableTime)) {
-                        earliestAvailableTime = availableTime;
-                        earliestAvailableMachine = machine;
-                    }
-                }
-                Schedule schedule = Schedule.scheduleBuilder()
-                        .job(job)
-                        .machineType(machineType)
-                        .startTime(earliestAvailableTime)
-                        .duration(job.getDuration())
-                        .status(ScheduleStatus.SCHEDULED)
-                        .build();
-                scheduleRepository.save(schedule);
-                LocalDateTime jobEndTime = earliestAvailableTime.plusMinutes(job.getDuration());
-                machineAvailability.put(earliestAvailableMachine, jobEndTime);
-                job.setStatus(JobStatus.SCHEDULED);
-                jobRepository.save(job);
-            }
+
+            Map<Machine, LocalDateTime> machineAvailability = initializeMachineAvailability(machines);
+            scheduleJobs(jobsForMachineType, machines, machineAvailability, machineType);
         }
-        List<Schedule> schedules = scheduleRepository.findAll();
-        saveSchedulesToFile(schedules, "priority");
+
+        saveSchedulesToFile(scheduleRepository.findAll(), "priority");
     }
 
-    public void testSchedulingByDueDate() {
+    private void scheduleByDueDate() {
         List<Job> pendingJobs = jobRepository.findByStatus(JobStatus.PENDING);
+        Map<Job, LocalDateTime> jobDueDates = assignDueDates(pendingJobs);
 
-        Map<Job, LocalDateTime> jobDueDates = new HashMap<>();
-        LocalDateTime now = LocalDateTime.now();
-        for (int i = 0; i < pendingJobs.size(); i++) {
-            Job job = pendingJobs.get(i);
-            LocalDateTime dueDate = now.plusDays(i);
-            jobDueDates.put(job, dueDate);
-        }
-        Map<MachineType, List<Job>> jobsByMachineType = pendingJobs.stream()
-                .collect(Collectors.groupingBy(Job::getRequiredMachineType));
+        Map<MachineType, List<Job>> jobsByMachineType = groupJobsByMachineType(pendingJobs);
 
         for (Map.Entry<MachineType, List<Job>> entry : jobsByMachineType.entrySet()) {
             MachineType machineType = entry.getKey();
             List<Job> jobsForMachineType = entry.getValue();
 
             List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
-
             if (machines.isEmpty()) {
                 continue;
             }
 
             jobsForMachineType.sort(
                     Comparator.comparing((Job job) -> jobDueDates.get(job))
-                            .thenComparing(Job::getId)
-            );
+                            .thenComparing(Job::getId));
 
-            Map<Machine, LocalDateTime> machineAvailability = new HashMap<>();
-            for (Machine machine : machines) {
-                machineAvailability.put(machine, LocalDateTime.now());
-            }
-
-            for (Job job : jobsForMachineType) {
-                Machine earliestAvailableMachine = machines.get(0);
-                LocalDateTime earliestAvailableTime = machineAvailability.get(earliestAvailableMachine);
-
-                for (Machine machine : machines) {
-                    LocalDateTime availableTime = machineAvailability.get(machine);
-                    if (availableTime.isBefore(earliestAvailableTime)) {
-                        earliestAvailableTime = availableTime;
-                        earliestAvailableMachine = machine;
-                    }
-                }
-
-                Schedule schedule = Schedule.scheduleBuilder()
-                        .job(job)
-                        .machineType(machineType)
-                        .startTime(earliestAvailableTime)
-                        .duration(job.getDuration())
-                        .dueDate(jobDueDates.get(job))
-                        .status(ScheduleStatus.SCHEDULED)
-                        .build();
-
-                scheduleRepository.save(schedule);
-
-                LocalDateTime jobEndTime = earliestAvailableTime.plusMinutes(job.getDuration());
-                machineAvailability.put(earliestAvailableMachine, jobEndTime);
-
-                job.setStatus(JobStatus.SCHEDULED);
-                jobRepository.save(job);
-            }
+            Map<Machine, LocalDateTime> machineAvailability = initializeMachineAvailability(machines);
+            scheduleJobsWithDueDate(jobsForMachineType, machines, machineAvailability, machineType, jobDueDates);
         }
 
-        List<Schedule> schedules = scheduleRepository.findAll();
-        saveSchedulesToFile(schedules, "dueDate");
+        saveSchedulesToFile(scheduleRepository.findAll(), "due-date");
     }
+
+    private Map<MachineType, List<Job>> groupJobsByMachineType(List<Job> jobs) {
+        return jobs.stream()
+                .collect(Collectors.groupingBy(Job::getRequiredMachineType));
+    }
+
+    private Map<Machine, LocalDateTime> initializeMachineAvailability(List<Machine> machines) {
+        Map<Machine, LocalDateTime> machineAvailability = new HashMap<>();
+        for (Machine machine : machines) {
+            machineAvailability.put(machine, LocalDateTime.now());
+        }
+        return machineAvailability;
+    }
+
+    private void scheduleJobs(List<Job> jobs, List<Machine> machines,
+                              Map<Machine, LocalDateTime> machineAvailability, MachineType machineType) {
+        for (Job job : jobs) {
+            Machine earliestMachine = findEarliestAvailableMachine(machines, machineAvailability);
+            LocalDateTime startTime = machineAvailability.get(earliestMachine);
+
+            Schedule schedule = createSchedule(job, machineType, startTime, null);
+            scheduleRepository.save(schedule);
+
+            updateMachineAvailability(machineAvailability, earliestMachine, startTime, job.getDuration());
+            updateJobStatus(job, JobStatus.SCHEDULED);
+        }
+    }
+
+    private void scheduleJobsWithDueDate(List<Job> jobs, List<Machine> machines,
+                                         Map<Machine, LocalDateTime> machineAvailability, MachineType machineType,
+                                         Map<Job, LocalDateTime> jobDueDates) {
+        for (Job job : jobs) {
+            Machine earliestMachine = findEarliestAvailableMachine(machines, machineAvailability);
+            LocalDateTime startTime = machineAvailability.get(earliestMachine);
+
+            Schedule schedule = createSchedule(job, machineType, startTime, jobDueDates.get(job));
+            scheduleRepository.save(schedule);
+
+            updateMachineAvailability(machineAvailability, earliestMachine, startTime, job.getDuration());
+            updateJobStatus(job, JobStatus.SCHEDULED);
+        }
+    }
+
+    private Machine findEarliestAvailableMachine(List<Machine> machines, Map<Machine, LocalDateTime> machineAvailability) {
+        return machines.stream()
+                .min(Comparator.comparing(machineAvailability::get))
+                .orElseThrow(() -> new NoSuchElementException("No machines available"));
+    }
+
+    private Schedule createSchedule(Job job, MachineType machineType, LocalDateTime startTime, LocalDateTime dueDate) {
+        return Schedule.scheduleBuilder()
+                .job(job)
+                .machineType(machineType)
+                .startTime(startTime)
+                .duration(job.getDuration())
+                .dueDate(dueDate)
+                .status(ScheduleStatus.SCHEDULED)
+                .build();
+    }
+
+    private void updateMachineAvailability(Map<Machine, LocalDateTime> machineAvailability,
+                                           Machine machine, LocalDateTime startTime, Long duration) {
+        LocalDateTime jobEndTime = startTime.plusMinutes(duration);
+        machineAvailability.put(machine, jobEndTime);
+    }
+
+    private void updateJobStatus(Job job, JobStatus status) {
+        job.setStatus(status);
+        jobRepository.save(job);
+    }
+
+    private Map<Job, LocalDateTime> assignDueDates(List<Job> jobs) {
+        Map<Job, LocalDateTime> jobDueDates = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 0; i < jobs.size(); i++) {
+            jobDueDates.put(jobs.get(i), now.plusDays(i));
+        }
+        return jobDueDates;
+    }
+
+    private void saveSchedulesToFile(List<Schedule> schedules, String type) {
+        List<ScheduleDTO> scheduleDTOs = schedules.stream()
+                .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
+                .collect(Collectors.toList());
+        String fileName = "./data/job-scheduled-by-" + type + ".json";
+
+        try {
+            new File("./data").mkdirs();
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), scheduleDTOs);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/scheduler")
-@Tag(name = "Scheduler", description = "Scheduler management APIs")
+@Tag(name = "scheduler-engine", description = "Scheduler management APIs")
 @AllArgsConstructor
 public class SchedulerController {
 
@@ -33,7 +33,12 @@ public class SchedulerController {
         return ResponseEntity.ok(null);
     }
 
-
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        scheduler.scheduleTesting("priority");
+        scheduler.scheduleTesting("due-date");
+        return new ResponseEntity<>("Test success", HttpStatus.OK);
+    }
 
 
 }

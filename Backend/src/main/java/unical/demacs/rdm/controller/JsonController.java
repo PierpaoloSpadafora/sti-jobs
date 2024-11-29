@@ -98,4 +98,21 @@ public class JsonController {
         return ResponseEntity.ok(modelMapperExtended.mapList(machines, MachineDTO.class));
     }
 
+
+    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
+            tags = {"json-controller"})
+    @GetMapping(value = "/export-job-scheduled-by-priority", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<JobDTO>> exportJobScheduledPriority() {
+        List<Job> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(modelMapperExtended.mapList(jobs, JobDTO.class));
+    }
+
+    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
+            tags = {"json-controller"})
+    @GetMapping(value = "/export-job-scheduled-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<JobDTO>> exportJobScheduledDueDate() {
+        List<Job> jobs = jobService.getAllJobs();
+        return ResponseEntity.ok(modelMapperExtended.mapList(jobs, JobDTO.class));
+    }
+
 }
