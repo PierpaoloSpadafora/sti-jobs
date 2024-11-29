@@ -124,8 +124,8 @@ public class ScheduleController {
     @Operation(summary = "Get schedules with dueDate before a specified date")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesDueBefore(
-            @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+            @RequestParam
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime date) {
         List<Schedule> schedules = scheduleService.getSchedulesDueBefore(date);
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
@@ -135,7 +135,7 @@ public class ScheduleController {
     @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
     public ResponseEntity<List<ScheduleDTO>> getSchedulesDueAfter(
             @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime date) {
         List<Schedule> schedules = scheduleService.getSchedulesDueAfter(date);
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
