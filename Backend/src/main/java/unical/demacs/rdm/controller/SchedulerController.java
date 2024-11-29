@@ -29,7 +29,8 @@ public class SchedulerController {
     @ApiResponse(responseCode = "200", description = "Successfully scheduled jobs")
     public ResponseEntity<List<ScheduleViewDTO>> scheduleByPriority(
             @PathVariable Long machineType) {
-        return ResponseEntity.ok(scheduler.scheduleByPriority(machineType));
+        //return ResponseEntity.ok(scheduler.scheduleByPriority(machineType));
+        return ResponseEntity.ok(null);
     }
 
 
