@@ -52,6 +52,7 @@ import {
 import {MatNativeDateModule} from "@angular/material/core";
 import {MatTableModule} from "@angular/material/table";
 import {ShowJobComponent} from "./components/show-job/show-job.component";
+import { GoogleChartsModule } from 'angular-google-charts';
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import {ShowJobComponent} from "./components/show-job/show-job.component";
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    GoogleChartsModule.forRoot(),
   ],
   providers: [
     MachineTypeControllerService,
