@@ -1,3 +1,5 @@
+<!-- view-export-delete-jobs.component.html -->
+
 <div class="jobs-container">
   <div class="table-responsive" *ngIf="jobs && jobs.length > 0">
     <table class="jobs-table">
@@ -15,7 +17,7 @@
       </thead>
       <tbody>
       <tr *ngFor="let job of jobs">
-        <td>{{ job.id }}</td>
+        <td>{{ job.id ?? 'N/A' }}</td>
         <td>{{ job.title }}</td>
         <td>{{ job.description }}</td>
         <td>{{ job.duration }} min</td>
@@ -37,7 +39,13 @@
           <button class="action-button edit" title="Edit" (click)="openEditDialog(job)">
             <i class="fas fa-edit"></i>
           </button>
-          <button class="action-button delete" title="Delete" (click)="deleteJob(job.id)">
+          <!-- Delete Button with Conditional Rendering -->
+          <button
+            *ngIf="job.id !== undefined"
+            class="action-button delete"
+            title="Delete"
+            (click)="deleteJob(job.id)"
+          >
             <i class="fas fa-trash"></i>
           </button>
         </td>

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { JsonControllerService } from "../../generated-api";
 import { MachineDTO, MachineTypeDTO } from '../../generated-api';
-import { MachineTypeControllerService } from "../../generated-api";
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
 
@@ -30,8 +29,7 @@ export class CreateImportMachineComponent implements OnInit {
   jsonError: string = '';
 
   constructor(
-    private jsonService: JsonControllerService,
-    private machineTypeService: MachineTypeControllerService
+    private jsonService: JsonControllerService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +44,7 @@ export class CreateImportMachineComponent implements OnInit {
       ]`;
     this.jsonInputContent = this.jsonExample;
 
-    this.machineTypeService.getAllMachineTypes().subscribe({
+    this.jsonService.exportMachineType().subscribe({
       next: (data: MachineTypeDTO[]) => {
         console.log('Data:', data);
         this.machineTypes = data;
