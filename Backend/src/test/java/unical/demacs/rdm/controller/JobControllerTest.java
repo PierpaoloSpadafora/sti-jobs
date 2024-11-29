@@ -56,9 +56,9 @@ public class JobControllerTest {
         jobDTO = new JobDTO();
         jobDTO.setId(TEST_ID);
         jobDTO.setTitle(TEST_TITLE);
-        jobDTO.setPriority(JobPriority.MEDIUM); // Setting required priority
-        jobDTO.setStatus(JobStatus.PENDING); // Setting required status
-        jobDTO.setIdMachineType(1L); // Setting required machine type
+        jobDTO.setPriority(JobPriority.MEDIUM);
+        jobDTO.setStatus(JobStatus.PENDING);
+        jobDTO.setIdMachineType(1L);
 
         job = Job.buildJob()
                 .id(TEST_ID)

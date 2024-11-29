@@ -75,7 +75,6 @@ public class JobServiceImplTest {
         testJobDTO.setTitle(TEST_TITLE);
         testJobDTO.setIdMachineType(TEST_MACHINE_TYPE_ID);
 
-        // Default behavior for rateLimiter to allow requests
         when(rateLimiter.tryAcquire()).thenReturn(true);
     }
 

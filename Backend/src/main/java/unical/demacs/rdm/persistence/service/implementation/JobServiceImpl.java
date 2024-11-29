@@ -48,7 +48,7 @@ public class JobServiceImpl implements IJobService {
             logger.info("Jobs found: {}", jobs.size());
             return jobs;
         } catch (TooManyRequestsException e) {
-            throw e;  // Lascio passare l'eccezione TooManyRequestsException
+            throw e;
         } catch (Exception e) {
             logger.error("Error getting all jobs", e);
             throw new JobException("Error getting all jobs");

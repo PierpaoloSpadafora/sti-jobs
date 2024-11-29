@@ -57,13 +57,13 @@ public class MachineControllerTest {
         machineDTO.setName(TEST_NAME);
         machineDTO.setDescription(TEST_DESCRIPTION);
         machineDTO.setTypeId(TEST_TYPE_ID);
-        machineDTO.setStatus(MachineStatus.AVAILABLE); // Aggiunto campo obbligatorio
+        machineDTO.setStatus(MachineStatus.AVAILABLE);
 
         machine = Machine.machineBuilder()
                 .id(TEST_ID)
                 .name(TEST_NAME)
                 .description(TEST_DESCRIPTION)
-                .status(MachineStatus.AVAILABLE) // Aggiunto campo obbligatorio
+                .status(MachineStatus.AVAILABLE)
                 .build();
     }
 
