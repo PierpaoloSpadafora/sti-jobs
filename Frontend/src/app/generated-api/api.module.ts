@@ -8,7 +8,7 @@ import { JsonControllerService } from './api/jsonController.service';
 import { MachineControllerService } from './api/machineController.service';
 import { MachineTypeControllerService } from './api/machineTypeController.service';
 import { ScheduleControllerService } from './api/scheduleController.service';
-import { SchedulerService } from './api/scheduler.service';
+import { SchedulerEngineService } from './api/schedulerEngine.service';
 import { UserControllerService } from './api/userController.service';
 
 @NgModule({
@@ -21,7 +21,7 @@ import { UserControllerService } from './api/userController.service';
     MachineControllerService,
     MachineTypeControllerService,
     ScheduleControllerService,
-    SchedulerService,
+    SchedulerEngineService,
     UserControllerService ]
 })
 export class ApiModule {

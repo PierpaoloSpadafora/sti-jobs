@@ -24,7 +24,7 @@ import { Configuration }                                     from '../configurat
 
 
 @Injectable()
-export class SchedulerService {
+export class SchedulerEngineService {
 
     protected basePath = 'http://localhost:7001/sti-jobs';
     public defaultHeaders = new HttpHeaders();
@@ -87,6 +87,42 @@ export class SchedulerService {
         ];
 
         return this.httpClient.request<Array<ScheduleViewDTO>>('post',`${this.basePath}/api/v1/scheduler/schedule/${encodeURIComponent(String(machineType))}`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * 
+     * 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public test(observe?: 'body', reportProgress?: boolean): Observable<string>;
+    public test(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
+    public test(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
+    public test(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            '*/*'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<string>('get',`${this.basePath}/api/v1/scheduler/test`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

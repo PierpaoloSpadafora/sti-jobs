@@ -31,17 +31,9 @@ public class Scheduler {
     private final MachineRepository machineRepository;
     private final ObjectMapper objectMapper;
 
-    public void scheduleTesting(String type) {
-        switch (type) {
-            case "priority":
-                scheduleByPriority();
-                break;
-            case "due-date":
-                scheduleByDueDate();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown scheduling type: " + type);
-        }
+    public void scheduleByEveryType(){
+        scheduleByPriority();
+        scheduleByDueDate();
     }
 
     private void scheduleByPriority() {

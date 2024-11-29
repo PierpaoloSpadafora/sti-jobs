@@ -450,6 +450,100 @@ export class ScheduleControllerService {
     }
 
     /**
+     * Get schedules with dueDate after a specified date
+     * 
+     * @param date 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getSchedulesDueAfter(date: Date, observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public getSchedulesDueAfter(date: Date, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public getSchedulesDueAfter(date: Date, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public getSchedulesDueAfter(date: Date, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (date === null || date === undefined) {
+            throw new Error('Required parameter date was null or undefined when calling getSchedulesDueAfter.');
+        }
+
+        let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
+        if (date !== undefined && date !== null) {
+            queryParameters = queryParameters.set('date', <any>date.toISOString());
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules/due-date/after`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Get schedules with dueDate before a specified date
+     * 
+     * @param date 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public getSchedulesDueBefore(date: Date, observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public getSchedulesDueBefore(date: Date, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public getSchedulesDueBefore(date: Date, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public getSchedulesDueBefore(date: Date, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        if (date === null || date === undefined) {
+            throw new Error('Required parameter date was null or undefined when calling getSchedulesDueBefore.');
+        }
+
+        let queryParameters = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
+        if (date !== undefined && date !== null) {
+            queryParameters = queryParameters.set('date', <any>date.toISOString());
+        }
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/schedules/due-date/before`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * 
      * 
      * @param startTime 

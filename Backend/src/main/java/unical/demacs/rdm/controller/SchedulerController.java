@@ -35,8 +35,7 @@ public class SchedulerController {
 
     @GetMapping("/test")
     public ResponseEntity<String> test() {
-        scheduler.scheduleTesting("priority");
-        scheduler.scheduleTesting("due-date");
+        scheduler.scheduleByEveryType();
         return new ResponseEntity<>("Test success", HttpStatus.OK);
     }
 

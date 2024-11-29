@@ -94,6 +94,78 @@ export class JsonControllerService {
     }
 
     /**
+     * Export Job data to JSON
+     * Export all Job data to JSON.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public exportJobScheduledDueDate(observe?: 'body', reportProgress?: boolean): Observable<Array<JobDTO>>;
+    public exportJobScheduledDueDate(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<JobDTO>>>;
+    public exportJobScheduledDueDate(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<JobDTO>>>;
+    public exportJobScheduledDueDate(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<JobDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-due-date`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Export Job data to JSON
+     * Export all Job data to JSON.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public exportJobScheduledPriority(observe?: 'body', reportProgress?: boolean): Observable<Array<JobDTO>>;
+    public exportJobScheduledPriority(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<JobDTO>>>;
+    public exportJobScheduledPriority(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<JobDTO>>>;
+    public exportJobScheduledPriority(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<JobDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Export Machine data to JSON
      * Export all Machine data to JSON.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
