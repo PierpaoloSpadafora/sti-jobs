@@ -1,6 +1,5 @@
 package unical.demacs.rdm.config.exception.handler;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -76,5 +75,4 @@ public class ExceptionsHandler {
         return new ResponseEntity<>(new JSONObject(
                 Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
     }
-
 }

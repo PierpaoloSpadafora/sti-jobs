@@ -47,12 +47,12 @@ public class JobServiceImpl implements IJobService {
             List<Job> jobs = jobRepository.findAll();
             logger.info("Jobs found: {}", jobs.size());
             return jobs;
-        }
-        catch (Exception e) {
+        } catch (TooManyRequestsException e) {
+            throw e;  // Lascio passare l'eccezione TooManyRequestsException
+        } catch (Exception e) {
             logger.error("Error getting all jobs", e);
             throw new JobException("Error getting all jobs");
-        }
-        finally {
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
@@ -69,20 +69,41 @@ public class JobServiceImpl implements IJobService {
             Optional<Job> job = jobRepository.findById(id);
             if (job.isEmpty()) {
                 logger.info("Job with id {} not found", id);
-                return Optional.empty();
+            } else {
+                logger.info("Job with id {} found", id);
             }
-            logger.info("Job with id {} found", id);
             return job;
-        }
-        catch (Exception e) {
+        } catch (TooManyRequestsException e) {
+            throw e;
+        } catch (Exception e) {
             logger.error("Error getting job by id: {}", id, e);
             throw new JobException("Error getting job by id");
-        }
-        finally {
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }
 
+    @Override
+    public Boolean deleteJob(Long id) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Attempting to delete job with id: {}", id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for deleteJob");
+                throw new TooManyRequestsException();
+            }
+            jobRepository.deleteById(id);
+            logger.info("Job with id {} deleted successfully", id);
+            return true;
+        } catch (TooManyRequestsException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting job with id: {}", id, e);
+            throw new JobException("Error deleting job");
+        } finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
     @Override
     public Job createJob(String email, JobDTO jobDTO) {
         logger.info("++++++START REQUEST++++++");
@@ -143,25 +164,5 @@ public class JobServiceImpl implements IJobService {
         }
     }
 
-    @Override
-    public Boolean deleteJob(Long id) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Attempting to delete job with id: {}", id);
-        try {
-            if (!rateLimiter.tryAcquire()) {
-                logger.warn("Rate limit exceeded for deleteJob");
-                throw new TooManyRequestsException();
-            }
-            jobRepository.deleteById(id);
-            logger.info("Job with id {} deleted successfully", id);
-            return true;
-        }
-        catch (Exception e) {
-            logger.error("Error deleting job with id: {}", id, e);
-            throw new JobException("Error deleting job");
-        }
-        finally {
-            logger.info("++++++END REQUEST++++++");
-        }
-    }
+
 }
