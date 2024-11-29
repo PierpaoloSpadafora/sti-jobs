@@ -146,6 +146,7 @@ public class ScheduleController {
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         scheduler.scheduleTesting("priority");
+        scheduler.scheduleTesting("dueDate");
         return new ResponseEntity<>("Test success", HttpStatus.OK);
     }
 
