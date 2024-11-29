@@ -28,7 +28,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
     this.jsonExample =
       `[
         {
-          "name": "Esempio Nome",
+          "name": "MachineTypeName",
           "description": "Esempio Descrizione"
         }
       ]`;

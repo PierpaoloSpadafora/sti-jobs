@@ -37,7 +37,7 @@ export class CreateImportMachineComponent implements OnInit {
       `[
         {
           "name": "Machine 1",
-          "description": "First machine",
+          "description": "Machine Description",
           "status": "AVAILABLE",
           "typeId": 1
         }
