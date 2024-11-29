@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { JsonService } from '../../services/json.service';
+import { JsonControllerService} from "../../generated-api";
 import { MachineDTO, MachineTypeDTO } from '../../generated-api';
 import { MachineTypeControllerService } from '../../generated-api';
 import Swal from 'sweetalert2';
@@ -16,9 +16,8 @@ export class CreateImportMachineComponent implements OnInit {
   machine: Omit<MachineDTO, 'id'> = {
     name: '',
     description: '',
-    status: undefined,
-    typeId: undefined,
-    typeName: '',
+    status: "AVAILABLE",
+    typeId: 0,
   };
 
   statuses = ['AVAILABLE', 'BUSY', 'MAINTENANCE', 'OUT_OF_SERVICE'];
@@ -31,7 +30,7 @@ export class CreateImportMachineComponent implements OnInit {
   jsonError: string = '';
 
   constructor(
-    private jsonService: JsonService,
+    private jsonService: JsonControllerService,
     private machineTypeService: MachineTypeControllerService
   ) {}
 
@@ -48,8 +47,8 @@ export class CreateImportMachineComponent implements OnInit {
     this.jsonInputContent = this.jsonExample;
 
     this.machineTypeService.getAllMachineTypes().subscribe({
-      next: (data: MachineTypeDTO[]) => {
-        this.machineTypes = data;
+      next: (data: MachineTypeDTO) => {
+        this.machineTypes = [data]; // Adatta il dato ricevuto come array
       },
       error: (error) => {
         console.error('Errore durante il recupero dei Machine Types:', error);
@@ -161,9 +160,8 @@ export class CreateImportMachineComponent implements OnInit {
     this.machine = {
       name: '',
       description: '',
-      status: undefined,
-      typeId: undefined,
-      typeName: '',
+      status: "AVAILABLE",
+      typeId: 0,
     };
     this.jsonInputContent = this.jsonExample;
     this.jsonError = '';

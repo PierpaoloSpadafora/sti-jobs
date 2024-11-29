@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { JobService } from '../../services/job.service';
+import {JobControllerService, JobDTO} from "../../generated-api";
+import { JsonControllerService} from "../../generated-api";
 import { MatDialog } from '@angular/material/dialog';
 import {Job, MachineType, MachineTypeDTO} from '../../interfaces/interfaces';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditJobDialogComponent } from '../edit-job-dialog/edit-job-dialog.component';
 import { forkJoin } from 'rxjs';
-import { JsonService } from '../../services/json.service';
 import Swal from "sweetalert2";
 
 @Component({
@@ -14,13 +14,24 @@ import Swal from "sweetalert2";
   styleUrls: ['./view-export-delete-jobs.component.css']
 })
 export class ViewExportDeleteJobsComponent implements OnInit {
-  jobs: Job[] = [];
+
   isLoading = false;
   machineTypes: MachineType[] = [];
 
+  jobs: {
+    duration: number | undefined;
+    description: string | undefined;
+    id: number;
+    assigneeEmail: string | undefined;
+    title: string;
+    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+    idMachineType: number;
+    status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+  }[] = [];
+
   constructor(
-    private jobService: JobService,
-    private jsonService: JsonService,
+    private jobService: JobControllerService,
+    private jsonService: JsonControllerService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -32,11 +43,21 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   loadJobs(): void {
     this.isLoading = true;
     forkJoin({
-      jobs: this.jobService.showJob(),
+      jobs: this.jobService.getAllJobs(), // Cambiato 'showJob()' in 'getAllJobs()'
       types: this.jsonService.exportMachineType()
     }).subscribe({
       next: (response) => {
-        this.jobs = Array.isArray(response.jobs) ? response.jobs as unknown as Job[] : [];
+        const jobDTOs = Array.isArray(response.jobs) ? response.jobs as JobDTO[] : [];
+        this.jobs = jobDTOs.map(dto => ({
+          id: dto.id!,
+          title: dto.title,
+          description: dto.description,
+          status: dto.status,
+          priority: dto.priority,
+          duration: dto.duration,
+          idMachineType: dto.idMachineType,
+          assigneeEmail: dto.assigneeEmail
+        }));
         this.machineTypes = this.transformMachineTypes(response.types);
         this.isLoading = false;
       },
@@ -127,7 +148,16 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     });
   }
 
-  openEditDialog(job: Job): void {
+  openEditDialog(job: {
+    duration: number | undefined;
+    description: string | undefined;
+    id: number;
+    assigneeEmail: string | undefined;
+    title: string;
+    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+    idMachineType: number;
+    status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+  }): void {
     const dialogRef = this.dialog.open(EditJobDialogComponent, {
       width: '500px',
       data: { ...job }
@@ -136,10 +166,11 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.jobService.updateJob(result).subscribe({
+        this.jobService.updateJob(result, result.id).subscribe({ // Aggiunto 'result.id' come secondo argomento
           next: (updatedJob) => {
             const index = this.jobs.findIndex(j => j.id === updatedJob.id);
             if (index !== -1) {
+              // @ts-ignore
               this.jobs[index] = updatedJob;
               this.jobs = [...this.jobs];
             }

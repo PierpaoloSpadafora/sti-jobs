@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { JobService } from '../../services/job.service';
+import { JobControllerService } from "../../generated-api";
 import Swal from 'sweetalert2';
 
 interface Job {
@@ -23,11 +23,15 @@ export class ShowJobComponent implements OnInit  {
   jobs: Job[] = [];
 
   constructor(
-    private jobService: JobService
+    private jobService: JobControllerService
   ) {}
 
   ngOnInit(): void {
-    this.jobService.showJob().subscribe({
+    this.getJobs();
+  }
+
+  getJobs() {
+    this.jobService.getAllJobs().subscribe({
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log("Jobs ottenuti:", this.jobs);
@@ -72,15 +76,4 @@ export class ShowJobComponent implements OnInit  {
     });
   }
 
-  getJobs() {
-    this.jobService.showJob().subscribe({
-      next: (response: any) => {
-        this.jobs = Array.isArray(response) ? response : [response];
-        console.log('Jobs retrieved:', this.jobs);
-      },
-      error: (error: any) => {
-        console.error('Error while retrieving jobs:', error);
-      }
-    });
-  }
 }

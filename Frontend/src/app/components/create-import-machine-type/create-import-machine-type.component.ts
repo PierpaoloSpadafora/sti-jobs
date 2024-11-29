@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { JsonService } from '../../services/json.service';
+import {MachineTypeControllerService} from '../../generated-api';
 import { MachineTypeDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
@@ -22,7 +22,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   jsonError: string = '';
 
-  constructor(private jsonService: JsonService) {}
+  constructor(private machineService: MachineTypeControllerService) {}
 
   ngOnInit(): void {
     this.jsonExample =
@@ -96,28 +96,28 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
     console.log('machineTypesToSubmitWithId:', machineTypesToSubmitWithId);
 
-    this.jsonService.importMachineType(machineTypesToSubmitWithId).subscribe({
-      next: (response: string) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Elemento importato con successo',
-          showConfirmButton: false,
-          timer: 1000
-        });
-        this.resetForm();
-        if (form) {
-          form.resetForm();
+    for (const machineType of machineTypesToSubmitWithId) {
+      this.machineService.createMachineType(machineType).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Machine Type creato con successo.',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          this.resetForm();
+        },
+        error: (error) => {
+          console.error('Error creating machine type:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Errore',
+            text: 'Non è stato possibile creare il Machine Type. Per favore, riprova più tardi.',
+          });
         }
-      },
-      error: (error) => {
-        console.error("Errore durante l'importazione dei Machine Types:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: "Errore durante l'importazione dei Machine Types: " + JSON.stringify(error),
-        });
-      },
-    });
+      });
+    }
+
   }
 
   resetForm() {

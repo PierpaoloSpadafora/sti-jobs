@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { JsonService } from '../../services/json.service';
 import { JobDTO, MachineTypeDTO } from '../../generated-api';
-import { MachineTypeControllerService } from '../../generated-api';
+import { JobControllerService, JsonControllerService, MachineTypeControllerService } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
 
@@ -16,51 +15,45 @@ export class CreateImportJobComponent implements OnInit {
   job: Omit<JobDTO, 'id'> = {
     title: '',
     description: '',
-    status: undefined,
-    assignee: undefined,
-    priority: undefined,
-    duration: undefined,
-    requiredMachineType: undefined,
+    status: JobDTO.StatusEnum.PENDING,
+    priority: JobDTO.PriorityEnum.LOW,
+    duration: 0,
+    idMachineType: 0,
+    assigneeEmail: ''
   };
 
   durationHours: number = 0;
   durationMinutes: number = 0;
   durationSeconds: number = 0;
 
-  statuses = ['PENDING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
-  priorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+  statuses = Object.values(JobDTO.StatusEnum);
+  priorities = Object.values(JobDTO.PriorityEnum);
 
   jsonInputContent: string = '';
   jsonExample: string = '';
-
   machineTypes: MachineTypeDTO[] = [];
-
   jsonError: string = '';
 
   constructor(
-    private jsonService: JsonService,
+    private jobService: JobControllerService,
+    private jsonService: JsonControllerService,
     private machineTypeService: MachineTypeControllerService
   ) {}
 
   ngOnInit(): void {
-    this.jsonExample =
-      `[{
-          "title": "Job 1",
-          "description": "First job",
-          "status": "PENDING",
-          "priority": "LOW",
-          "duration": 3600,
-          "requiredMachineType": {
-            "id": 1,
-            "name": "Type 1",
-            "description": "Description of Type 1"
-          }
-        }]`;
+    this.jsonExample = `[{
+      "title": "Job 1",
+      "description": "First job",
+      "status": "PENDING",
+      "priority": "LOW",
+      "duration": 3600,
+      "idMachineType": 1
+    }]`;
     this.jsonInputContent = this.jsonExample;
 
-    this.machineTypeService.getAllMachineTypes().subscribe({
-      next: (data: MachineTypeDTO[]) => {
-        this.machineTypes = data;
+    this.machineTypeService.getAllMachineTypes('body').subscribe({
+      next: (machineTypes) => {
+        this.machineTypes = machineTypes as unknown as MachineTypeDTO[];
       },
       error: (error) => {
         console.error('Errore durante il recupero dei Machine Types:', error);
@@ -95,14 +88,21 @@ export class CreateImportJobComponent implements OnInit {
   }
 
   submitJob(form?: NgForm) {
-    let jobsToSubmit: JobDTO[] = [];
     const email = localStorage.getItem('user-email');
+    if (!email) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Errore',
+        text: 'Non è stato trovato un assignee valido.',
+      });
+      return;
+    }
 
     if (this.showJsonInput) {
+      // Gestione JSON input
       try {
-        jobsToSubmit = JSON.parse(this.jsonInputContent);
-
-        if (!Array.isArray(jobsToSubmit)) {
+        const jobs: JobDTO[] = JSON.parse(this.jsonInputContent);
+        if (!Array.isArray(jobs)) {
           Swal.fire({
             icon: 'error',
             title: 'Errore',
@@ -111,50 +111,39 @@ export class CreateImportJobComponent implements OnInit {
           return;
         }
 
-        for (const job of jobsToSubmit) {
-          if (
-            !job.title ||
-            !job.status ||
-            !job.priority ||
-            job.duration === undefined ||
-            job.duration <= 0 ||
-            !job.requiredMachineType ||
-            !job.requiredMachineType.id
-          ) {
+        this.jsonService.importJob(jobs, email).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Job importati con successo.',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            this.resetForm();
+          },
+          error: (error) => {
+            console.error("Errore durante l'importazione dei Job:", error);
             Swal.fire({
               icon: 'error',
               title: 'Errore',
-              text: 'Uno o più Job nel JSON non sono validi. Assicurati che tutti i campi obbligatori siano presenti e validi.',
+              text: "Errore durante l'importazione dei Job: " + error.message,
             });
-            return;
           }
-
-          job.assignee = { email: email || 'default@example.com' };
-        }
-
+        });
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'Errore',
           text: 'Il JSON inserito non è valido.',
         });
-        return;
       }
     } else {
-      if (form) {
-        if (!form.valid) {
-          Object.keys(form.controls).forEach(field => {
-            const control = form.controls[field];
-            control.markAsTouched({ onlySelf: true });
-          });
-
-          Swal.fire({
-            icon: 'error',
-            title: 'Errore',
-            text: 'Per favore, compila tutti i campi obbligatori.',
-          });
-          return;
-        }
+      if (form && !form.valid) {
+        Object.keys(form.controls).forEach(field => {
+          const control = form.controls[field];
+          control.markAsTouched({ onlySelf: true });
+        });
+        return;
       }
 
       this.job.duration =
@@ -162,7 +151,7 @@ export class CreateImportJobComponent implements OnInit {
         (this.durationMinutes * 60) +
         this.durationSeconds;
 
-      if (isNaN(this.job.duration!) || this.job.duration! <= 0) {
+      if (!this.job.duration || this.job.duration <= 0) {
         Swal.fire({
           icon: 'error',
           title: 'Errore',
@@ -171,67 +160,38 @@ export class CreateImportJobComponent implements OnInit {
         return;
       }
 
-      if (!this.job.requiredMachineType || !this.job.requiredMachineType.id) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: 'Seleziona un Tipo Macchina Richiesto.',
-        });
-        return;
-      }
-
-      if (email) {
-        this.job.assignee = { email };
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: 'Non è stato trovato un assignee valido.',
-        });
-        return;
-      }
-
-      jobsToSubmit = [this.job];
-    }
-
-    const jobsToSubmitWithId: JobDTO[] = jobsToSubmit.map(job => ({
-      ...job,
-      id: 0,
-    }));
-
-    this.jsonService.importJob(jobsToSubmitWithId).subscribe({
-      next: (response: string) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Job importati con successo.',
-          showConfirmButton: false,
-          timer: 1500
-        });
-        this.resetForm();
-        if (form) {
-          form.resetForm();
+      this.jobService.createJob(this.job, email).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Job creato con successo.',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          this.resetForm();
+          if (form) form.resetForm();
+        },
+        error: (error) => {
+          console.error("Errore durante la creazione del Job:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Errore',
+            text: "Errore durante la creazione del Job: " + error.message,
+          });
         }
-      },
-      error: (error) => {
-        console.error("Errore durante l'importazione dei Job:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: "Errore durante l'importazione dei Job: " + error.message,
-        });
-      },
-    });
+      });
+    }
   }
 
   resetForm() {
     this.job = {
       title: '',
       description: '',
-      status: undefined,
-      assignee: undefined,
-      priority: undefined,
-      duration: undefined,
-      requiredMachineType: undefined,
+      status: JobDTO.StatusEnum.PENDING,
+      priority: JobDTO.PriorityEnum.LOW,
+      duration: 0,
+      idMachineType: 0,
+      assigneeEmail: ''
     };
     this.durationHours = 0;
     this.durationMinutes = 0;

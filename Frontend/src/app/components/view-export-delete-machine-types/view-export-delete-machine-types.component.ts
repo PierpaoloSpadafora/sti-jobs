@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import { JsonService } from '../../services/json.service';
-import { MachineTypeService } from '../../services/machineType.service';
+import { JsonControllerService} from "../../generated-api";
+import { MachineTypeControllerService } from "../../generated-api";
 import { MachineType } from '../../interfaces/interfaces';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,8 +17,8 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
   isLoading = false;
 
   constructor(
-    private jsonService: JsonService,
-    private machineTypeService: MachineTypeService,
+    private jsonService: JsonControllerService,
+    private machineTypeService: MachineTypeControllerService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -61,7 +61,7 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
-        this.machineTypeService.delete(id).subscribe({
+        this.machineTypeService.deleteMachineType(id).subscribe({
           next: () => {
             this.machineTypes = this.machineTypes.filter(type => type.id !== id);
             Swal.fire(
@@ -92,6 +92,13 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
       }
     });
   }
+  showMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+  }
 
   openEditDialog(type: MachineType): void {
     const dialogRef = this.dialog.open(EditMachineTypesDialogComponent, {
@@ -102,32 +109,17 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.machineTypeService.update(result).subscribe({
-          next: (updated) => {
-            const index = this.machineTypes.findIndex(t => t.id === updated.id);
-            if (index !== -1) {
-              this.machineTypes[index] = updated;
-              this.machineTypes = [...this.machineTypes];
-            }
+        this.machineTypeService.updateMachineType(result, result.id).subscribe({
+          next: () => {
+            this.loadMachineTypes();
             this.showMessage('Machine type updated successfully');
-            this.isLoading = false;
           },
           error: (error) => {
             console.error('Error updating machine type:', error);
-            this.isLoading = false;
             this.showMessage('Error updating machine type. Please try again later.');
           }
         });
       }
     });
   }
-
-  private showMessage(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
-  }
-
 }

@@ -1,12 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import { JsonService } from '../../services/json.service';
-import { MachineService } from '../../services/machine.service';
+import { JsonControllerService} from "../../generated-api";
+import { MachineControllerService} from "../../generated-api";
 import { Machine, MachineDTO, MachineTypeDTO, MachineType } from '../../interfaces/interfaces';
 import { EditMachineDialogComponent } from '../edit-machine-dialog/edit-machine-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
 import Swal from "sweetalert2";
 
 @Component({
@@ -20,8 +19,8 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   machineTypes: MachineType[] = [];
 
   constructor(
-    private jsonService: JsonService,
-    private machineService: MachineService,
+    private jsonService: JsonControllerService,
+    private machineService: MachineControllerService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -43,7 +42,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
         );
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error("Error while retrieving data:", error);
         this.isLoading = false;
         this.showMessage('Error loading machines. Please try again later.');
@@ -57,9 +56,9 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
       dto.name != null &&
       dto.description != null
     ).map(dto => ({
-      id: dto.id!,
-      name: dto.name!,
-      description: dto.description!
+      id: dto.id as number,
+      name: dto.name as string,
+      description: dto.description as string
     }));
   }
 
@@ -70,10 +69,10 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
       dto.status != null &&
       dto.typeId != null
     ).map(dto => ({
-      id: dto.id!,
-      name: dto.name!,
-      status: dto.status!,
-      typeId: dto.typeId!,
+      id: dto.id as number,
+      name: dto.name as string,
+      status: dto.status as string,
+      typeId: dto.typeId as number,
       description: dto.description || '',
       createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : new Date()
@@ -117,7 +116,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
-        this.machineService.delete(id).subscribe({
+        this.machineService.deleteMachine(id).subscribe({
           next: () => {
             this.machines = this.machines.filter(m => m.id !== id);
             Swal.fire(
@@ -127,7 +126,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
             );
             this.isLoading = false;
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error deleting machine:', error);
             this.isLoading = false;
             if (error.status === 404) {
@@ -158,17 +157,17 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.machineService.update(result).subscribe({
+        this.machineService.updateMachine(result, result.id).subscribe({
           next: (updated) => {
             const index = this.machines.findIndex(m => m.id === updated.id);
             if (index !== -1) {
-              this.machines[index] = updated;
+              this.machines[index] = updated as Machine;
               this.machines = [...this.machines];
             }
             this.showMessage('Machine updated successfully');
             this.isLoading = false;
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error updating machine:', error);
             this.isLoading = false;
             this.showMessage('Error updating machine. Please try again later.');

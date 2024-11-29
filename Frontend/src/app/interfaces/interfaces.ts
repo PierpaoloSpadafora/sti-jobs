@@ -15,7 +15,7 @@ export interface MachineTypeDTO {
 }
 
 export interface Job {
-    id: number;
+    id?: number;
     title: string;
     description: string;
     duration: number;

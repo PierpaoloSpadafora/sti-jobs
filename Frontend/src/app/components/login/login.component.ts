@@ -1,14 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserControllerService, UserDTO } from '../../generated-api';
-import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-
 
 @Component({
   selector: 'app-login',
-  providers: [UserControllerService], 
+  providers: [UserControllerService],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -21,14 +18,14 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private userService: UserControllerService,
-    private cdr: ChangeDetectorRef  
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
-   
+
     setTimeout(() => {
       this.cdr.detectChanges();
     });
@@ -37,16 +34,16 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      this.cdr.detectChanges(); 
-      
+      this.cdr.detectChanges();
+
       const email = this.loginForm.get('email')?.value;
-      
+
       this.userService.getUserByEmail(email).subscribe({
         next: (user) => {
           localStorage.setItem('user-email', email);
           this.router.navigate(['/home']);
           this.isLoading = false;
-          this.cdr.detectChanges(); 
+          this.cdr.detectChanges();
         },
         error: (error) => {
           if (error.status === 404) {
@@ -54,7 +51,7 @@ export class LoginComponent implements OnInit {
           } else {
             this.error = 'Si è verificato un errore durante il login';
             this.isLoading = false;
-            this.cdr.detectChanges(); 
+            this.cdr.detectChanges();
             console.error('Errore durante il login:', error);
           }
         }

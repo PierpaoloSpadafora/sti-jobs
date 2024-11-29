@@ -1,8 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Machine } from '../../interfaces/interfaces'; 
-import { JsonService } from '../../services/json.service';
+import { Machine } from '../../interfaces/interfaces';
+import { JsonControllerService } from "../../generated-api";
 
 @Component({
   selector: 'app-edit-machine-dialog',
@@ -15,7 +15,7 @@ export class EditMachineDialogComponent {
 
   constructor(
     private fb: FormBuilder,
-    private jsonService: JsonService,
+    private jsonService: JsonControllerService,
     private dialogRef: MatDialogRef<EditMachineDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Machine
   ) {

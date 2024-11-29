@@ -45,7 +45,7 @@
         <tbody>
         <tr *ngFor="let schedule of schedules">
           <td>{{ schedule.jobId }}</td>
-          <td>{{ schedule.machineType }}</td>
+          <td>{{ schedule.machineTypeId }}</td>
           <td>{{ schedule.startTime | date: 'short' }}</td>
           <td>{{ schedule.dueDate | date: 'short' }}</td>
           <td>{{ secondsToDuration(schedule.duration) }}</td>

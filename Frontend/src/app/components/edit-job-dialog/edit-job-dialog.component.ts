@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { JsonService } from '../../services/json.service';
+import { JsonControllerService } from "../../generated-api";
 import { MachineTypeDTO } from '../../interfaces/interfaces';
 
 @Component({
@@ -17,7 +17,7 @@ export class EditJobDialogComponent {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<EditJobDialogComponent>,
-    private jsonService: JsonService,
+    private jsonService: JsonControllerService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.editForm = this.fb.group({

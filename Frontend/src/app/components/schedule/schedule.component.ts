@@ -1,9 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { JobDTO, ScheduleDTO } from '../../generated-api';
+import { JobDTO, ScheduleDTO, ScheduleControllerService, JobControllerService } from '../../generated-api';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { SchedulerService } from '../../services/scheduler.service';
-import { JobService } from "../../services/job.service";
 import Swal from "sweetalert2";
 
 @Component({
@@ -25,8 +23,8 @@ export class ScheduleComponent implements OnInit {
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
   constructor(
-    private jobService: JobService,
-    private scheduleService: SchedulerService,
+    private jobService: JobControllerService,
+    private scheduleService: ScheduleControllerService,
     private dialog: MatDialog,
     private fb: FormBuilder
   ) {
@@ -47,7 +45,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   getJobs() {
-    this.jobService.showJob().subscribe({
+    this.jobService.getAllJobs().subscribe({
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
@@ -69,7 +67,7 @@ export class ScheduleComponent implements OnInit {
           if (schedule.jobId) {
             const job = this.jobs.find(j => j.id === schedule.jobId);
             if (job) {
-              schedule.job = job;
+              schedule.jobId = job.id;
             } else {
               console.warn(`Job with ID ${schedule.jobId} not found.`);
             }
@@ -171,11 +169,12 @@ export class ScheduleComponent implements OnInit {
     this.selectedJob = this.jobs.find(job => job.id === schedule.jobId)!;
 
     this.scheduleForm.patchValue({
-      startTime: new Date(schedule.startTime),
-      dueDate: new Date(schedule.dueDate)
+      startTime: schedule.startTime ? new Date(schedule.startTime) : null,
+      dueDate: schedule.dueDate ? new Date(schedule.dueDate) : null
     });
 
     if (schedule.duration) {
+      // @ts-ignore //FIXME
       this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
     } else {
       this.calculatedEndTime = null;
@@ -196,7 +195,7 @@ export class ScheduleComponent implements OnInit {
     const scheduleData: ScheduleDTO = {
       id: this.selectedSchedule?.id,
       jobId: this.selectedJob.id,
-      machineType: this.selectedJob.requiredMachineType?.name || '',
+      machineTypeId: this.selectedJob.idMachineType,
       dueDate: dueDate.toISOString(),
       startTime: startTime.toISOString(),
       duration: jobDuration,
@@ -204,7 +203,7 @@ export class ScheduleComponent implements OnInit {
     };
 
     if (this.selectedSchedule) {
-      this.scheduleService.updateSchedule(this.selectedSchedule.id!, scheduleData).subscribe({
+      this.scheduleService.updateSchedule(scheduleData, this.selectedSchedule.id!).subscribe({
         next: (response) => {
           console.log('Schedule updated successfully:', response);
           this.dialogRef.close();
