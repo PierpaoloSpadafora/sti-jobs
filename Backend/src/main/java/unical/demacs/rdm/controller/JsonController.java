@@ -13,7 +13,10 @@ import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.dto.UserDTO;
 import unical.demacs.rdm.persistence.entities.Job;
+import unical.demacs.rdm.persistence.entities.Machine;
+import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.entities.User;
+import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
@@ -31,6 +34,8 @@ public class JsonController {
 
     private final IJobService jobService;
     private final ExtendedModelMapper extendedModelMapper;
+    private final MachineTypeServiceImpl machineTypeService;
+    private final IMachineService machineService;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})
@@ -57,34 +62,45 @@ public class JsonController {
         return ResponseEntity.ok(extendedModelMapper.mapList(jobs, JobDTO.class));
     }
 
-    /*
+
     @Operation(summary = "Import MachineType data from JSON", description = "Import MachineType data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
-
+        try {
+            machineTypes.forEach(machineTypeService::createMachineType);
+            return ResponseEntity.ok("MachineTypes imported successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Error importing MachineTypes: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Export MachineType data to JSON", description = "Export all MachineType data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/exportMachineType", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineTypeDTO>> exportMachineType() {
-
+        List<MachineType> machineTypes = machineTypeService.getAllMachineTypes();
+        return ResponseEntity.ok(extendedModelMapper.mapList(machineTypes, MachineTypeDTO.class));
     }
 
     @Operation(summary = "Import Machine data from JSON", description = "Import Machine data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importMachine", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> importMachine(@RequestBody List<MachineDTO> machines) {
-
+        try {
+            machines.forEach(machineService::createMachine);
+            return ResponseEntity.ok("Machines imported successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Error importing Machines: " + e.getMessage());
+        }
     }
 
     @Operation(summary = "Export Machine data to JSON", description = "Export all Machine data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineDTO>> exportMachine() {
-
+        List<Machine> machines = machineService.getAllMachines();
+        return ResponseEntity.ok(extendedModelMapper.mapList(machines, MachineDTO.class));
     }
 
-     */
 }
