@@ -1,5 +1,7 @@
 package unical.demacs.rdm.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -35,18 +37,23 @@ public class ScheduleController {
         return new ResponseEntity<>(modelMapper.map(createdSchedule, ScheduleDTO.class), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDTO scheduleDTO) {
+        return new ResponseEntity<>(modelMapper.map(scheduleService.updateSchedule(id, scheduleDTO), ScheduleDTO.class), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
+        boolean deleted = scheduleService.deleteSchedule(id);
+        return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<ScheduleDTO> updateScheduleStatus(@PathVariable Long id, @RequestParam String status) {
         ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
         Schedule updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
         return new ResponseEntity<>(modelMapper.map(updatedSchedule, ScheduleDTO.class), HttpStatus.OK);
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDTO scheduleDTO) {
-        return new ResponseEntity<>(modelMapper.map(scheduleService.updateSchedule(id, scheduleDTO), ScheduleDTO.class), HttpStatus.OK);
-    }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ScheduleDTO> getScheduleById(@PathVariable Long id) {
@@ -112,10 +119,26 @@ public class ScheduleController {
         return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
-        boolean deleted = scheduleService.deleteSchedule(id);
-        return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+
+    @GetMapping("/duedate/before")
+    @Operation(summary = "Get schedules with dueDate before a specified date")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
+    public ResponseEntity<List<ScheduleDTO>> getSchedulesDueBefore(
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+        List<Schedule> schedules = scheduleService.getSchedulesDueBefore(date);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
     }
+
+    @GetMapping("/duedate/after")
+    @Operation(summary = "Get schedules with dueDate after a specified date")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved schedules")
+    public ResponseEntity<List<ScheduleDTO>> getSchedulesDueAfter(
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date) {
+        List<Schedule> schedules = scheduleService.getSchedulesDueAfter(date);
+        return new ResponseEntity<>(modelMapperExtended.mapList(schedules, ScheduleDTO.class), HttpStatus.OK);
+    }
+
 
 }

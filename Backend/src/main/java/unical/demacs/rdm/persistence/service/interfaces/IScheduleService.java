@@ -21,6 +21,9 @@ public interface IScheduleService {
     List<Schedule> getAllSchedules();
     boolean isTimeSlotAvailable(String machineType, LocalDateTime startTime, LocalDateTime endTime);
 
+    List<Schedule> getSchedulesDueBefore(LocalDateTime date);
+    List<Schedule> getSchedulesDueAfter(LocalDateTime date);
+
     List<Schedule> getUpcomingSchedules(LocalDateTime from);
     List<Schedule> getPastSchedules(LocalDateTime until);
 }

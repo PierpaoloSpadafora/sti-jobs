@@ -15,15 +15,18 @@ import java.util.Optional;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByStatus(ScheduleStatus status);
     List<Schedule> findByJob_Id(Long jobId);
-    List<Schedule> findByMachineType_Id(long machineTypeId);  // Modificato per cercare per ID
+    List<Schedule> findByMachineType_Id(long machineTypeId);
     List<Schedule> findByStartTimeAfter(LocalDateTime startTime);
     List<Schedule> findByStartTimeBefore(LocalDateTime endTime);
     List<Schedule> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
-    List<Schedule> findByMachineType_IdAndStatus(long machineTypeId, ScheduleStatus scheduleStatus);  // Modificato per cercare per ID
+    List<Schedule> findByMachineType_IdAndStatus(long machineTypeId, ScheduleStatus scheduleStatus);
 
     @Query(value = "SELECT MAX(start_time + (duration * INTERVAL '1 second')) " +
             "FROM schedules WHERE machine_id = :machineType",
             nativeQuery = true)
     Optional<LocalDateTime> findLatestEndTimeForMachine(@Param("machineType") String machineType);
+
+    List<Schedule> findByDueDateBefore(LocalDateTime date);
+    List<Schedule> findByDueDateAfter(LocalDateTime date);
 }

@@ -367,4 +367,46 @@ public class ScheduleServiceImpl implements IScheduleService {
             logger.info("++++++END REQUEST++++++");
         }
     }
+
+    @Override
+    public List<Schedule> getSchedulesDueBefore(LocalDateTime date) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules with dueDate before: {}", date);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesDueBefore");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findByDueDateBefore(date);
+            logger.info("Found {} schedules with dueDate before {}", schedules.size(), date);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules with dueDate before: {}", date, e);
+            throw new RuntimeException("Error getting schedules due before the specified date");
+        } finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public List<Schedule> getSchedulesDueAfter(LocalDateTime date) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Getting schedules with dueDate after: {}", date);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for getSchedulesDueAfter");
+                throw new RuntimeException("Rate limit exceeded");
+            }
+            List<Schedule> schedules = scheduleRepository.findByDueDateAfter(date);
+            logger.info("Found {} schedules with dueDate after {}", schedules.size(), date);
+            return schedules;
+        } catch (Exception e) {
+            logger.error("Error getting schedules with dueDate after: {}", date, e);
+            throw new RuntimeException("Error getting schedules due after the specified date");
+        } finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+
 }
