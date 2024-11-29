@@ -18,4 +18,8 @@ export class LoginService {
   logout(): void {
     localStorage.removeItem('user-email');
   }
+
+  getUserEmail(): string | null{
+    return localStorage.getItem('user-email');
+  }
 }

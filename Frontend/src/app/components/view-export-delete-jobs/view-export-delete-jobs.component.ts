@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import {JobControllerService, JobDTO} from "../../generated-api";
-import { JsonControllerService} from "../../generated-api";
+import { JobControllerService, JobDTO } from '../../generated-api';
+import { JsonControllerService } from '../../generated-api';
 import { MatDialog } from '@angular/material/dialog';
-import {Job, MachineType, MachineTypeDTO} from '../../interfaces/interfaces';
+import { MachineType, MachineTypeDTO } from '../../interfaces/interfaces';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditJobDialogComponent } from '../edit-job-dialog/edit-job-dialog.component';
 import { forkJoin } from 'rxjs';
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-view-export-delete-jobs',
@@ -18,22 +19,14 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   isLoading = false;
   machineTypes: MachineType[] = [];
 
-  jobs: {
-    duration: number | undefined;
-    description: string | undefined;
-    id: number;
-    assigneeEmail: string | undefined;
-    title: string;
-    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-    idMachineType: number;
-    status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
-  }[] = [];
+  jobs: JobDTO[] = [];
 
   constructor(
     private jobService: JobControllerService,
     private jsonService: JsonControllerService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private loginService: LoginService
   ) {}
 
   ngOnInit(): void {
@@ -43,7 +36,7 @@ export class ViewExportDeleteJobsComponent implements OnInit {
   loadJobs(): void {
     this.isLoading = true;
     forkJoin({
-      jobs: this.jobService.getAllJobs(), // Cambiato 'showJob()' in 'getAllJobs()'
+      jobs: this.jobService.getAllJobs(),
       types: this.jsonService.exportMachineType()
     }).subscribe({
       next: (response) => {
@@ -56,7 +49,7 @@ export class ViewExportDeleteJobsComponent implements OnInit {
           priority: dto.priority,
           duration: dto.duration,
           idMachineType: dto.idMachineType,
-          assigneeEmail: dto.assigneeEmail
+          assigneeEmail: this.loginService.getUserEmail()!
         }));
         this.machineTypes = this.transformMachineTypes(response.types);
         this.isLoading = false;
@@ -69,20 +62,9 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     });
   }
 
-  getMachineTypeName(machineType: any): string {
-    if (!machineType) return 'Any';
-    if (typeof machineType === 'object' && machineType.id) {
-      const machineTypeId = Number(machineType.id);
-      const foundType = this.machineTypes.find(type => type.id === machineTypeId);
-      return foundType ? foundType.name : 'Unknown Type';
-    }
-    if (typeof machineType === 'number' || !isNaN(Number(machineType))) {
-      const machineTypeId = Number(machineType);
-      const foundType = this.machineTypes.find(type => type.id === machineTypeId);
-      return foundType ? foundType.name : 'Unknown Type';
-    }
-    console.warn('Unexpected machine type format:', machineType);
-    return 'Unknown Type';
+  getMachineTypeName(machineTypeId: number): string {
+    const foundType = this.machineTypes.find(type => type.id === machineTypeId);
+    return foundType ? foundType.name : 'Unknown Type';
   }
 
   private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
@@ -105,14 +87,12 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     }
 
     Swal.fire({
-      title: 'Sei sicuro?',
-      text: `Vuoi eliminare il job "${job.title}"?`,
+      title: 'Are you sure?',
+      text: `Do you want to delete the job "${job.title}"?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sì, elimina!',
-      cancelButtonText: 'Annulla'
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
@@ -120,8 +100,8 @@ export class ViewExportDeleteJobsComponent implements OnInit {
           next: () => {
             this.jobs = this.jobs.filter(job => job.id !== id);
             Swal.fire(
-              'Eliminato!',
-              `Il job "${job.title}" è stato eliminato.`,
+              'Deleted!',
+              `The job "${job.title}" has been deleted.`,
               'success'
             );
             this.isLoading = false;
@@ -131,14 +111,14 @@ export class ViewExportDeleteJobsComponent implements OnInit {
             this.isLoading = false;
             if (error.status === 404) {
               Swal.fire(
-                'Errore!',
-                'Job non trovato. Potrebbe essere già stato eliminato.',
+                'Error!',
+                'Job not found. It might have already been deleted.',
                 'error'
               );
             } else {
               Swal.fire(
-                'Errore!',
-                'Non è stato possibile eliminare il job. Per favore, riprova più tardi.',
+                'Error!',
+                'Unable to delete the job. Please try again later.',
                 'error'
               );
             }
@@ -148,16 +128,7 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     });
   }
 
-  openEditDialog(job: {
-    duration: number | undefined;
-    description: string | undefined;
-    id: number;
-    assigneeEmail: string | undefined;
-    title: string;
-    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-    idMachineType: number;
-    status: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
-  }): void {
+  openEditDialog(job: JobDTO): void {
     const dialogRef = this.dialog.open(EditJobDialogComponent, {
       width: '500px',
       data: { ...job }
@@ -166,12 +137,25 @@ export class ViewExportDeleteJobsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.jobService.updateJob(result, result.id).subscribe({ // Aggiunto 'result.id' come secondo argomento
-          next: (updatedJob) => {
-            const index = this.jobs.findIndex(j => j.id === updatedJob.id);
+
+        const updatedJob: JobDTO = {
+          id: result.id,
+          title: result.title || job.title,
+          description: result.description || job.description,
+          status: result.status || job.status,
+          priority: result.priority || job.priority,
+          duration: result.duration || job.duration,
+          idMachineType: result.idMachineType || job.idMachineType,
+          assigneeEmail: result.assigneeEmail || job.assigneeEmail
+        };
+
+        console.log('Updated Job:', updatedJob);
+
+        this.jobService.updateJob(updatedJob, updatedJob.id!).subscribe({
+          next: (updatedJobResponse) => {
+            const index = this.jobs.findIndex(j => j.id === updatedJobResponse.id);
             if (index !== -1) {
-              // @ts-ignore
-              this.jobs[index] = updatedJob;
+              this.jobs[index] = updatedJobResponse;
               this.jobs = [...this.jobs];
             }
             this.showMessage('Job updated successfully');

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { JsonControllerService} from "../../generated-api";
+import { JsonControllerService } from "../../generated-api";
 import { MachineDTO, MachineTypeDTO } from '../../generated-api';
-import { MachineTypeControllerService } from '../../generated-api';
+import { MachineTypeControllerService } from "../../generated-api";
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
 
@@ -47,8 +47,9 @@ export class CreateImportMachineComponent implements OnInit {
     this.jsonInputContent = this.jsonExample;
 
     this.machineTypeService.getAllMachineTypes().subscribe({
-      next: (data: MachineTypeDTO) => {
-        this.machineTypes = [data]; // Adatta il dato ricevuto come array
+      next: (data: MachineTypeDTO[]) => {
+        console.log('Data:', data);
+        this.machineTypes = data;
       },
       error: (error) => {
         console.error('Errore durante il recupero dei Machine Types:', error);
@@ -83,7 +84,6 @@ export class CreateImportMachineComponent implements OnInit {
 
     if (!this.showJsonInput && form) {
       if (!form.valid) {
-        // Marca tutti i campi come touched per mostrare gli errori
         Object.keys(form.controls).forEach(field => {
           const control = form.controls[field];
           control.markAsTouched({ onlySelf: true });
@@ -113,8 +113,6 @@ export class CreateImportMachineComponent implements OnInit {
           return;
         }
 
-        // Opzionale: Validazione aggiuntiva degli oggetti Machine
-
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -133,10 +131,11 @@ export class CreateImportMachineComponent implements OnInit {
     }));
 
     this.jsonService.importMachine(machinesToSubmitWithId).subscribe({
-      next: (response: string) => {
+      next: (response: any) => {
+        const message = typeof response === 'string' ? response : 'Elemento importato con successo';
         Swal.fire({
           icon: 'success',
-          title: 'Elemento importato con successo',
+          title: message,
           showConfirmButton: false,
           timer: 1000
         });
@@ -146,11 +145,25 @@ export class CreateImportMachineComponent implements OnInit {
         }
       },
       error: (error) => {
+        if (error.status === 200 && error.error && error.error.text) {
+          Swal.fire({
+            icon: 'success',
+            title: error.error.text,
+            showConfirmButton: false,
+            timer: 1000
+          });
+          this.resetForm();
+          if (form) {
+            form.resetForm();
+          }
+          return;
+        }
+
         console.error("Errore durante l'importazione delle Machines:", error);
         Swal.fire({
           icon: 'error',
           title: 'Errore',
-          text: "Errore durante l'importazione delle Machines: " + JSON.stringify(error),
+          text: `Errore durante l'importazione delle Machines: ${error.message || JSON.stringify(error)}`
         });
       },
     });

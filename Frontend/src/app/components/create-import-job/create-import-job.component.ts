@@ -3,6 +3,7 @@ import { JobDTO, MachineTypeDTO } from '../../generated-api';
 import { JobControllerService, JsonControllerService, MachineTypeControllerService } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
+import {LoginService} from "../../services/login.service";
 
 @Component({
   selector: 'app-create-import-job',
@@ -19,7 +20,7 @@ export class CreateImportJobComponent implements OnInit {
     priority: JobDTO.PriorityEnum.LOW,
     duration: 0,
     idMachineType: 0,
-    assigneeEmail: ''
+    assigneeEmail: this.loginService.getUserEmail()!
   };
 
   durationHours: number = 0;
@@ -37,7 +38,8 @@ export class CreateImportJobComponent implements OnInit {
   constructor(
     private jobService: JobControllerService,
     private jsonService: JsonControllerService,
-    private machineTypeService: MachineTypeControllerService
+    private machineTypeService: MachineTypeControllerService,
+    private loginService: LoginService
   ) {}
 
   ngOnInit(): void {
@@ -99,7 +101,6 @@ export class CreateImportJobComponent implements OnInit {
     }
 
     if (this.showJsonInput) {
-      // Gestione JSON input
       try {
         const jobs: JobDTO[] = JSON.parse(this.jsonInputContent);
         if (!Array.isArray(jobs)) {
@@ -160,6 +161,10 @@ export class CreateImportJobComponent implements OnInit {
         return;
       }
 
+      if (typeof this.job.idMachineType === 'object') {
+        this.job.idMachineType = (this.job.idMachineType as MachineTypeDTO).id!;
+      }
+
       this.jobService.createJob(this.job, email).subscribe({
         next: () => {
           Swal.fire({
@@ -191,7 +196,7 @@ export class CreateImportJobComponent implements OnInit {
       priority: JobDTO.PriorityEnum.LOW,
       duration: 0,
       idMachineType: 0,
-      assigneeEmail: ''
+      assigneeEmail: this.loginService.getUserEmail()!
     };
     this.durationHours = 0;
     this.durationMinutes = 0;

@@ -26,7 +26,8 @@ import {
   JobControllerService,
   MachineTypeControllerService,
   ScheduleControllerService,
-  UserControllerService
+  UserControllerService,
+  JsonControllerService, MachineControllerService
 } from "./generated-api";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {MatIconModule} from "@angular/material/icon";
@@ -109,6 +110,8 @@ import {ShowJobComponent} from "./components/show-job/show-job.component";
     UserControllerService,
     JobControllerService,
     ScheduleControllerService,
+    JsonControllerService,
+    MachineControllerService,
     provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })

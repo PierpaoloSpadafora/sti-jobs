@@ -151,10 +151,10 @@
           >
             <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
             <option
-              *ngFor="let machineType of machineTypes"
-              [ngValue]="machineType"
+              *ngFor="let type of machineTypes"
+              [ngValue]="type.id"
             >
-              {{ machineType.name }}
+              {{ type.name }}
             </option>
           </select>
           <div class="invalid-feedback" *ngIf="machineType.invalid && (machineType.dirty || machineType.touched)">
