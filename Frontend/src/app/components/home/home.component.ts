@@ -66,25 +66,23 @@ export class HomeComponent implements OnInit {
 
   processData() {
     console.log('Raw Schedule Data:', this.scheduleData);
-    
+
     try {
       this.chartData = this.scheduleData.map(schedule => {
         const job = this.jobsMap.get(schedule.jobId || 0);
         const taskId = schedule.id?.toString() || '';
         const taskName = job ? job.title : 'Job Sconosciuto';
 
-        // Assicuriamoci che le date siano oggetti Date validi
         let startDate = new Date(schedule.startTime || '');
         let endDate = new Date(startDate.getTime() + (schedule.duration || 0) * 1000);
 
-        // Verifica se le date sono valide
         if (isNaN(startDate.getTime())) {
           console.error('Invalid start date for task:', taskId);
-          startDate = new Date(); // fallback to current date
+          startDate = new Date();
         }
         if (isNaN(endDate.getTime())) {
           console.error('Invalid end date for task:', taskId);
-          endDate = new Date(startDate.getTime() + 3600000); // fallback to start + 1 hour
+          endDate = new Date(startDate.getTime() + 3600000);
         }
 
         const row = [
@@ -104,7 +102,7 @@ export class HomeComponent implements OnInit {
       console.log('Final Chart Data:', this.chartData);
     } catch (error) {
       console.error('Error processing data:', error);
-      this.chartData = []; // Reset in caso di errore
+      this.chartData = [];
     }
   }
 
