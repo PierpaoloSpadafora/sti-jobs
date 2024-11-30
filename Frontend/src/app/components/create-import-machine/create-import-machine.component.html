@@ -87,7 +87,7 @@
             <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
             <option
               *ngFor="let machineType of machineTypes"
-              [value]="machineType.id"
+              [ngValue]="machineType.id"
             >
               {{ machineType.name }}
             </option>

@@ -16,7 +16,7 @@ export class CreateImportMachineComponent implements OnInit {
     name: '',
     description: '',
     status: "AVAILABLE",
-    typeId: 0,
+    typeId: undefined,
   };
 
   statuses = ['AVAILABLE', 'BUSY', 'MAINTENANCE', 'OUT_OF_SERVICE'];
@@ -185,7 +185,7 @@ export class CreateImportMachineComponent implements OnInit {
       name: '',
       description: '',
       status: "AVAILABLE",
-      typeId: 0,
+      typeId: undefined,
     };
     this.jsonInputContent = this.jsonExample;
     this.jsonError = '';
