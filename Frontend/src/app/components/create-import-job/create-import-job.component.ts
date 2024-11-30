@@ -121,7 +121,7 @@ export class CreateImportJobComponent implements OnInit {
               showConfirmButton: false,
               timer: 1500
             });
-            this.resetForm();
+            this.resetForm(form);
           },
           error: (error) => {
             console.error("Errore durante l'importazione dei Job:", error);
@@ -189,7 +189,7 @@ export class CreateImportJobComponent implements OnInit {
             showConfirmButton: false,
             timer: 1500
           });
-          this.resetForm();
+          this.resetForm(form);
           if (form) form.resetForm();
         },
         error: (error) => {
@@ -204,7 +204,7 @@ export class CreateImportJobComponent implements OnInit {
     }
   }
 
-  resetForm() {
+  resetForm(form?: NgForm) {
     this.job = {
       title: '',
       description: '',
@@ -220,5 +220,19 @@ export class CreateImportJobComponent implements OnInit {
     this.durationSeconds = 0;
     this.jsonInputContent = this.jsonExample;
     this.jsonError = '';
+
+    if (form) {
+      form.resetForm({
+        title: this.job.title,
+        description: this.job.description,
+        status: this.job.status,
+        priority: this.job.priority,
+        idMachineType: this.job.idMachineType,
+        durationHours: this.durationHours,
+        durationMinutes: this.durationMinutes,
+        durationSeconds: this.durationSeconds
+      });
+    }
   }
+
 }

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
@@ -21,17 +22,21 @@ public class MachineTypeServiceImpl implements IMachineTypeService {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineTypeServiceImpl.class);
     private final RateLimiter rateLimiter;
-
     private final MachineTypeRepository machineTypeRepository;
 
     @Override
     public MachineType createMachineType(MachineTypeDTO machineTypeDTO) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Creating machine type with name: " + machineTypeDTO.getName());
+        logger.info("Creating machine type with name: {}", machineTypeDTO.getName());
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for createMachineType");
                 throw new MachineException("Rate limit exceeded for createMachineType");
+            }
+            Optional<MachineType> existingMachineType = machineTypeRepository.findByName(machineTypeDTO.getName());
+            if (existingMachineType.isPresent()) {
+                logger.error("Duplicate machine type name: {}", machineTypeDTO.getName());
+                throw new MachineException("Esiste già un Machine Type con questo nome.");
             }
             MachineType machineType = MachineType.buildMachineType()
                     .name(machineTypeDTO.getName())
@@ -40,11 +45,15 @@ public class MachineTypeServiceImpl implements IMachineTypeService {
             machineTypeRepository.save(machineType);
             logger.info("Machine type with name {} created successfully", machineTypeDTO.getName());
             return machineType;
+        } catch (MachineException e) {
+            throw e;
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Data integrity violation while creating machine type: {}", machineTypeDTO.getName(), e);
+            throw new MachineException("Esiste già un Machine Type con questo nome.");
         } catch (Exception e) {
             logger.error("Error creating machine type with name: {}", machineTypeDTO.getName(), e);
-            throw new MachineException("Error creating machine type");
-        }
-        finally {
+            throw new MachineException("Errore nella creazione del Machine Type.");
+        } finally {
             logger.info("++++++END REQUEST++++++");
         }
     }

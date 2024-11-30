@@ -34,10 +34,12 @@ public class MachineTypeController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Machine type created successfully.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineTypeDTO.class))),
+            @ApiResponse(responseCode = "409", description = "Machine type with the given name already exists.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
-    @PostMapping(path="create")
+    @PostMapping(path = "/create")
     public ResponseEntity<MachineTypeDTO> createMachineType(@Valid @RequestBody MachineTypeDTO machineTypeDTO) {
         return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.createMachineType(machineTypeDTO), MachineTypeDTO.class));
     }

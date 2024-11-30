@@ -3,7 +3,7 @@ import { MachineTypeControllerService } from '../../generated-api';
 import { MachineTypeDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
-import {forkJoin} from "rxjs";
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-create-import-machine-type',
@@ -26,19 +26,19 @@ export class CreateImportMachineTypeComponent implements OnInit {
   constructor(private machineService: MachineTypeControllerService) {}
 
   ngOnInit(): void {
-    this.jsonExample = `[
-  {
-    "name": "MachineTypeName",
-    "description": "Esempio Descrizione"
-  }
-]`;
+    this.jsonExample = `
+    [
+      {
+        "name": "MachineTypeName",
+        "description": "Esempio Descrizione"
+      }
+    ]`;
     this.jsonInputContent = this.jsonExample;
   }
 
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
     this.jsonError = '';
-    // Optionally reset the form when toggling
     if (!this.showJsonInput) {
       this.resetForm();
     }
@@ -78,7 +78,6 @@ export class CreateImportMachineTypeComponent implements OnInit {
           return;
         }
 
-        // Validate each machine type in JSON
         for (const mt of machineTypesToSubmit) {
           if (!mt.name || !mt.description) {
             Swal.fire({
@@ -128,10 +127,15 @@ export class CreateImportMachineTypeComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error creating machine type:', error);
+        let errorMessage = 'Non è stato possibile creare il Machine Type. Per favore, riprova più tardi.';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+
         Swal.fire({
           icon: 'error',
           title: 'Errore',
-          text: 'Non è stato possibile creare il Machine Type. Per favore, riprova più tardi.',
+          text: errorMessage,
         });
       }
     });

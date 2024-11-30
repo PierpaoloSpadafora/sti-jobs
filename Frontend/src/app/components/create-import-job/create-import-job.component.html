@@ -64,7 +64,7 @@
             [ngClass]="{'is-invalid': status.invalid && (status.dirty || status.touched)}"
           >
             <option [ngValue]="undefined">Seleziona Stato</option>
-            <option *ngFor="let statusOption of statuses" [value]="statusOption">
+            <option *ngFor="let statusOption of statuses" [ngValue]="statusOption">
               {{ statusOption }}
             </option>
           </select>
@@ -85,7 +85,7 @@
             [ngClass]="{'is-invalid': priority.invalid && (priority.dirty || priority.touched)}"
           >
             <option [ngValue]="undefined">Seleziona Priorità</option>
-            <option *ngFor="let priorityOption of priorities" [value]="priorityOption">
+            <option *ngFor="let priorityOption of priorities" [ngValue]="priorityOption">
               {{ priorityOption }}
             </option>
           </select>
