@@ -1,5 +1,3 @@
-<!-- view-export-delete-jobs.component.html -->
-
 <div class="jobs-container">
   <div class="table-responsive" *ngIf="jobs && jobs.length > 0">
     <table class="jobs-table">
@@ -39,7 +37,6 @@
           <button class="action-button edit" title="Edit" (click)="openEditDialog(job)">
             <i class="fas fa-edit"></i>
           </button>
-          <!-- Delete Button with Conditional Rendering -->
           <button
             *ngIf="job.id !== undefined"
             class="action-button delete"
