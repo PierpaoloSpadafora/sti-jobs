@@ -3,6 +3,7 @@ import { JsonControllerService } from "../../generated-api";
 import { MachineDTO, MachineTypeDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-create-import-machine',
@@ -34,8 +35,8 @@ export class CreateImportMachineComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.jsonExample =
-      `[
+    this.jsonExample =`
+      [
         {
           "name": "Machine 1",
           "description": "Machine Description",
@@ -142,7 +143,7 @@ export class CreateImportMachineComponent implements OnInit {
 
     this.jsonService.importMachine(machinesToSubmitWithId).subscribe({
       next: (response: any) => {
-        const message = typeof response === 'string' ? response : 'Elemento importato con successo';
+        const message = response.message || 'Elemento importato con successo';
         Swal.fire({
           icon: 'success',
           title: message,
@@ -158,29 +159,26 @@ export class CreateImportMachineComponent implements OnInit {
           });
         }
       },
-      error: (error) => {
-        if (error.status === 200 && error.error && error.error.text) {
-          Swal.fire({
-            icon: 'success',
-            title: error.error.text,
-            showConfirmButton: false,
-            timer: 1000
-          });
-          this.resetForm();
-          if (form) {
-            form.resetForm();
-          }
-          return;
-        }
+      error: (error: HttpErrorResponse) => {
+      console.error("Errore durante l'importazione delle Machines:", error);
 
-        console.error("Errore durante l'importazione delle Machines:", error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Errore',
-          text: `Errore durante l'importazione delle Machines: ${error.message || JSON.stringify(error)}`
-        });
-      },
-    });
+      let errorMessage = 'Errore durante l\'importazione delle Machines.';
+
+      if (error.status === 409) {
+        errorMessage = 'Il nome della macchina esiste già. Per favore, utilizza un nome diverso.';
+      } else if (error.error && error.error.message) {
+        errorMessage = error.error.message;
+      } else if (typeof error.error === 'string') {
+        errorMessage = error.error;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Errore',
+        text: errorMessage
+      });
+    },
+  });
   }
 
   resetForm() {
