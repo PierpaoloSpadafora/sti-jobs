@@ -80,9 +80,9 @@
             class="form-select"
             [(ngModel)]="machine.typeId"
             name="typeName"
-            required
             #typeName="ngModel"
             [ngClass]="{'is-invalid': typeName.invalid && (typeName.dirty || typeName.touched)}"
+            required
           >
             <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
             <option
