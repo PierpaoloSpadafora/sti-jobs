@@ -94,6 +94,11 @@ export class CreateImportMachineComponent implements OnInit {
         });
         return;
       }
+
+      // Imposta description a "" se non è stata inserita
+      if (!this.machine.description) {
+        this.machine.description = '';
+      }
     }
 
     let machinesToSubmit: Array<Omit<MachineDTO, 'id'>>;
@@ -110,6 +115,14 @@ export class CreateImportMachineComponent implements OnInit {
           });
           return;
         }
+
+        // Assicura che ogni machine abbia description non null
+        machinesToSubmit = machinesToSubmit.map(machine => {
+          if (!machine.description) {
+            machine.description = '';
+          }
+          return machine;
+        });
 
       } catch (error) {
         Swal.fire({
