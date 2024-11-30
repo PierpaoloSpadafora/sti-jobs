@@ -16,6 +16,7 @@ export class CreateImportMachineComponent implements OnInit {
     name: '',
     description: '',
     status: "AVAILABLE",
+    // @ts-ignore
     typeId: undefined,
   };
 
@@ -150,9 +151,13 @@ export class CreateImportMachineComponent implements OnInit {
           showConfirmButton: false,
           timer: 1000
         });
-        this.resetForm();
         if (form) {
-          form.resetForm();
+          form.resetForm({
+            name: '',
+            description: '',
+            status: 'AVAILABLE',
+            typeId: undefined
+          });
         }
       },
       error: (error) => {
@@ -185,9 +190,16 @@ export class CreateImportMachineComponent implements OnInit {
       name: '',
       description: '',
       status: "AVAILABLE",
+      // @ts-ignore
       typeId: undefined,
     };
     this.jsonInputContent = this.jsonExample;
     this.jsonError = '';
+
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.reset();
+      this.machine.status = "AVAILABLE";
+    }
   }
 }
