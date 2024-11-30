@@ -10,7 +10,9 @@ import unical.demacs.rdm.persistence.enums.MachineStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "machines")
+@Table(name = "machines", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name", name = "uq_machine_name")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +22,7 @@ public class Machine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false)

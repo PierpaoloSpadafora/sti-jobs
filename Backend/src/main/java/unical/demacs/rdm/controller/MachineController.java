@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
@@ -32,13 +33,17 @@ public class MachineController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Machine created successfully.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
+            @ApiResponse(responseCode = "409", description = "Machine with the given name already exists.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "429", description = "Rate limit exceeded.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PostMapping
     public ResponseEntity<MachineDTO> createMachine(@Valid @RequestBody MachineDTO machineDTO) {
         MachineDTO createdMachine = modelMapper.map(machineServiceImpl.createMachine(machineDTO), MachineDTO.class);
-        return ResponseEntity.status(201).body(createdMachine);
+        return new ResponseEntity<>(createdMachine, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a machine", description = "Update a machine's details by ID.",
@@ -48,11 +53,15 @@ public class MachineController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
             @ApiResponse(responseCode = "404", description = "Machine not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "409", description = "Machine with the given name already exists.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "429", description = "Rate limit exceeded.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @PutMapping(path = "/{id}")
-    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @Valid@RequestBody MachineDTO machineDTO) {
+    public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @Valid @RequestBody MachineDTO machineDTO) {
         MachineDTO updatedMachine = modelMapper.map(machineServiceImpl.updateMachine(id, machineDTO), MachineDTO.class);
         return ResponseEntity.ok(updatedMachine);
     }
@@ -63,6 +72,8 @@ public class MachineController {
             @ApiResponse(responseCode = "200", description = "Machine retrieved successfully.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
             @ApiResponse(responseCode = "404", description = "Machine not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "429", description = "Rate limit exceeded.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
@@ -77,6 +88,8 @@ public class MachineController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Machines retrieved successfully.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MachineDTO.class))),
+            @ApiResponse(responseCode = "429", description = "Rate limit exceeded.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
@@ -95,11 +108,14 @@ public class MachineController {
             @ApiResponse(responseCode = "204", description = "Machine deleted successfully."),
             @ApiResponse(responseCode = "404", description = "Machine not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "429", description = "Rate limit exceeded.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Server error. Please try again later.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class)))
     })
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Boolean> deleteMachine(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(machineServiceImpl.deleteMachine(id));
+    public ResponseEntity<Void> deleteMachine(@PathVariable("id") Long id) {
+        machineServiceImpl.deleteMachine(id);
+        return ResponseEntity.noContent().build();
     }
 }

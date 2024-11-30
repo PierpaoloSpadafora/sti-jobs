@@ -2,19 +2,15 @@ package unical.demacs.rdm.persistence.service.implementation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import unical.demacs.rdm.config.exception.JsonException;
 import unical.demacs.rdm.persistence.dto.*;
-import unical.demacs.rdm.persistence.entities.*;
 import unical.demacs.rdm.persistence.repository.*;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor

@@ -2,12 +2,11 @@ package unical.demacs.rdm.config.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import unical.demacs.rdm.config.exception.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import unical.demacs.rdm.config.exception.*;
 
 import java.util.Map;
 
@@ -21,15 +20,17 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(TooManyRequestsException.class)
-    private ResponseEntity<?> handleTooManyRequests() {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", "Too Many Request")).toString(), HttpStatus.TOO_MANY_REQUESTS);
+    public ResponseEntity<String> handleTooManyRequests() {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", "Too Many Requests");
+        return new ResponseEntity<>(response.toString(), HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(UserException.class)
-    private ResponseEntity<?> handleUserExceptionException(UserException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleUserException(UserException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(NoUserFoundException.class)
@@ -37,42 +38,55 @@ public class ExceptionsHandler {
         ObjectNode response = objectMapper.createObjectNode();
         response.put("error", "No user found");
         response.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response.toString());
+        return new ResponseEntity<>(response.toString(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ScheduleNotFoundException.class)
-    private ResponseEntity<?> handleScheduleNotFoundExceptionException(ScheduleNotFoundException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleScheduleNotFoundException(ScheduleNotFoundException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ScheduleException.class)
-    private ResponseEntity<?> handleScheduleExceptionException(ScheduleException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleScheduleException(ScheduleException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(JobNotFoundException.class)
-    private ResponseEntity<?> handleJobNotFoundExceptionException(JobNotFoundException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleJobNotFoundException(JobNotFoundException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(JobException.class)
-    private ResponseEntity<?> handleJobExceptionException(JobException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(MachineException.class)
-    private ResponseEntity<?> handleMachineExceptionException(MachineException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleJobException(JobException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MachineNotFoundException.class)
-    private ResponseEntity<?> handleMachineNotFoundExceptionException(MachineNotFoundException ex) {
-        return new ResponseEntity<>(new JSONObject(
-                Map.of("message", ex.getMessage())).toString(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleMachineNotFoundException(MachineNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(DuplicateMachineNameException.class)
+    public ResponseEntity<ObjectNode> handleDuplicateMachineNameException(DuplicateMachineNameException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MachineException.class)
+    public ResponseEntity<String> handleMachineException(MachineException ex) {
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
 }

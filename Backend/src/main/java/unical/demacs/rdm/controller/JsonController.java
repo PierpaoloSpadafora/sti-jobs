@@ -18,6 +18,7 @@ import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -57,7 +58,6 @@ public class JsonController {
         return ResponseEntity.ok(modelMapperExtended.mapList(jobs, JobDTO.class));
     }
 
-
     @Operation(summary = "Import MachineType data from JSON", description = "Import MachineType data into the system from JSON content.",
             tags = {"json-controller"})
     @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -78,15 +78,15 @@ public class JsonController {
         return ResponseEntity.ok(modelMapperExtended.mapList(machineTypes, MachineTypeDTO.class));
     }
 
-    @Operation(summary = "Import Machine data from JSON", description = "Import Machine data into the system from JSON content.",
-            tags = {"json-controller"})
-    @PostMapping(value = "/importMachine", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> importMachine(@RequestBody List<MachineDTO> machines) {
+    @PostMapping("/importMachine")
+    public ResponseEntity<Map<String, String>> importMachine(@RequestBody List<MachineDTO> machines) {
         try {
-            machines.forEach(machineService::createMachine);
-            return ResponseEntity.ok("Machines imported successfully.");
+            for (MachineDTO machine : machines) {
+                machineService.createMachine(machine);
+            }
+            return ResponseEntity.ok(Map.of("message", "Machines imported successfully."));
         } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error importing Machines: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("message", "Errore durante l'importazione delle Machines."));
         }
     }
 

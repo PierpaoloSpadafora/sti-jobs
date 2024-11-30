@@ -12,5 +12,7 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
     List<Machine> findByTypeId(Long typeId);
     Optional<Machine> findById(Long id);
     Optional<Machine> findByIdOrName(Long id, String name);
+
+    Optional<Machine> findByName(String name);
     void deleteByTypeId(Long typeId);
 }
