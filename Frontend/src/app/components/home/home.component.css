@@ -28,6 +28,21 @@
   padding: 1.5rem;
 }
 
+.schedule-selector {
+  margin-bottom: 1rem;
+}
+
+.schedule-selector label {
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+.schedule-selector select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
 .chart-wrapper {
   position: relative;
   min-height: 600px;
@@ -61,28 +76,28 @@
   100% { transform: rotate(360deg); }
 }
 
-.error-message {
+.no-schedule-message {
   text-align: center;
   padding: 2rem;
-  color: #e74c3c;
+  color: #7f8c8d;
 }
 
-.error-icon {
-  font-size: 2rem;
+.no-schedule-message p {
+  font-size: 1.2rem;
   margin-bottom: 1rem;
 }
 
-.retry-button {
+.no-schedule-message button {
   background: #3498db;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1.2rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.3s ease;
 }
 
-.retry-button:hover {
+.no-schedule-message button:hover {
   background: #2980b9;
 }
 

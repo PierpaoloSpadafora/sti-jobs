@@ -4,6 +4,8 @@ import { ScheduleControllerService } from '../../generated-api';
 import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
 import { ChartType } from 'angular-google-charts';
+import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -16,7 +18,7 @@ export class HomeComponent implements OnInit {
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
 
   public chartData: any[] = [];
-  public chartOptions = {
+  public chartOptions: ChartOptions = {
     height: 600,
     gantt: {
       trackHeight: 30,
@@ -25,6 +27,10 @@ export class HomeComponent implements OnInit {
         fontName: 'Arial',
         fontSize: 12,
         color: '#000'
+      },
+      criticalPathEnabled: true,
+      timeline: {
+        showRowLabels: false
       }
     }
   };
@@ -39,71 +45,146 @@ export class HomeComponent implements OnInit {
   ];
   public chartType = ChartType.Gantt;
 
+  scheduleTypes = [
+    { label: 'All Jobs', value: 'ALL' },
+    { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
+    { label: 'Scheduled by Priority', value: 'PRIORITY' }
+  ];
+
+  selectedScheduleType = 'ALL';
+
+  hasScheduledJobs = false;
+  loading = true;
+
   constructor(
     private scheduleService: ScheduleControllerService,
-    private jsonService: JsonControllerService
+    private jsonService: JsonControllerService,
+    private router: Router
   ) { }
 
   ngOnInit() {
     this.fetchData();
   }
 
+  onScheduleTypeChange() {
+    this.fetchData();
+  }
+
   fetchData() {
-    this.scheduleService.getAllSchedules().subscribe(scheduleData => {
+    this.loading = true;
+    let scheduleObservable: Observable<ScheduleDTO[]>;
+
+    if (this.selectedScheduleType === 'ALL') {
+      scheduleObservable = this.scheduleService.getAllSchedules();
+    } else if (this.selectedScheduleType === 'DUE_DATE') {
+      scheduleObservable = this.jsonService.exportJobScheduledDueDate();
+    } else if (this.selectedScheduleType === 'PRIORITY') {
+      scheduleObservable = this.jsonService.exportJobScheduledPriority();
+    } else {
+      scheduleObservable = this.scheduleService.getAllSchedules();
+    }
+
+    scheduleObservable.subscribe(scheduleData => {
       this.scheduleData = scheduleData;
       this.jsonService.exportJob().subscribe(jobs => {
+        this.jobsMap.clear();
         jobs.forEach(job => {
           if (job.id !== undefined) {
             this.jobsMap.set(job.id, job);
           }
         });
         this.processData();
+        this.loading = false;
       });
     }, error => {
-      console.error('Errore nel recupero dei dati di scheduling', error);
+      console.error('Error fetching schedule data', error);
+      this.loading = false;
     });
   }
 
   processData() {
-    console.log('Raw Schedule Data:', this.scheduleData);
+    if (this.scheduleData.length === 0) {
+      this.hasScheduledJobs = false;
+      return;
+    } else {
+      this.hasScheduledJobs = true;
+    }
 
-    try {
-      this.chartData = this.scheduleData.map(schedule => {
-        const job = this.jobsMap.get(schedule.jobId || 0);
-        const taskId = schedule.id?.toString() || '';
-        const taskName = job ? job.title : 'Job Sconosciuto';
+    let minStartDate: Date | null = null;
+    let maxEndDate: Date | null = null;
 
-        let startDate = new Date(schedule.startTime || '');
-        let endDate = new Date(startDate.getTime() + (schedule.duration || 0) * 1000);
+    this.chartData = this.scheduleData.map(schedule => {
+      const job = this.jobsMap.get(schedule.jobId || 0);
+      const taskId = schedule.id?.toString() || '';
+      const taskName = job ? job.title : 'Unknown Job';
 
-        if (isNaN(startDate.getTime())) {
-          console.error('Invalid start date for task:', taskId);
-          startDate = new Date();
+      let startDate = new Date(schedule.startTime || '');
+      let endDate = new Date(startDate.getTime() + (schedule.duration || 0) * 1000);
+
+      if (isNaN(startDate.getTime())) {
+        console.error('Invalid start date for task:', taskId);
+        startDate = new Date();
+      }
+      if (isNaN(endDate.getTime())) {
+        console.error('Invalid end date for task:', taskId);
+        endDate = new Date(startDate.getTime() + 3600000);
+      }
+
+      // Update min and max dates
+      if (!minStartDate || startDate < minStartDate) {
+        minStartDate = startDate;
+      }
+      if (!maxEndDate || endDate > maxEndDate) {
+        maxEndDate = endDate;
+      }
+
+      const row = [
+        taskId,
+        taskName,
+        startDate,
+        endDate,
+        null,
+        100,
+        null
+      ];
+
+      return row;
+    });
+
+    if (minStartDate && maxEndDate) {
+      this.chartOptions = {
+        ...this.chartOptions,
+        hAxis: {
+          minValue: minStartDate,
+          maxValue: maxEndDate
         }
-        if (isNaN(endDate.getTime())) {
-          console.error('Invalid end date for task:', taskId);
-          endDate = new Date(startDate.getTime() + 3600000);
-        }
-
-        const row = [
-          taskId,      // string
-          taskName,    // string
-          startDate,   // Date object
-          endDate,     // Date object
-          null,        // number or null
-          100,         // number
-          null         // string or null
-        ];
-
-        console.log('Generated row:', row);
-        return row;
-      });
-
-      console.log('Final Chart Data:', this.chartData);
-    } catch (error) {
-      console.error('Error processing data:', error);
-      this.chartData = [];
+      };
     }
   }
 
+  navigateToSchedule() {
+    this.router.navigate(['/schedule']);
+  }
+
+}
+
+interface ChartOptions {
+  height: number;
+  gantt: {
+    trackHeight: number;
+    barCornerRadius: number;
+    labelStyle: {
+      fontName: string;
+      fontSize: number;
+      color: string;
+    };
+    criticalPathEnabled: boolean;
+    timeline: {
+      showRowLabels: boolean;
+    };
+  };
+  hAxis?: {
+    minValue: Date;
+    maxValue: Date;
+  };
 }

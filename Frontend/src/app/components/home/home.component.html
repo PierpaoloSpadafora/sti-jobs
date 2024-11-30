@@ -1,8 +1,42 @@
-<div class="chart-container">
-  <google-chart
-    [type]="chartType"
-    [data]="chartData"
-    [columns]="chartColumns"
-    [options]="chartOptions">
-  </google-chart>
+<div class="page-container">
+  <div class="page-header">
+    <h1>Scheduled Jobs</h1>
+    <p class="header-description">View the scheduled jobs in the calendar below.</p>
+  </div>
+
+  <div class="content-container">
+    <div class="schedule-selector">
+      <label for="scheduleType">Select Scheduling Type:</label>
+      <select id="scheduleType" [(ngModel)]="selectedScheduleType" (change)="onScheduleTypeChange()">
+        <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
+      </select>
+    </div>
+
+    <div class="chart-wrapper">
+      <div *ngIf="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+      </div>
+
+      <div *ngIf="!loading">
+        <div *ngIf="!hasScheduledJobs" class="no-schedule-message">
+          <p>No scheduled jobs found. Please schedule jobs.</p>
+          <button (click)="navigateToSchedule()">Go to Schedule</button>
+        </div>
+
+        <div *ngIf="hasScheduledJobs" class="chart-container">
+          <google-chart
+            [type]="chartType"
+            [data]="chartData"
+            [columns]="chartColumns"
+            [options]="chartOptions">
+          </google-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    &copy; 2023 Your Company Name
+  </div>
 </div>
