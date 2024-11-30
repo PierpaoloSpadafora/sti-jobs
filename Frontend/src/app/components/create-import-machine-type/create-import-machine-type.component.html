@@ -24,7 +24,12 @@
         </button>
       </div>
 
-      <form *ngIf="!showJsonInput" #machineTypeForm="ngForm" (ngSubmit)="submitMachineType(machineTypeForm)">
+      <form
+        *ngIf="!showJsonInput"
+        #machineTypeForm="ngForm"
+        (ngSubmit)="submitMachineType(machineTypeForm)"
+        novalidate
+      >
         <div class="mb-3">
           <label for="name" class="form-label">Nome</label>
           <input
@@ -34,9 +39,12 @@
             name="name"
             required
             #name="ngModel"
-            [ngClass]="{'is-invalid': name.invalid && (name.dirty || name.touched)}"
+            [ngClass]="{ 'is-invalid': name.invalid && (name.dirty || name.touched) }"
           />
-          <div class="invalid-feedback" *ngIf="name.invalid && (name.dirty || name.touched)">
+          <div
+            class="invalid-feedback"
+            *ngIf="name.invalid && (name.dirty || name.touched)"
+          >
             Il campo Nome è obbligatorio.
           </div>
         </div>
@@ -65,9 +73,12 @@
           name="jsonInput"
           required
           #jsonInput="ngModel"
-          [ngClass]="{'is-invalid': jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)}"
+          [ngClass]="{ 'is-invalid': jsonInput.invalid && (jsonInput.dirty || jsonInput.touched) }"
         ></textarea>
-        <div class="invalid-feedback" *ngIf="jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)">
+        <div
+          class="invalid-feedback"
+          *ngIf="jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)"
+        >
           Il campo JSON è obbligatorio.
         </div>
         <small class="text-muted">Esempio di JSON atteso:</small>

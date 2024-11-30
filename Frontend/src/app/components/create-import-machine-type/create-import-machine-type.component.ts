@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {MachineTypeControllerService} from '../../generated-api';
+import { MachineTypeControllerService } from '../../generated-api';
 import { MachineTypeDTO } from '../../generated-api';
 import Swal from 'sweetalert2';
 import { NgForm } from '@angular/forms';
+import {forkJoin} from "rxjs";
 
 @Component({
   selector: 'app-create-import-machine-type',
@@ -25,19 +26,19 @@ export class CreateImportMachineTypeComponent implements OnInit {
   constructor(private machineService: MachineTypeControllerService) {}
 
   ngOnInit(): void {
-    this.jsonExample =
-      `[
-        {
-          "name": "MachineTypeName",
-          "description": "Esempio Descrizione"
-        }
-      ]`;
+    this.jsonExample = `[
+  {
+    "name": "MachineTypeName",
+    "description": "Esempio Descrizione"
+  }
+]`;
     this.jsonInputContent = this.jsonExample;
   }
 
   toggleJsonInput() {
     this.showJsonInput = !this.showJsonInput;
     this.jsonError = '';
+    // Optionally reset the form when toggling
     if (!this.showJsonInput) {
       this.resetForm();
     }
@@ -77,6 +78,18 @@ export class CreateImportMachineTypeComponent implements OnInit {
           return;
         }
 
+        // Validate each machine type in JSON
+        for (const mt of machineTypesToSubmit) {
+          if (!mt.name || !mt.description) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Errore',
+              text: 'Tutti i campi (name e description) sono obbligatori nei Machine Types.',
+            });
+            return;
+          }
+        }
+
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -96,28 +109,32 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
     console.log('machineTypesToSubmitWithId:', machineTypesToSubmitWithId);
 
-    for (const machineType of machineTypesToSubmitWithId) {
-      this.machineService.createMachineType(machineType).subscribe({
-        next: () => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Machine Type creato con successo.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-          this.resetForm();
-        },
-        error: (error) => {
-          console.error('Error creating machine type:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Errore',
-            text: 'Non è stato possibile creare il Machine Type. Per favore, riprova più tardi.',
-          });
-        }
-      });
-    }
+    const requests = machineTypesToSubmitWithId.map(machineType =>
+      this.machineService.createMachineType(machineType)
+    );
 
+    forkJoin(requests).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Machine Type creati con successo.',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        this.resetForm();
+        if (form) {
+          form.resetForm();
+        }
+      },
+      error: (error: any) => {
+        console.error('Error creating machine type:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Non è stato possibile creare il Machine Type. Per favore, riprova più tardi.',
+        });
+      }
+    });
   }
 
   resetForm() {
