@@ -19,7 +19,8 @@ export class CreateImportJobComponent implements OnInit {
     status: JobDTO.StatusEnum.PENDING,
     priority: JobDTO.PriorityEnum.LOW,
     duration: 0,
-    idMachineType: 0,
+    //@ts-ignore
+    idMachineType: undefined,
     assigneeEmail: this.loginService.getUserEmail()!
   };
 
@@ -144,6 +145,21 @@ export class CreateImportJobComponent implements OnInit {
           const control = form.controls[field];
           control.markAsTouched({ onlySelf: true });
         });
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Per favore, compila tutti i campi obbligatori.'
+        });
+        return;
+      }
+
+      if (!this.job.idMachineType) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Per favore, seleziona un Tipo Macchina.',
+        });
         return;
       }
 
@@ -195,7 +211,8 @@ export class CreateImportJobComponent implements OnInit {
       status: JobDTO.StatusEnum.PENDING,
       priority: JobDTO.PriorityEnum.LOW,
       duration: 0,
-      idMachineType: 0,
+      //@ts-ignore
+      idMachineType: undefined,
       assigneeEmail: this.loginService.getUserEmail()!
     };
     this.durationHours = 0;
