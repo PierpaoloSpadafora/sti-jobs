@@ -34,6 +34,7 @@ public class Scheduler {
     public void scheduleByEveryType(){
         scheduleByPriority();
         scheduleByDueDate();
+        scheduleByDuration();
     }
 
     private void scheduleByPriority() {
@@ -85,6 +86,32 @@ public class Scheduler {
 
         saveSchedulesToFile(scheduleRepository.findAll(), "due-date");
     }
+
+    public void scheduleByDuration() {
+        List<Job> pendingJobs = jobRepository.findByStatus(JobStatus.PENDING);
+        Map<MachineType, List<Job>> jobsByMachineType = groupJobsByMachineType(pendingJobs);
+
+        for (Map.Entry<MachineType, List<Job>> entry : jobsByMachineType.entrySet()) {
+            MachineType machineType = entry.getKey();
+            List<Job> jobsForMachineType = entry.getValue();
+
+            List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
+            if (machines.isEmpty()) {
+                continue;
+            }
+
+            jobsForMachineType.sort(
+                    Comparator.comparing(Job::getDuration)
+                            .thenComparing(Job::getId)
+            );
+
+            Map<Machine, LocalDateTime> machineAvailability = initializeMachineAvailability(machines);
+            scheduleJobs(jobsForMachineType, machines, machineAvailability, machineType);
+        }
+
+        saveSchedulesToFile(scheduleRepository.findAll(), "duration");
+    }
+
 
     private Map<MachineType, List<Job>> groupJobsByMachineType(List<Job> jobs) {
         return jobs.stream()

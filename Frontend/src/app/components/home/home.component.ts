@@ -47,7 +47,8 @@ export class HomeComponent implements OnInit {
   scheduleTypes = [
     { label: 'All Jobs', value: 'ALL' },
     { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
-    { label: 'Scheduled by Priority', value: 'PRIORITY' }
+    { label: 'Scheduled by Priority', value: 'PRIORITY' },
+    { label: 'Scheduled by Duration', value: 'DURATION' }
   ];
 
   selectedScheduleType = 'ALL';
@@ -103,6 +104,14 @@ export class HomeComponent implements OnInit {
             const priorityB = jobB ? priorityOrder.indexOf(jobB.priority) : -1;
 
             return priorityB - priorityA;
+          });
+        }
+        else if (this.selectedScheduleType === 'DURATION') {
+          this.scheduleData.sort((a, b) => {
+            const durationA = a.duration || 0;
+            const durationB = b.duration || 0;
+        
+            return durationA - durationB;
           });
         }
 
