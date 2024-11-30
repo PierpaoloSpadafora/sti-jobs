@@ -1,3 +1,4 @@
+// home.component.ts
 import { Component, OnInit } from '@angular/core';
 import { JsonControllerService } from '../../generated-api';
 import { ScheduleControllerService } from '../../generated-api';
@@ -72,20 +73,19 @@ export class HomeComponent implements OnInit {
 
   fetchData() {
     this.loading = true;
-    let scheduleObservable: Observable<ScheduleDTO[]>;
 
-    if (this.selectedScheduleType === 'ALL') {
-      scheduleObservable = this.scheduleService.getAllSchedules();
-    } else if (this.selectedScheduleType === 'DUE_DATE') {
-      scheduleObservable = this.jsonService.exportJobScheduledDueDate();
-    } else if (this.selectedScheduleType === 'PRIORITY') {
-      scheduleObservable = this.jsonService.exportJobScheduledPriority();
-    } else {
-      scheduleObservable = this.scheduleService.getAllSchedules();
-    }
+    this.scheduleService.getAllSchedules().subscribe(scheduleData => {
+      // Convert startTime e dueDate in oggetti Date
+      this.scheduleData = scheduleData.map(schedule => {
+        if (typeof schedule.startTime === 'string') {
+          schedule.startTime = new Date(schedule.startTime);
+        }
+        if (typeof schedule.dueDate === 'string') {
+          schedule.dueDate = new Date(schedule.dueDate);
+        }
+        return schedule;
+      });
 
-    scheduleObservable.subscribe(scheduleData => {
-      this.scheduleData = scheduleData;
       this.jsonService.exportJob().subscribe(jobs => {
         this.jobsMap.clear();
         jobs.forEach(job => {
@@ -93,6 +93,31 @@ export class HomeComponent implements OnInit {
             this.jobsMap.set(job.id, job);
           }
         });
+
+        // Ora, in base al tipo di programmazione selezionato, ordiniamo i dati
+        if (this.selectedScheduleType === 'DUE_DATE') {
+          // Ordina scheduleData in base a dueDate
+          this.scheduleData.sort((a, b) => {
+            if (a.dueDate && b.dueDate) {
+              return a.dueDate.getTime() - b.dueDate.getTime();
+            } else {
+              return 0;
+            }
+          });
+        } else if (this.selectedScheduleType === 'PRIORITY') {
+          // Ordina scheduleData in base alla priorità del job
+          this.scheduleData.sort((a, b) => {
+            const jobA = this.jobsMap.get(a.jobId || 0);
+            const jobB = this.jobsMap.get(b.jobId || 0);
+            const priorityOrder = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+
+            const priorityA = jobA ? priorityOrder.indexOf(jobA.priority) : -1;
+            const priorityB = jobB ? priorityOrder.indexOf(jobB.priority) : -1;
+
+            return priorityB - priorityA; // Priorità più alta prima
+          });
+        }
+
         this.processData();
         this.loading = false;
       });
@@ -106,9 +131,8 @@ export class HomeComponent implements OnInit {
     if (this.scheduleData.length === 0) {
       this.hasScheduledJobs = false;
       return;
-    } else {
-      this.hasScheduledJobs = true;
     }
+    this.hasScheduledJobs = true;
 
     let minStartDate: Date | null = null;
     let maxEndDate: Date | null = null;
@@ -118,19 +142,26 @@ export class HomeComponent implements OnInit {
       const taskId = schedule.id?.toString() || '';
       const taskName = job ? job.title : 'Unknown Job';
 
-      let startDate = new Date(schedule.startTime || '');
-      let endDate = new Date(startDate.getTime() + (schedule.duration || 0) * 1000);
-
-      if (isNaN(startDate.getTime())) {
-        console.error('Invalid start date for task:', taskId);
+      // Assicurati che startTime sia un oggetto Date valido
+      let startDate: Date;
+      if (schedule.startTime && !isNaN(new Date(schedule.startTime).getTime())) {
+        startDate = new Date(schedule.startTime);
+      } else {
+        console.warn(`Invalid startTime for task ${taskId}, using current date`);
         startDate = new Date();
       }
-      if (isNaN(endDate.getTime())) {
-        console.error('Invalid end date for task:', taskId);
-        endDate = new Date(startDate.getTime() + 3600000);
+
+      // Calcola endDate in base alla durata
+      let endDate: Date;
+      try {
+        const duration = schedule.duration || 3600; // default a 1 ora se la durata manca
+        endDate = new Date(startDate.getTime() + duration * 1000);
+      } catch (error) {
+        console.error(`Error calculating end date for task ${taskId}:`, error);
+        endDate = new Date(startDate.getTime() + 3600000); // durata predefinita di 1 ora
       }
 
-      // Update min and max dates
+      // Aggiorna le date minime e massime
       if (!minStartDate || startDate < minStartDate) {
         minStartDate = startDate;
       }
@@ -138,7 +169,7 @@ export class HomeComponent implements OnInit {
         maxEndDate = endDate;
       }
 
-      const row = [
+      return [
         taskId,
         taskName,
         startDate,
@@ -147,10 +178,9 @@ export class HomeComponent implements OnInit {
         100,
         null
       ];
-
-      return row;
     });
 
+    // Aggiorna le opzioni del grafico con l'intervallo di date
     if (minStartDate && maxEndDate) {
       this.chartOptions = {
         ...this.chartOptions,
