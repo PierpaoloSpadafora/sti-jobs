@@ -97,7 +97,7 @@ export class ScheduleComponent implements OnInit {
           if (schedule.jobId) {
             const job = this.jobs.find(j => j.id === schedule.jobId);
             if (job) {
-              // schedule.jobTitle = job.title;
+              // schedule.jobTitle = job.title; // Se necessario
             } else {
               console.warn(`Job with ID ${schedule.jobId} not found.`);
             }
