@@ -8,7 +8,7 @@
   {
     "name": "Fresatrice CNC FC-500",
     "description": "Fresatrice a controllo numerico computerizzato con 5 assi per la produzione di componenti complessi.",
-    "status": "IN_USE",
+    "status": "BUSY",
     "typeId": 2
   },
   {
@@ -44,7 +44,7 @@
   {
     "name": "Pialla Automatica PA-1100",
     "description": "Pialla automatica per la rifinitura di superfici in legno, garantendo uniformità e qualità elevata.",
-    "status": "IN_USE",
+    "status": "BUSY",
     "typeId": 8
   },
   {
