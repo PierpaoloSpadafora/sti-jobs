@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Torno Meccanico",
+    "description": "Macchina utensile utilizzata per la lavorazione di materiali metallici e plastici mediante rotazione dell'opera."
+  },
+  {
+    "name": "Fresatrice CNC",
+    "description": "Fresatrice a controllo numerico computerizzato, ideale per la produzione di componenti complessi con alta precisione."
+  },
+  {
+    "name": "Trapano a Colonna",
+    "description": "Trapano stabile e preciso, utilizzato per forature verticali in materiali come legno, metallo e plastica."
+  },
+  {
+    "name": "Pressa Idraulica",
+    "description": "Macchina utilizzata per modellare e tagliare materiali metallici mediante l'applicazione di forza idraulica."
+  },
+  {
+    "name": "Segatrice Laser",
+    "description": "Macchina di taglio ad alta precisione che utilizza un raggio laser per tagliare materiali metallici e non."
+  },
+  {
+    "name": "Pialla Automatica",
+    "description": "Macchina utilizzata per livellare e rifinire superfici di legno, garantendo uniformità e finitura di alta qualità."
+  },
+  {
+    "name": "Sega a Nastro Industriale",
+    "description": "Sega robusta utilizzata per tagliare grandi quantità di legno, metallo o plastica con precisione e velocità."
+  },
+  {
+    "name": "Macchina per Stampaggio a Iniezione",
+    "description": "Macchina utilizzata per produrre parti in plastica tramite il processo di stampaggio a iniezione ad alta efficienza."
+  },
+  {
+    "name": "Compattatore Vibroassiale",
+    "description": "Macchina utilizzata per compattare materiali granulari e sabbie in modo uniforme e consistente."
+  },
+  {
+    "name": "Miscelatore Industriale",
+    "description": "Macchina utilizzata per mescolare materiali in polvere o liquidi in grandi quantità, garantendo un'omogeneità perfetta."
+  }
+]
