@@ -7,6 +7,14 @@
         <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
       </select>
     </div>
+
+    <!-- Nuova sezione per la selezione dei giorni per pagina -->
+    <div class="days-selector">
+      <label for="daysPerPage">Giorni per pagina:</label>
+      <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" (change)="onDaysPerPageChange()">
+        <option *ngFor="let option of daysPerPageOptions" [value]="option">{{ option }}</option>
+      </select>
+    </div>
   </div>
 
   <div class="content-container">
@@ -23,8 +31,8 @@
         </div>
 
         <div *ngIf="hasScheduledJobs">
-          <div *ngFor="let date of Array.from(schedulesByDateAndMachine.keys())">
-            <h2>{{ date }}</h2>
+          <div *ngFor="let date of visibleDates">
+            <h2>{{ formatDate(date) }}</h2>
             <div *ngFor="let machineTypeId of Array.from(schedulesByDateAndMachine.get(date)?.keys() || [])">
               <h3>{{ machinesMap.get(machineTypeId) || 'Unknown Machine Type' }}</h3>
               <table class="schedule-table">
@@ -46,6 +54,13 @@
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <!-- Pulsanti di navigazione -->
+          <div class="pagination-controls" *ngIf="paginatedDates.length > selectedDaysPerPage">
+            <button (click)="previousPage()" [disabled]="currentPage === 0">Indietro</button>
+            <span>Pagina {{ currentPage + 1 }} di {{ totalPages }}</span>
+            <button (click)="nextPage()" [disabled]="(currentPage + 1) * selectedDaysPerPage >= paginatedDates.length">Avanti</button>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
 import { JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,11 @@ export class HomeComponent implements OnInit {
     { label: 'Scheduled by Duration', value: 'DURATION' }
   ];
   selectedScheduleType = 'ALL';
+
+  daysPerPageOptions = [1, 3, 5, 7];
+  selectedDaysPerPage = 7;
+  currentPage = 0;
+  paginatedDates: string[] = [];
 
   hasScheduledJobs = false;
   loading = true;
@@ -130,7 +136,17 @@ export class HomeComponent implements OnInit {
       machineMap.get(machineTypeId)!.push(schedule);
     });
 
-    this.schedulesByDateAndMachine = new Map([...schedulesByDateAndMachine.entries()].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()));
+    // Ordina le date
+    const sortedDates = Array.from(schedulesByDateAndMachine.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    this.schedulesByDateAndMachine = new Map([...schedulesByDateAndMachine.entries()]
+      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()));
+
+    // Salva le date ordinate per la paginazione
+    this.paginatedDates = sortedDates;
+
+    // Reset della paginazione
+    this.currentPage = 0;
 
     this.schedulesByDateAndMachine.forEach((machineMap, date) => {
       machineMap.forEach((schedules, machineTypeId) => {
@@ -143,8 +159,44 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  get visibleDates(): string[] {
+    const start = this.currentPage * this.selectedDaysPerPage;
+    return this.paginatedDates.slice(start, start + this.selectedDaysPerPage);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.paginatedDates.length / this.selectedDaysPerPage);
+  }
+
+  nextPage() {
+    if ((this.currentPage + 1) * this.selectedDaysPerPage < this.paginatedDates.length) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+    }
+  }
+
+  onDaysPerPageChange() {
+    this.currentPage = 0;
+  }
+
   navigateToSchedule() {
     this.router.navigate(['/schedule']);
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    };
+    return new Intl.DateTimeFormat('it-IT', options).format(date);
   }
 
   protected readonly Array = Array;

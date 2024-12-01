@@ -16,17 +16,20 @@
   margin-bottom: 0.5rem;
 }
 
-.schedule-selector {
+.schedule-selector,
+.days-selector {
   margin-top: 1rem;
   text-align: center;
 }
 
-.schedule-selector label {
+.schedule-selector label,
+.days-selector label {
   margin-right: 0.5rem;
   font-weight: bold;
 }
 
-.schedule-selector select {
+.schedule-selector select,
+.days-selector select {
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid #ccc;
@@ -123,6 +126,39 @@
   background-color: #dcdde1;
 }
 
+/* Stili per i controlli di paginazione */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.pagination-controls button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.pagination-controls button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.pagination-controls span {
+  font-size: 1rem;
+}
+
+/* Rendere la tabella responsiva */
 @media (max-width: 768px) {
   .page-container {
     padding: 1rem;
@@ -132,7 +168,8 @@
     font-size: 2rem;
   }
 
-  .schedule-selector select {
+  .schedule-selector select,
+  .days-selector select {
     width: 100%;
     margin-top: 0.5rem;
   }
