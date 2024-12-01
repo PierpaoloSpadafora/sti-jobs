@@ -3,60 +3,60 @@
     "name": "Torno Meccanico TM-400",
     "description": "Torno meccanico di ultima generazione per lavorazioni precise su acciaio e leghe leggere.",
     "status": "AVAILABLE",
-    "typeId": 4
+    "typeId": 1
   },
   {
     "name": "Fresatrice CNC FC-500",
     "description": "Fresatrice a controllo numerico computerizzato con 5 assi per la produzione di componenti complessi.",
     "status": "IN_USE",
-    "typeId": 5
+    "typeId": 2
   },
   {
     "name": "Sega a Nastro Industriale SN-600",
     "description": "Sega a nastro robusta con lama ad alta resistenza per tagli rapidi e precisi su legno e metallo.",
     "status": "AVAILABLE",
-    "typeId": 6
+    "typeId": 3
   },
   {
     "name": "Stampatrice a Iniezione SI-700",
     "description": "Macchina per stampaggio a iniezione ad alta efficienza con capacità di 700 tonnellate.",
     "status": "MAINTENANCE",
-    "typeId": 7
+    "typeId": 4
   },
   {
     "name": "Trapano a Colonna TC-800",
     "description": "Trapano a colonna avanzato con sistema di misurazione automatica per forature precise in materiali duri.",
     "status": "AVAILABLE",
-    "typeId": 8
+    "typeId": 5
   },
   {
     "name": "Pressa Idraulica PI-900",
     "description": "Pressa idraulica ad alta capacità per operazioni di stampaggio e piegatura di lamiere metalliche.",
     "status": "BUSY",
-    "typeId": 9
+    "typeId": 6
   },
   {
     "name": "Segatrice Laser SL-1000",
     "description": "Segatrice laser ad alta precisione con interfaccia utente intuitiva e controllo remoto.",
     "status": "AVAILABLE",
-    "typeId": 10
+    "typeId": 7
   },
   {
     "name": "Pialla Automatica PA-1100",
     "description": "Pialla automatica per la rifinitura di superfici in legno, garantendo uniformità e qualità elevata.",
     "status": "IN_USE",
-    "typeId": 11
+    "typeId": 8
   },
   {
     "name": "Compattatore Vibroassiale CV-1200",
     "description": "Compattatore vibroassiale con controllo elettronico per ottimizzare la densità dei materiali compattati.",
     "status": "AVAILABLE",
-    "typeId": 12
+    "typeId": 9
   },
   {
     "name": "Miscelatore Industriale MI-1300",
     "description": "Miscelatore industriale ad alta capacità per la miscelazione omogenea di materiali liquidi e solidi.",
     "status": "AVAILABLE",
-    "typeId": 13
+    "typeId": 10
   }
 ]

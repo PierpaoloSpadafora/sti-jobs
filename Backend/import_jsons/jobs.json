@@ -8,12 +8,20 @@
     "idMachineType": 1
   },
   {
+    "title": "Produzione Componenti CNC",
+    "description": "Realizzazione di componenti complessi con alta precisione utilizzando la Fresatrice CNC.",
+    "status": "PENDING",
+    "priority": "URGENT",
+    "duration": 10000,
+    "idMachineType": 2
+  },
+  {
     "title": "Taglio Legno di Precisione",
     "description": "Operazione di taglio su larga scala utilizzando la Sega a Nastro Industriale per legno massiccio.",
     "status": "PENDING",
     "priority": "HIGH",
     "duration": 5400,
-    "idMachineType": 2
+    "idMachineType": 3
   },
   {
     "title": "Stampaggio Parti in Plastica",
@@ -21,7 +29,7 @@
     "status": "PENDING",
     "priority": "URGENT",
     "duration": 10800,
-    "idMachineType": 3
+    "idMachineType": 4
   },
   {
     "title": "Foratura Verticale Precisa",
@@ -29,7 +37,7 @@
     "status": "PENDING",
     "priority": "LOW",
     "duration": 3600,
-    "idMachineType": 4
+    "idMachineType": 5
   },
   {
     "title": "Formatura Materiali Metallici",
@@ -37,7 +45,7 @@
     "status": "PENDING",
     "priority": "MEDIUM",
     "duration": 9000,
-    "idMachineType": 5
+    "idMachineType": 6
   },
   {
     "title": "Taglio Laser di Alta Precisione",
@@ -45,7 +53,7 @@
     "status": "PENDING",
     "priority": "HIGH",
     "duration": 7200,
-    "idMachineType": 6
+    "idMachineType": 7
   },
   {
     "title": "Rifinitura Superfici in Legno",
@@ -53,7 +61,7 @@
     "status": "PENDING",
     "priority": "MEDIUM",
     "duration": 4800,
-    "idMachineType": 7
+    "idMachineType": 8
   },
   {
     "title": "Compattazione Materiali Granulari",
@@ -61,7 +69,7 @@
     "status": "PENDING",
     "priority": "LOW",
     "duration": 6000,
-    "idMachineType": 8
+    "idMachineType": 9
   },
   {
     "title": "Miscelazione Materiali in Polvere",
@@ -69,14 +77,6 @@
     "status": "PENDING",
     "priority": "HIGH",
     "duration": 8400,
-    "idMachineType": 9
-  },
-  {
-    "title": "Produzione Componenti CNC",
-    "description": "Realizzazione di componenti complessi con alta precisione utilizzando la Fresatrice CNC.",
-    "status": "PENDING",
-    "priority": "URGENT",
-    "duration": 10000,
     "idMachineType": 10
   }
 ]
