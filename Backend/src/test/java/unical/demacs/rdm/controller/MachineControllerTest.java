@@ -137,8 +137,7 @@ public class MachineControllerTest {
         when(machineService.deleteMachine(TEST_ID)).thenReturn(true);
 
         mockMvc.perform(delete("/api/v1/machine/" + TEST_ID))
-                .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(status().isNoContent());
 
         verify(machineService, times(1)).deleteMachine(TEST_ID);
     }

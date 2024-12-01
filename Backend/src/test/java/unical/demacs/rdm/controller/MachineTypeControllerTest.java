@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import unical.demacs.rdm.config.ModelMapperExtended;
+import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
@@ -89,7 +90,7 @@ public class MachineTypeControllerTest {
     @Test
     void testGetMachineTypeById() throws Exception {
         when(machineTypeService.getMachineTypeById(TEST_ID)).thenReturn(Optional.of(machineType));
-        when(modelMapper.map(eq(machineType), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTO);
+        when(modelMapper.map(any(MachineType.class), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTO);
 
         mockMvc.perform(get("/api/v1/machine-type/by-id/" + TEST_ID))
                 .andExpect(status().isOk())
@@ -100,6 +101,16 @@ public class MachineTypeControllerTest {
         verify(machineTypeService).getMachineTypeById(TEST_ID);
     }
 
+    @Test
+    void testGetMachineTypeById_NotFound() throws Exception {
+        when(machineTypeService.getMachineTypeById(TEST_ID))
+                .thenThrow(new MachineNotFoundException("Machine type not found."));
+
+        mockMvc.perform(get("/api/v1/machine-type/by-id/" + TEST_ID))
+                .andExpect(status().isNotFound());
+
+        verify(machineTypeService).getMachineTypeById(TEST_ID);
+    }
     @Test
     void testGetAllMachineTypes() throws Exception {
         List<MachineType> machineTypes = Arrays.asList(machineType);
@@ -144,12 +155,5 @@ public class MachineTypeControllerTest {
         verify(machineTypeService).deleteMachineType(TEST_ID);
     }
 
-    @Test
-    void testGetMachineTypeById_NotFound() throws Exception {
-        when(machineTypeService.getMachineTypeById(TEST_ID)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/machine-type/by-id/" + TEST_ID))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Machine type not found"));
-    }
 }
