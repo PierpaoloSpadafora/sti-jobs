@@ -4,7 +4,6 @@ import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
 import { JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
-import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +24,7 @@ export class HomeComponent implements OnInit {
   selectedScheduleType = 'ALL';
 
   daysPerPageOptions = [1, 3, 5, 7];
-  selectedDaysPerPage = 7;
+  selectedDaysPerPage = 3;
   currentPage = 0;
   paginatedDates: string[] = [];
 
