@@ -1,17 +1,1 @@
-[ {
-  "id" : 5,
-  "jobId" : 1,
-  "machineTypeId" : 1,
-  "dueDate" : "2024-11-29T23:00:00",
-  "startTime" : "2024-11-30T12:00:00",
-  "duration" : 3600,
-  "status" : "SCHEDULED"
-}, {
-  "id" : 8,
-  "jobId" : 2,
-  "machineTypeId" : 1,
-  "dueDate" : "2024-11-29T23:00:00",
-  "startTime" : "2024-11-30T13:00:00",
-  "duration" : 7200,
-  "status" : "SCHEDULED"
-} ]
+[ ]

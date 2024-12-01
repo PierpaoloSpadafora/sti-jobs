@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Lavorazione Componenti Metallici",
+    "description": "Utilizzo del Tornio Meccanico per la lavorazione precisa di componenti metallici.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 7200,
+    "idMachineType": 1
+  },
+  {
+    "title": "Taglio Legno di Precisione",
+    "description": "Operazione di taglio su larga scala utilizzando la Sega a Nastro Industriale per legno massiccio.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 5400,
+    "idMachineType": 2
+  },
+  {
+    "title": "Stampaggio Parti in Plastica",
+    "description": "Produzione di componenti in plastica mediante Macchina per Stampaggio a Iniezione ad alta efficienza.",
+    "status": "PENDING",
+    "priority": "URGENT",
+    "duration": 10800,
+    "idMachineType": 3
+  },
+  {
+    "title": "Foratura Verticale Precisa",
+    "description": "Esecuzione di forature verticali in materiali vari con il Trapano a Colonna.",
+    "status": "PENDING",
+    "priority": "LOW",
+    "duration": 3600,
+    "idMachineType": 4
+  },
+  {
+    "title": "Formatura Materiali Metallici",
+    "description": "Utilizzo della Pressa Idraulica per modellare e tagliare materiali metallici con forza controllata.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 9000,
+    "idMachineType": 5
+  },
+  {
+    "title": "Taglio Laser di Alta Precisione",
+    "description": "Taglio di materiali metallici e non mediante la Segatrice Laser ad alta precisione.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 7200,
+    "idMachineType": 6
+  },
+  {
+    "title": "Rifinitura Superfici in Legno",
+    "description": "Livellamento e rifinitura delle superfici in legno utilizzando la Pialla Automatica.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 4800,
+    "idMachineType": 7
+  },
+  {
+    "title": "Compattazione Materiali Granulari",
+    "description": "Compattazione uniforme di materiali granulari e sabbie con il Compattatore Vibroassiale.",
+    "status": "PENDING",
+    "priority": "LOW",
+    "duration": 6000,
+    "idMachineType": 8
+  },
+  {
+    "title": "Miscelazione Materiali in Polvere",
+    "description": "Mescolamento omogeneo di materiali in polvere o liquidi in grandi quantità con il Miscelatore Industriale.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 8400,
+    "idMachineType": 9
+  },
+  {
+    "title": "Produzione Componenti CNC",
+    "description": "Realizzazione di componenti complessi con alta precisione utilizzando la Fresatrice CNC.",
+    "status": "PENDING",
+    "priority": "URGENT",
+    "duration": 10000,
+    "idMachineType": 10
+  }
+]
