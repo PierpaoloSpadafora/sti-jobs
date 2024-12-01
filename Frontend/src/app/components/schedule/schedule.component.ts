@@ -20,7 +20,6 @@ export class ScheduleComponent implements OnInit {
   availableStartTimes: Date[] = [];
   selectedSchedule?: ScheduleDTO;
 
-  // Variabili per la paginazione
   currentJobPage: number = 1;
   jobPageSize: number = 5;
   totalJobPages: number = 1;
@@ -55,7 +54,7 @@ export class ScheduleComponent implements OnInit {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
         this.totalJobPages = Math.ceil(this.jobs.length / this.jobPageSize);
-        this.currentJobPage = 1; // Reset alla prima pagina
+        this.currentJobPage = 1;
         this.getAllSchedules();
       },
       error: (error: any) => {
@@ -91,8 +90,7 @@ export class ScheduleComponent implements OnInit {
           if (schedule.jobId) {
             const job = this.jobs.find(j => j.id === schedule.jobId);
             if (job) {
-              // Opzionale: puoi estendere le informazioni del job nella schedule se necessario
-              // Esempio: schedule.jobTitle = job.title;
+              // schedule.jobTitle = job.title;
             } else {
               console.warn(`Job with ID ${schedule.jobId} not found.`);
             }

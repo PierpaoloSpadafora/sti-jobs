@@ -1,9 +1,7 @@
-// src/app/components/home/home.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ScheduleControllerService } from '../../generated-api';
 import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
-import { MachineTypeDTO } from '../../generated-api';
 import { JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
 
@@ -15,9 +13,8 @@ import { Router } from '@angular/router';
 export class HomeComponent implements OnInit {
   scheduleData: ScheduleDTO[] = [];
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
-  machinesMap: Map<number, string> = new Map<number, string>(); // Map of machineTypeId to machineTypeName
+  machinesMap: Map<number, string> = new Map<number, string>();
 
-  // Schedule types
   scheduleTypes = [
     { label: 'All Jobs', value: 'ALL' },
     { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
@@ -29,7 +26,6 @@ export class HomeComponent implements OnInit {
   hasScheduledJobs = false;
   loading = true;
 
-  // Properties to hold grouped schedules
   schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map<string, Map<number, ScheduleDTO[]>>();
 
   constructor(
@@ -68,7 +64,6 @@ export class HomeComponent implements OnInit {
       next: (scheduleData: ScheduleDTO[]) => {
         this.scheduleData = scheduleData;
 
-        // Fetch jobs
         this.jsonService.exportJob().subscribe({
           next: (jobs) => {
             this.jobsMap.clear();
@@ -78,7 +73,6 @@ export class HomeComponent implements OnInit {
               }
             });
 
-            // Fetch machine types
             this.jsonService.exportMachineType().subscribe({
               next: (machineTypes) => {
                 this.machinesMap.clear();
@@ -88,7 +82,6 @@ export class HomeComponent implements OnInit {
                   }
                 });
 
-                // Process data
                 this.processData();
                 this.loading = false;
               },
@@ -118,7 +111,6 @@ export class HomeComponent implements OnInit {
     }
     this.hasScheduledJobs = true;
 
-    // Group schedules by date and then by machineTypeId
     const schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map();
 
     this.scheduleData.forEach(schedule => {
@@ -138,10 +130,8 @@ export class HomeComponent implements OnInit {
       machineMap.get(machineTypeId)!.push(schedule);
     });
 
-    // Sort the dates
     this.schedulesByDateAndMachine = new Map([...schedulesByDateAndMachine.entries()].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()));
 
-    // Sort schedules within each machine by start time
     this.schedulesByDateAndMachine.forEach((machineMap, date) => {
       machineMap.forEach((schedules, machineTypeId) => {
         schedules.sort((a, b) => {
