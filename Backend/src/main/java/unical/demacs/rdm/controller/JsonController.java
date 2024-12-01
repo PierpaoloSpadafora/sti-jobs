@@ -39,10 +39,14 @@ public class JsonController {
     public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs, @RequestParam("assigneeEmail") String assigneeEmail) {
         try {
             jobs.forEach(job -> {
-                Optional<Job> existingJob = jobService.getJobById(job.getId());
-                if (existingJob.isEmpty()) {
-                    jobService.createJob(assigneeEmail, job);
+                if (job.getId()!=null) {
+                    Optional<Job> existingJob = jobService.getJobById(job.getId());
+                    if (existingJob.isEmpty()) {
+                        jobService.createJob(assigneeEmail, job);
+                    }
                 }
+                else
+                    jobService.createJob(assigneeEmail, job);
             });
             return ResponseEntity.ok("Jobs imported successfully.");
         } catch (Exception e) {
