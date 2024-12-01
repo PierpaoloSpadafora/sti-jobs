@@ -22,6 +22,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findByMachineType_IdAndStatus(long machineTypeId, ScheduleStatus scheduleStatus);
 
+    List<Schedule> findAll();
+
     @Query(value = "SELECT MAX(start_time + (duration * INTERVAL '1 second')) " +
             "FROM schedules WHERE machine_id = :machineType",
             nativeQuery = true)
