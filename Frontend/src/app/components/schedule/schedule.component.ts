@@ -20,6 +20,11 @@ export class ScheduleComponent implements OnInit {
   availableStartTimes: Date[] = [];
   selectedSchedule?: ScheduleDTO;
 
+  // Variabili per la paginazione
+  currentJobPage: number = 1;
+  jobPageSize: number = 5;
+  totalJobPages: number = 1;
+
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
   constructor(
@@ -49,12 +54,31 @@ export class ScheduleComponent implements OnInit {
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
+        this.totalJobPages = Math.ceil(this.jobs.length / this.jobPageSize);
+        this.currentJobPage = 1; // Reset alla prima pagina
         this.getAllSchedules();
       },
       error: (error: any) => {
         console.error('Error while retrieving jobs:', error);
       }
     });
+  }
+
+  get paginatedJobs(): JobDTO[] {
+    const start = (this.currentJobPage - 1) * this.jobPageSize;
+    return this.jobs.slice(start, start + this.jobPageSize);
+  }
+
+  nextJobPage() {
+    if (this.currentJobPage < this.totalJobPages) {
+      this.currentJobPage++;
+    }
+  }
+
+  previousJobPage() {
+    if (this.currentJobPage > 1) {
+      this.currentJobPage--;
+    }
   }
 
   getAllSchedules() {
@@ -67,7 +91,8 @@ export class ScheduleComponent implements OnInit {
           if (schedule.jobId) {
             const job = this.jobs.find(j => j.id === schedule.jobId);
             if (job) {
-              schedule.jobId = job.id;
+              // Opzionale: puoi estendere le informazioni del job nella schedule se necessario
+              // Esempio: schedule.jobTitle = job.title;
             } else {
               console.warn(`Job with ID ${schedule.jobId} not found.`);
             }

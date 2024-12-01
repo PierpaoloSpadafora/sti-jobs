@@ -12,7 +12,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let job of jobs">
+        <tr *ngFor="let job of paginatedJobs">
           <td>{{ job.title }}</td>
           <td>{{ job.description }}</td>
           <td>{{ secondsToDuration(Number(job.duration)) }}</td>
@@ -24,6 +24,23 @@
         </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Controlli di paginazione -->
+    <div class="pagination-controls">
+      <button
+        class="pagination-button"
+        (click)="previousJobPage()"
+        [disabled]="currentJobPage === 1">
+        Precedente
+      </button>
+      <span>Pagina {{currentJobPage}} di {{totalJobPages}}</span>
+      <button
+        class="pagination-button"
+        (click)="nextJobPage()"
+        [disabled]="currentJobPage === totalJobPages">
+        Successiva
+      </button>
     </div>
   </div>
 
