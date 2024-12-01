@@ -66,13 +66,14 @@ public class JsonController {
 
     @Operation(summary = "Import MachineType data from JSON", description = "Import MachineType data into the system from JSON content.",
             tags = {"json-controller"})
-    @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
+    @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
         try {
             machineTypes.forEach(machineTypeService::createMachineType);
-            return ResponseEntity.ok("MachineTypes imported successfully.");
+            Map<String, String> response = Map.of("message", "MachineTypes imported successfully.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error importing MachineTypes: " + e.getMessage());
+            return ResponseEntity.status(400).body(Map.of("message", "Error importing MachineTypes: " + e.getMessage()));
         }
     }
 
@@ -84,7 +85,7 @@ public class JsonController {
         return ResponseEntity.ok(modelMapperExtended.mapList(machineTypes, MachineTypeDTO.class));
     }
 
-    @PostMapping("/importMachine")
+    @PostMapping(value = "/importMachine", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> importMachine(@RequestBody List<MachineDTO> machines) {
         try {
             for (MachineDTO machine : machines) {
@@ -92,7 +93,7 @@ public class JsonController {
             }
             return ResponseEntity.ok(Map.of("message", "Machines imported successfully."));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("message", "Errore durante l'importazione delle Machines."));
+            return ResponseEntity.status(500).body(Map.of("message", "Errore durante l'importazione delle Machines: " + e.getMessage()));
         }
     }
 
