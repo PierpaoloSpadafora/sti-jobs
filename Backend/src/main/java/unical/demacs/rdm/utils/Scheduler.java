@@ -9,15 +9,12 @@ import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.entities.Schedule;
-import unical.demacs.rdm.persistence.enums.JobStatus;
-import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.repository.MachineRepository;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,117 +35,74 @@ public class Scheduler {
     }
 
     private void scheduleByPriority() {
-        List<Schedule> schedules = scheduleRepository.findAll();
-        if (schedules.isEmpty()) {
-            return;
-        }
+        scheduleBy("priority", (s1, s2) -> {
+            int priority1 = (s1.getJob() != null && s1.getJob().getPriority() != null) ? s1.getJob().getPriority().ordinal() : Integer.MAX_VALUE;
+            int priority2 = (s2.getJob() != null && s2.getJob().getPriority() != null) ? s2.getJob().getPriority().ordinal() : Integer.MAX_VALUE;
 
-        Map<Long, Job> jobsMap = loadJobsMap(schedules);
-        Map<MachineType, List<Schedule>> schedulesByMachineType = groupSchedulesByMachineType(schedules);
-
-        List<Schedule> schedulesForType = new ArrayList<>();
-        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByMachineType.entrySet()) {
-            MachineType machineType = entry.getKey();
-            schedulesForType = entry.getValue();
-
-            List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
-            if (machines.isEmpty()) {
-                continue;
+            int priorityComparison = Integer.compare(priority2, priority1);
+            if (priorityComparison != 0) {
+                return priorityComparison;
             }
 
-            schedulesForType.sort(new Comparator<Schedule>() {
-                @Override
-                public int compare(Schedule schedule1, Schedule schedule2) {
-                    Job job1 = jobsMap.get(schedule1.getJob().getId());
-                    Job job2 = jobsMap.get(schedule2.getJob().getId());
-
-                    int priority1 = (job1 != null) ? job1.getPriority().ordinal() : Integer.MAX_VALUE;
-                    int priority2 = (job2 != null) ? job2.getPriority().ordinal() : Integer.MAX_VALUE;
-
-                    int priorityComparison = Integer.compare(priority2, priority1);
-                    if (priorityComparison != 0) {
-                        return priorityComparison;
-                    }
-
-                    Long jobId1 = schedule1.getJob().getId();
-                    Long jobId2 = schedule2.getJob().getId();
-                    return jobId1.compareTo(jobId2);
-                }
-            });
-        }
-        saveSchedulesToFile(schedulesForType, "priority");
+            Long jobId1 = s1.getJob().getId();
+            Long jobId2 = s2.getJob().getId();
+            return jobId1.compareTo(jobId2);
+        }, true);
     }
 
-
     private void scheduleByDueDate() {
-        List<Schedule> schedules = scheduleRepository.findAll();
-        if (schedules.isEmpty()) {
-            return;
-        }
-
-        Map<Long, Job> jobsMap = loadJobsMap(schedules);
-        Map<MachineType, List<Schedule>> schedulesByMachineType = groupSchedulesByMachineType(schedules);
-
-        List<Schedule> schedulesForType = new ArrayList<>();
-        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByMachineType.entrySet()) {
-            MachineType machineType = entry.getKey();
-            schedulesForType = entry.getValue();
-
-            List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
-            if (machines.isEmpty()) {
-                continue;
-            }
-
-            schedulesForType.sort(Comparator
-                    .comparing(Schedule::getDueDate, Comparator.nullsLast(Comparator.naturalOrder()))
-                    .thenComparing(schedule -> schedule.getJob().getId()));
-
-        }
-
-        saveSchedulesToFile(schedulesForType, "due-date");
+        scheduleBy("due-date", Comparator
+                .comparing(Schedule::getDueDate, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(schedule -> schedule.getJob().getId()), false);
     }
 
     private void scheduleByDuration() {
+        scheduleBy("duration", (s1, s2) -> {
+            long duration1 = (s1.getJob() != null) ? s1.getJob().getDuration() : Long.MAX_VALUE;
+            long duration2 = (s2.getJob() != null) ? s2.getJob().getDuration() : Long.MAX_VALUE;
+
+            int durationComparison = Long.compare(duration1, duration2);
+            if (durationComparison != 0) {
+                return durationComparison;
+            }
+
+            Long jobId1 = s1.getJob().getId();
+            Long jobId2 = s2.getJob().getId();
+            return jobId1.compareTo(jobId2);
+        }, true);
+    }
+
+    private void scheduleBy(String type, Comparator<Schedule> comparator, boolean requiresJobDetails) {
         List<Schedule> schedules = scheduleRepository.findAll();
         if (schedules.isEmpty()) {
             return;
         }
 
-        Map<Long, Job> jobsMap = loadJobsMap(schedules);
+        Map<Long, Job> jobsMap = requiresJobDetails ? loadJobsMap(schedules) : null;
+        if (jobsMap != null) {
+            for (Schedule schedule : schedules) {
+                Job job = jobsMap.get(schedule.getJob().getId());
+                schedule.setJob(job);
+            }
+        }
+
         Map<MachineType, List<Schedule>> schedulesByMachineType = groupSchedulesByMachineType(schedules);
 
-        List<Schedule> schedulesForType = new ArrayList<>();
+        List<Schedule> allSortedSchedules = new ArrayList<>();
         for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByMachineType.entrySet()) {
             MachineType machineType = entry.getKey();
-            schedulesForType = entry.getValue();
+            List<Schedule> schedulesForType = entry.getValue();
 
             List<Machine> machines = machineRepository.findByTypeId(machineType.getId());
             if (machines.isEmpty()) {
                 continue;
             }
-            schedulesForType.sort(new Comparator<Schedule>() {
-                @Override
-                public int compare(Schedule schedule1, Schedule schedule2) {
-                    Job job1 = jobsMap.get(schedule1.getJob().getId());
-                    Job job2 = jobsMap.get(schedule2.getJob().getId());
 
-                    long duration1 = (job1 != null) ? job1.getDuration() : Long.MAX_VALUE;
-                    long duration2 = (job2 != null) ? job2.getDuration() : Long.MAX_VALUE;
-
-                    int durationComparison = Long.compare(duration1, duration2);
-                    if (durationComparison != 0) {
-                        return durationComparison;
-                    }
-
-                    Long jobId1 = schedule1.getJob().getId();
-                    Long jobId2 = schedule2.getJob().getId();
-                    return jobId1.compareTo(jobId2);
-                }
-            });
-
+            schedulesForType.sort(comparator);
+            allSortedSchedules.addAll(schedulesForType);
         }
 
-        saveSchedulesToFile(schedulesForType, "duration");
+        saveSchedulesToFile(allSortedSchedules, type);
     }
 
     private Map<Long, Job> loadJobsMap(List<Schedule> schedules) {
@@ -166,7 +120,6 @@ public class Scheduler {
                 .collect(Collectors.groupingBy(Schedule::getMachineType));
     }
 
-
     private void saveSchedulesToFile(List<Schedule> schedules, String type) {
         List<ScheduleDTO> scheduleDTOs = schedules.stream()
                 .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
@@ -180,9 +133,4 @@ public class Scheduler {
             e.printStackTrace();
         }
     }
-
-
-
-
-
 }

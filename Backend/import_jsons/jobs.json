@@ -13,7 +13,7 @@
     "status": "PENDING",
     "priority": "URGENT",
     "duration": 3600,
-    "idMachineType": 2
+    "idMachineType": 1
   },
   {
     "title": "Taglio Legno di Precisione",
@@ -21,7 +21,7 @@
     "status": "PENDING",
     "priority": "HIGH",
     "duration": 5400,
-    "idMachineType": 3
+    "idMachineType": 1
   },
   {
     "title": "Stampaggio Parti in Plastica",
