@@ -24,6 +24,10 @@ export class ScheduleComponent implements OnInit {
   jobPageSize: number = 5;
   totalJobPages: number = 1;
 
+  currentSchedulePage: number = 1;
+  schedulePageSize: number = 5;
+  totalSchedulePages: number = 1;
+
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
   constructor(
@@ -86,6 +90,9 @@ export class ScheduleComponent implements OnInit {
         this.schedules = response;
         console.log('Schedules retrieved:', this.schedules);
 
+        this.totalSchedulePages = Math.ceil(this.schedules.length / this.schedulePageSize);
+        this.currentSchedulePage = 1;
+
         this.schedules.forEach(schedule => {
           if (schedule.jobId) {
             const job = this.jobs.find(j => j.id === schedule.jobId);
@@ -101,6 +108,23 @@ export class ScheduleComponent implements OnInit {
         console.error('Error while retrieving schedules:', error);
       }
     });
+  }
+
+  get paginatedSchedules(): ScheduleDTO[] {
+    const start = (this.currentSchedulePage - 1) * this.schedulePageSize;
+    return this.schedules.slice(start, start + this.schedulePageSize);
+  }
+
+  nextSchedulePage() {
+    if (this.currentSchedulePage < this.totalSchedulePages) {
+      this.currentSchedulePage++;
+    }
+  }
+
+  previousSchedulePage() {
+    if (this.currentSchedulePage > 1) {
+      this.currentSchedulePage--;
+    }
   }
 
   generateAvailableStartTimes() {

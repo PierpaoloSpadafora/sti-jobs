@@ -26,7 +26,6 @@
       </table>
     </div>
 
-    <!-- Controlli di paginazione -->
     <div class="pagination-controls">
       <button
         class="pagination-button"
@@ -60,7 +59,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let schedule of schedules">
+        <tr *ngFor="let schedule of paginatedSchedules">
           <td>{{ schedule.jobId }}</td>
           <td>{{ schedule.machineTypeId }}</td>
           <td>{{ schedule.startTime | date: 'short' }}</td>
@@ -79,41 +78,24 @@
         </tbody>
       </table>
     </div>
+
+    <div class="pagination-controls">
+      <button
+        class="pagination-button"
+        (click)="previousSchedulePage()"
+        [disabled]="currentSchedulePage === 1">
+        Precedente
+      </button>
+      <span>Pagina {{currentSchedulePage}} di {{totalSchedulePages}}</span>
+      <button
+        class="pagination-button"
+        (click)="nextSchedulePage()"
+        [disabled]="currentSchedulePage === totalSchedulePages">
+        Successiva
+      </button>
+    </div>
   </div>
 </div>
 
 <ng-template #scheduleDialog let-data>
-  <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
-  <mat-dialog-content [formGroup]="scheduleForm">
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Ora di Inizio</mat-label>
-        <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required [compareWith]="compareDate">
-          <mat-option *ngFor="let time of availableStartTimes" [value]="time">
-            {{ time | date: 'shortTime' }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Ora di Fine</mat-label>
-        <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
-      </mat-form-field>
-    </div>
-
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Data di Scadenza</mat-label>
-        <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" required>
-        <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #dueDatePicker></mat-datepicker>
-      </mat-form-field>
-    </div>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancella</button>
-    <button mat-button color="primary" [disabled]="scheduleForm.invalid" (click)="scheduleJob()">Schedula</button>
-  </mat-dialog-actions>
 </ng-template>

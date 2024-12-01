@@ -8,7 +8,6 @@
       </select>
     </div>
 
-    <!-- Nuova sezione per la selezione dei giorni per pagina -->
     <div class="days-selector">
       <label for="daysPerPage">Giorni per pagina:</label>
       <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" (change)="onDaysPerPageChange()">
@@ -56,7 +55,6 @@
             </div>
           </div>
 
-          <!-- Pulsanti di navigazione -->
           <div class="pagination-controls" *ngIf="paginatedDates.length > selectedDaysPerPage">
             <button (click)="previousPage()" [disabled]="currentPage === 0">Indietro</button>
             <span>Pagina {{ currentPage + 1 }} di {{ totalPages }}</span>

@@ -136,16 +136,13 @@ export class HomeComponent implements OnInit {
       machineMap.get(machineTypeId)!.push(schedule);
     });
 
-    // Ordina le date
     const sortedDates = Array.from(schedulesByDateAndMachine.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
     this.schedulesByDateAndMachine = new Map([...schedulesByDateAndMachine.entries()]
       .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()));
 
-    // Salva le date ordinate per la paginazione
     this.paginatedDates = sortedDates;
 
-    // Reset della paginazione
     this.currentPage = 0;
 
     this.schedulesByDateAndMachine.forEach((machineMap, date) => {
