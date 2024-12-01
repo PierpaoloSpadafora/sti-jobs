@@ -20,6 +20,7 @@ import { Observable }                                        from 'rxjs';
 import { JobDTO } from '../model/jobDTO';
 import { MachineDTO } from '../model/machineDTO';
 import { MachineTypeDTO } from '../model/machineTypeDTO';
+import { ScheduleDTO } from '../model/scheduleDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -99,9 +100,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledDueDate(observe?: 'body', reportProgress?: boolean): Observable<Array<JobDTO>>;
-    public exportJobScheduledDueDate(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<JobDTO>>>;
-    public exportJobScheduledDueDate(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<JobDTO>>>;
+    public exportJobScheduledDueDate(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public exportJobScheduledDueDate(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public exportJobScheduledDueDate(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
     public exportJobScheduledDueDate(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -119,7 +120,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<JobDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-due-date`,
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-due-date`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -135,9 +136,45 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledPriority(observe?: 'body', reportProgress?: boolean): Observable<Array<JobDTO>>;
-    public exportJobScheduledPriority(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<JobDTO>>>;
-    public exportJobScheduledPriority(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<JobDTO>>>;
+    public exportJobScheduledDuration(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public exportJobScheduledDuration(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public exportJobScheduledDuration(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public exportJobScheduledDuration(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-duration`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Export Job data to JSON
+     * Export all Job data to JSON.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public exportJobScheduledPriority(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public exportJobScheduledPriority(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public exportJobScheduledPriority(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
     public exportJobScheduledPriority(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -155,7 +192,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<JobDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -245,9 +282,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'body', reportProgress?: boolean): Observable<{ [key: string]: string; }>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<{ [key: string]: string; }>>;
+    public importJob(body: Array<JobDTO>, assigneeEmail: string, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<{ [key: string]: string; }>>;
     public importJob(body: Array<JobDTO>, assigneeEmail: string, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
@@ -283,7 +320,7 @@ export class JsonControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importJob`,
+        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/importJob`,
             {
                 body: body,
                 params: queryParameters,
@@ -349,9 +386,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
+    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'body', reportProgress?: boolean): Observable<{ [key: string]: string; }>;
+    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<{ [key: string]: string; }>>;
+    public importMachineType(body: Array<MachineTypeDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<{ [key: string]: string; }>>;
     public importMachineType(body: Array<MachineTypeDTO>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
@@ -378,7 +415,7 @@ export class JsonControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importMachineType`,
+        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/importMachineType`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,

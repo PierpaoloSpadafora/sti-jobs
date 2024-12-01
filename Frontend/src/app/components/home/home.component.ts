@@ -1,10 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { JsonControllerService } from '../../generated-api';
 import { ScheduleControllerService } from '../../generated-api';
 import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
 import { ChartType } from 'angular-google-charts';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { InjectionToken } from '@angular/core';
+
+export const SCHEDULE_SERVICE = new InjectionToken<ScheduleControllerService>('ScheduleControllerService');
+export const JSON_SERVICE = new InjectionToken<JsonControllerService>('JsonControllerService');
 
 @Component({
   selector: 'app-home',
@@ -12,7 +17,6 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-
   scheduleData: ScheduleDTO[] = [];
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
 
@@ -52,7 +56,6 @@ export class HomeComponent implements OnInit {
   ];
 
   selectedScheduleType = 'ALL';
-
   hasScheduledJobs = false;
   loading = true;
 
@@ -72,13 +75,24 @@ export class HomeComponent implements OnInit {
 
   fetchData() {
     this.loading = true;
+    let scheduleObservable;
+    switch (this.selectedScheduleType) {
+      case 'PRIORITY':
+        scheduleObservable = this.jsonService.exportJobScheduledPriority();
+        break;
+      case 'DUE_DATE':
+        scheduleObservable = this.jsonService.exportJobScheduledDueDate();
+        break;
+      case 'DURATION':
+        scheduleObservable = this.jsonService.exportJobScheduledDuration();
+        break;
+      default:
+        scheduleObservable = this.scheduleService.getAllSchedules();
+    }
 
-    this.scheduleService.getAllSchedules().subscribe(scheduleData => {
-      this.scheduleData = scheduleData.map(schedule => {
-        return schedule;
-      });
-
-      this.jsonService.exportJob().subscribe(jobs => {
+    // Otteniamo prima i job per il mapping
+    this.jsonService.exportJob().subscribe({
+      next: (jobs) => {
         this.jobsMap.clear();
         jobs.forEach(job => {
           if (job.id !== undefined) {
@@ -86,41 +100,23 @@ export class HomeComponent implements OnInit {
           }
         });
 
-        if (this.selectedScheduleType === 'DUE_DATE') {
-          this.scheduleData.sort((a, b) => {
-            if (a.dueDate && b.dueDate) {
-              return a.dueDate.getTime() - b.dueDate.getTime();
-            } else {
-              return 0;
-            }
-          });
-        } else if (this.selectedScheduleType === 'PRIORITY') {
-          this.scheduleData.sort((a, b) => {
-            const jobA = this.jobsMap.get(a.jobId || 0);
-            const jobB = this.jobsMap.get(b.jobId || 0);
-            const priorityOrder = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-
-            const priorityA = jobA ? priorityOrder.indexOf(jobA.priority) : -1;
-            const priorityB = jobB ? priorityOrder.indexOf(jobB.priority) : -1;
-
-            return priorityB - priorityA;
-          });
-        }
-        else if (this.selectedScheduleType === 'DURATION') {
-          this.scheduleData.sort((a, b) => {
-            const durationA = a.duration || 0;
-            const durationB = b.duration || 0;
-        
-            return durationA - durationB;
-          });
-        }
-
-        this.processData();
+        // Correzione: aggiungiamo type casting per l'observable
+        (scheduleObservable as Observable<ScheduleDTO[]>).subscribe({
+          next: (scheduleData: ScheduleDTO[]) => {
+            this.scheduleData = scheduleData;
+            this.processData();
+            this.loading = false;
+          },
+          error: (error: any) => {
+            console.error('Error fetching schedule data', error);
+            this.loading = false;
+          }
+        });
+      },
+      error: (error: any) => {
+        console.error('Error fetching jobs data', error);
         this.loading = false;
-      });
-    }, error => {
-      console.error('Error fetching schedule data', error);
-      this.loading = false;
+      }
     });
   }
 
@@ -188,7 +184,6 @@ export class HomeComponent implements OnInit {
   navigateToSchedule() {
     this.router.navigate(['/schedule']);
   }
-
 }
 
 interface ChartOptions {
