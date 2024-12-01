@@ -1,15 +1,11 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { JsonControllerService } from '../../generated-api';
+// src/app/components/home/home.component.ts
+import { Component, OnInit } from '@angular/core';
 import { ScheduleControllerService } from '../../generated-api';
 import { JobDTO } from '../../generated-api';
 import { ScheduleDTO } from '../../generated-api';
-import { ChartType } from 'angular-google-charts';
+import { MachineTypeDTO } from '../../generated-api';
+import { JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { InjectionToken } from '@angular/core';
-
-export const SCHEDULE_SERVICE = new InjectionToken<ScheduleControllerService>('ScheduleControllerService');
-export const JSON_SERVICE = new InjectionToken<JsonControllerService>('JsonControllerService');
 
 @Component({
   selector: 'app-home',
@@ -19,45 +15,22 @@ export const JSON_SERVICE = new InjectionToken<JsonControllerService>('JsonContr
 export class HomeComponent implements OnInit {
   scheduleData: ScheduleDTO[] = [];
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
+  machinesMap: Map<number, string> = new Map<number, string>(); // Map of machineTypeId to machineTypeName
 
-  public chartData: any[] = [];
-  public chartOptions: ChartOptions = {
-    height: 600,
-    gantt: {
-      trackHeight: 30,
-      barCornerRadius: 5,
-      labelStyle: {
-        fontName: 'Arial',
-        fontSize: 12,
-        color: '#000'
-      },
-      criticalPathEnabled: true,
-      timeline: {
-        showRowLabels: false
-      }
-    }
-  };
-  public chartColumns = [
-    { type: 'string', label: 'Task ID' },
-    { type: 'string', label: 'Task Name' },
-    { type: 'date', label: 'Start Date' },
-    { type: 'date', label: 'End Date' },
-    { type: 'number', label: 'Duration' },
-    { type: 'number', label: 'Percent Complete' },
-    { type: 'string', label: 'Dependencies' }
-  ];
-  public chartType = ChartType.Gantt;
-
+  // Schedule types
   scheduleTypes = [
     { label: 'All Jobs', value: 'ALL' },
     { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
     { label: 'Scheduled by Priority', value: 'PRIORITY' },
     { label: 'Scheduled by Duration', value: 'DURATION' }
   ];
-
   selectedScheduleType = 'ALL';
+
   hasScheduledJobs = false;
   loading = true;
+
+  // Properties to hold grouped schedules
+  schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map<string, Map<number, ScheduleDTO[]>>();
 
   constructor(
     private scheduleService: ScheduleControllerService,
@@ -75,6 +48,7 @@ export class HomeComponent implements OnInit {
 
   fetchData() {
     this.loading = true;
+
     let scheduleObservable;
     switch (this.selectedScheduleType) {
       case 'PRIORITY':
@@ -90,31 +64,48 @@ export class HomeComponent implements OnInit {
         scheduleObservable = this.scheduleService.getAllSchedules();
     }
 
-    // Otteniamo prima i job per il mapping
-    this.jsonService.exportJob().subscribe({
-      next: (jobs) => {
-        this.jobsMap.clear();
-        jobs.forEach(job => {
-          if (job.id !== undefined) {
-            this.jobsMap.set(job.id, job);
-          }
-        });
+    scheduleObservable.subscribe({
+      next: (scheduleData: ScheduleDTO[]) => {
+        this.scheduleData = scheduleData;
 
-        // Correzione: aggiungiamo type casting per l'observable
-        (scheduleObservable as Observable<ScheduleDTO[]>).subscribe({
-          next: (scheduleData: ScheduleDTO[]) => {
-            this.scheduleData = scheduleData;
-            this.processData();
-            this.loading = false;
+        // Fetch jobs
+        this.jsonService.exportJob().subscribe({
+          next: (jobs) => {
+            this.jobsMap.clear();
+            jobs.forEach(job => {
+              if (job.id !== undefined) {
+                this.jobsMap.set(job.id, job);
+              }
+            });
+
+            // Fetch machine types
+            this.jsonService.exportMachineType().subscribe({
+              next: (machineTypes) => {
+                this.machinesMap.clear();
+                machineTypes.forEach(machineType => {
+                  if (machineType.id !== undefined && machineType.name !== undefined) {
+                    this.machinesMap.set(machineType.id, machineType.name);
+                  }
+                });
+
+                // Process data
+                this.processData();
+                this.loading = false;
+              },
+              error: (error: any) => {
+                console.error('Error fetching machine types data', error);
+                this.loading = false;
+              }
+            });
           },
           error: (error: any) => {
-            console.error('Error fetching schedule data', error);
+            console.error('Error fetching jobs data', error);
             this.loading = false;
           }
         });
       },
       error: (error: any) => {
-        console.error('Error fetching jobs data', error);
+        console.error('Error fetching schedule data', error);
         this.loading = false;
       }
     });
@@ -127,82 +118,44 @@ export class HomeComponent implements OnInit {
     }
     this.hasScheduledJobs = true;
 
-    let minStartDate: Date | null = null;
-    let maxEndDate: Date | null = null;
+    // Group schedules by date and then by machineTypeId
+    const schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map();
 
-    this.chartData = this.scheduleData.map(schedule => {
-      const job = this.jobsMap.get(schedule.jobId || 0);
-      const taskId = schedule.id?.toString() || '';
-      const taskName = job ? job.title : 'Unknown Job';
+    this.scheduleData.forEach(schedule => {
+      const date = schedule.startTime ? new Date(schedule.startTime).toDateString() : 'Unknown Date';
+      const machineTypeId = schedule.machineTypeId || 0;
 
-      let startDate: Date;
-      if (schedule.startTime && !isNaN(new Date(schedule.startTime).getTime())) {
-        startDate = new Date(schedule.startTime);
-      } else {
-        console.warn(`Invalid startTime for task ${taskId}, using current date`);
-        startDate = new Date();
+      if (!schedulesByDateAndMachine.has(date)) {
+        schedulesByDateAndMachine.set(date, new Map<number, ScheduleDTO[]>());
       }
 
-      let endDate: Date;
-      try {
-        const duration = schedule.duration || 3600;
-        endDate = new Date(startDate.getTime() + duration * 1000);
-      } catch (error) {
-        console.error(`Error calculating end date for task ${taskId}:`, error);
-        endDate = new Date(startDate.getTime() + 3600000);
+      const machineMap = schedulesByDateAndMachine.get(date)!;
+
+      if (!machineMap.has(machineTypeId)) {
+        machineMap.set(machineTypeId, []);
       }
 
-      if (!minStartDate || startDate < minStartDate) {
-        minStartDate = startDate;
-      }
-      if (!maxEndDate || endDate > maxEndDate) {
-        maxEndDate = endDate;
-      }
-
-      return [
-        taskId,
-        taskName,
-        startDate,
-        endDate,
-        null,
-        100,
-        null
-      ];
+      machineMap.get(machineTypeId)!.push(schedule);
     });
 
-    if (minStartDate && maxEndDate) {
-      this.chartOptions = {
-        ...this.chartOptions,
-        hAxis: {
-          minValue: minStartDate,
-          maxValue: maxEndDate
-        }
-      };
-    }
+    // Sort the dates
+    this.schedulesByDateAndMachine = new Map([...schedulesByDateAndMachine.entries()].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()));
+
+    // Sort schedules within each machine by start time
+    this.schedulesByDateAndMachine.forEach((machineMap, date) => {
+      machineMap.forEach((schedules, machineTypeId) => {
+        schedules.sort((a, b) => {
+          const dateA = new Date(a.startTime || 0).getTime();
+          const dateB = new Date(b.startTime || 0).getTime();
+          return dateA - dateB;
+        });
+      });
+    });
   }
 
   navigateToSchedule() {
     this.router.navigate(['/schedule']);
   }
-}
 
-interface ChartOptions {
-  height: number;
-  gantt: {
-    trackHeight: number;
-    barCornerRadius: number;
-    labelStyle: {
-      fontName: string;
-      fontSize: number;
-      color: string;
-    };
-    criticalPathEnabled: boolean;
-    timeline: {
-      showRowLabels: boolean;
-    };
-  };
-  hAxis?: {
-    minValue: Date;
-    maxValue: Date;
-  };
+  protected readonly Array = Array;
 }

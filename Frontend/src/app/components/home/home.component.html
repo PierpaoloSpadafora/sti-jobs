@@ -1,16 +1,16 @@
+<!-- src/app/components/home/home.component.html -->
 <div class="page-container">
   <div class="page-header">
     <h1>Scheduled Jobs</h1>
-  </div>
-
-  <div class="content-container">
     <div class="schedule-selector">
-      <label for="scheduleType">Seleziona il tipo di scheduling:</label>
+      <label for="scheduleType">Select scheduling type:</label>
       <select id="scheduleType" [(ngModel)]="selectedScheduleType" (change)="onScheduleTypeChange()">
         <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
       </select>
     </div>
+  </div>
 
+  <div class="content-container">
     <div class="chart-wrapper">
       <div *ngIf="loading" class="loading-overlay">
         <div class="spinner"></div>
@@ -19,18 +19,37 @@
 
       <div *ngIf="!loading">
         <div *ngIf="!hasScheduledJobs" class="no-schedule-message">
-          <p>Non sono stati trovati lavori programmati.</p>
-          <button (click)="navigateToSchedule()">Vai a Schedula</button>
+          <p>No scheduled jobs found.</p>
+          <button (click)="navigateToSchedule()">Go to Schedule</button>
         </div>
 
-        <div *ngIf="hasScheduledJobs" class="chart-container">
-          <google-chart
-            [type]="chartType"
-            [data]="chartData"
-            [columns]="chartColumns"
-            [options]="chartOptions">
-          </google-chart>
+        <div *ngIf="hasScheduledJobs">
+          <div *ngFor="let date of Array.from(schedulesByDateAndMachine.keys())">
+            <h2>{{ date }}</h2>
+            <div *ngFor="let machineTypeId of Array.from(schedulesByDateAndMachine.get(date)?.keys() || [])">
+              <h3>{{ machinesMap.get(machineTypeId) || 'Unknown Machine Type' }}</h3>
+              <table class="schedule-table">
+                <thead>
+                <tr>
+                  <th>Job Title</th>
+                  <th>Start Time</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let schedule of schedulesByDateAndMachine.get(date)?.get(machineTypeId)">
+                  <td>{{ jobsMap.get(schedule.jobId || 0)?.title || 'Unknown Job' }}</td>
+                  <td>{{ schedule.startTime | date: 'shortTime' }}</td>
+                  <td>{{ schedule.duration ? (schedule.duration / 3600) + ' hours' : 'N/A' }}</td>
+                  <td>{{ schedule.status }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
