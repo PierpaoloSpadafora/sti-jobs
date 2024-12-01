@@ -35,24 +35,26 @@ public class JsonController {
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})
-    @PostMapping(value = "/importJob", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> importJob(@RequestBody List<JobDTO> jobs, @RequestParam("assigneeEmail") String assigneeEmail) {
+    @PostMapping(value = "/importJob", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> importJob(@RequestBody List<JobDTO> jobs, @RequestParam("assigneeEmail") String assigneeEmail) {
         try {
             jobs.forEach(job -> {
-                if (job.getId()!=null) {
+                if (job.getId() != null) {
                     Optional<Job> existingJob = jobService.getJobById(job.getId());
                     if (existingJob.isEmpty()) {
                         jobService.createJob(assigneeEmail, job);
                     }
-                }
-                else
+                } else {
                     jobService.createJob(assigneeEmail, job);
+                }
             });
-            return ResponseEntity.ok("Jobs imported successfully.");
+            Map<String, String> response = Map.of("message", "Jobs imported successfully.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body("Error importing jobs: " + e.getMessage());
+            return ResponseEntity.status(400).body(Map.of("message", "Error importing jobs: " + e.getMessage()));
         }
     }
+
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})

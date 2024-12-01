@@ -296,15 +296,15 @@ export class JsonControllerService {
     }
 
     /**
-     * Import Machine data from JSON
-     * Import Machine data into the system from JSON content.
+     * 
+     * 
      * @param body 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public importMachine(body: Array<MachineDTO>, observe?: 'body', reportProgress?: boolean): Observable<string>;
-    public importMachine(body: Array<MachineDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<string>>;
-    public importMachine(body: Array<MachineDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<string>>;
+    public importMachine(body: Array<MachineDTO>, observe?: 'body', reportProgress?: boolean): Observable<{ [key: string]: string; }>;
+    public importMachine(body: Array<MachineDTO>, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<{ [key: string]: string; }>>;
+    public importMachine(body: Array<MachineDTO>, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<{ [key: string]: string; }>>;
     public importMachine(body: Array<MachineDTO>, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         if (body === null || body === undefined) {
@@ -331,7 +331,7 @@ export class JsonControllerService {
             headers = headers.set('Content-Type', httpContentTypeSelected);
         }
 
-        return this.httpClient.request<string>('post',`${this.basePath}/api/v1/json/importMachine`,
+        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/importMachine`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,

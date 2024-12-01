@@ -450,7 +450,7 @@ export class ScheduleControllerService {
     }
 
     /**
-     * Get schedules with dueDate after a specified date
+     * Get schedules with due-date after a specified date
      * 
      * @param date 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -497,7 +497,7 @@ export class ScheduleControllerService {
     }
 
     /**
-     * Get schedules with dueDate before a specified date
+     * Get schedules with due-date before a specified date
      * 
      * @param date 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
