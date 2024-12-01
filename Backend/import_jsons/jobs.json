@@ -12,7 +12,7 @@
     "description": "Realizzazione di componenti complessi con alta precisione utilizzando la Fresatrice CNC.",
     "status": "PENDING",
     "priority": "URGENT",
-    "duration": 10000,
+    "duration": 3600,
     "idMachineType": 2
   },
   {
@@ -28,7 +28,7 @@
     "description": "Produzione di componenti in plastica mediante Macchina per Stampaggio a Iniezione ad alta efficienza.",
     "status": "PENDING",
     "priority": "URGENT",
-    "duration": 10800,
+    "duration": 3600,
     "idMachineType": 4
   },
   {
@@ -44,7 +44,7 @@
     "description": "Utilizzo della Pressa Idraulica per modellare e tagliare materiali metallici con forza controllata.",
     "status": "PENDING",
     "priority": "MEDIUM",
-    "duration": 9000,
+    "duration": 5400,
     "idMachineType": 6
   },
   {
@@ -60,7 +60,7 @@
     "description": "Livellamento e rifinitura delle superfici in legno utilizzando la Pialla Automatica.",
     "status": "PENDING",
     "priority": "MEDIUM",
-    "duration": 4800,
+    "duration": 3600,
     "idMachineType": 8
   },
   {
@@ -68,7 +68,7 @@
     "description": "Compattazione uniforme di materiali granulari e sabbie con il Compattatore Vibroassiale.",
     "status": "PENDING",
     "priority": "LOW",
-    "duration": 6000,
+    "duration": 7200,
     "idMachineType": 9
   },
   {
@@ -76,7 +76,7 @@
     "description": "Mescolamento omogeneo di materiali in polvere o liquidi in grandi quantità con il Miscelatore Industriale.",
     "status": "PENDING",
     "priority": "HIGH",
-    "duration": 8400,
+    "duration": 5400,
     "idMachineType": 10
   }
 ]
