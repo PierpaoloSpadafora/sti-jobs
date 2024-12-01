@@ -44,14 +44,18 @@ export class CreateImportJobComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.jsonExample = `[{
-      "title": "Job 1",
-      "description": "First job",
-      "status": "PENDING",
-      "priority": "LOW",
-      "duration": 3600,
-      "idMachineType": 1
-    }]`;
+    this.jsonExample = `
+    [
+      {
+        "title": "Job 1",
+        "description": "First job",
+        "status": "PENDING",
+        "priority": "LOW",
+        "duration": 3600,
+        "idMachineType": 1
+      }
+    ]
+    `;
     this.jsonInputContent = this.jsonExample;
 
     this.machineTypeService.getAllMachineTypes('body').subscribe({
