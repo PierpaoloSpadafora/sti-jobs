@@ -3,7 +3,6 @@ package unical.demacs.rdm.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +15,10 @@ import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
+import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
-import unical.demacs.rdm.utils.JsonFileService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +33,7 @@ public class JsonController {
     private final IJobService jobService;
     private final IMachineService machineService;
     private final IMachineTypeService machineTypeService;
-    private final JsonFileService jsonFileService; //FIXME
+    private final IJsonService jsonService;
     private final ModelMapperExtended modelMapperExtended;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
@@ -115,38 +113,23 @@ public class JsonController {
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-priority", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScheduleDTO>> exportJobScheduledPriority() {
-        try {
-            List<ScheduleDTO> schedules = jsonFileService.readScheduleFile("./data/job-scheduled-by-priority.json");
-            return ResponseEntity.ok(schedules);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-priority.json");
+        return ResponseEntity.ok(schedules);
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScheduleDTO>> exportJobScheduledDueDate() {
-        try {
-            List<ScheduleDTO> schedules = jsonFileService.readScheduleFile("./data/job-scheduled-by-due-date.json");
-            return ResponseEntity.ok(schedules);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-due-date.json");
+        return ResponseEntity.ok(schedules);
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-duration", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScheduleDTO>> exportJobScheduledDuration() {
-        try {
-            List<ScheduleDTO> schedules = jsonFileService.readScheduleFile("./data/job-scheduled-by-duration.json");
-            return ResponseEntity.ok(schedules);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
+        return ResponseEntity.ok(schedules);
     }
 }

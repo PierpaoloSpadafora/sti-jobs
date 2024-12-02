@@ -14,11 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 
 public class JsonFileService {
-    private final ObjectMapper objectMapper;
 
-    public List<ScheduleDTO> readScheduleFile(String fileName) throws IOException {
-        File file = new File(fileName);
-        return objectMapper.readValue(file,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, ScheduleDTO.class));
-    }
 }

@@ -16,7 +16,7 @@ import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
 import unical.demacs.rdm.persistence.repository.UserRepository;
 import unical.demacs.rdm.persistence.service.implementation.JobServiceImpl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +78,7 @@ public class JobServiceImplTest {
 
     @Test
     void testGetAllJobs_Success() {
-        when(jobRepository.findAll()).thenReturn(Arrays.asList(testJob));
+        when(jobRepository.findAll()).thenReturn(Collections.singletonList(testJob));
 
         List<Job> jobs = jobService.getAllJobs();
 
@@ -165,7 +165,6 @@ public class JobServiceImplTest {
 
     @Test
     void testDeleteJob_Success() {
-        // Nel service viene usato deleteById, quindi dobbiamo mockare quello
         doNothing().when(jobRepository).deleteById(TEST_ID);
 
         assertTrue(jobService.deleteJob(TEST_ID));

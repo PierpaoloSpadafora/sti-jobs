@@ -106,15 +106,9 @@ public class Scheduler {
 
     private void reorganizeScheduleTimes(List<Schedule> schedules) {
         if (schedules.isEmpty()) return;
-
-        // Prendiamo il primo startTime come riferimento
         LocalDateTime currentTime = schedules.get(0).getStartTime();
-
         for (Schedule schedule : schedules) {
-            // Impostiamo il nuovo startTime
             schedule.setStartTime(currentTime);
-
-            // Calcoliamo il prossimo startTime disponibile
             currentTime = currentTime.plusSeconds(schedule.getDuration());
         }
     }

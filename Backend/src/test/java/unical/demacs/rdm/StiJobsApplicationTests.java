@@ -11,12 +11,14 @@ import unical.demacs.rdm.service.*;
 @Suite
 @SelectClasses({
 		JobControllerTest.class,
+		JsonControllerTest.class,
 		MachineControllerTest.class,
 		MachineTypeControllerTest.class,
 		ScheduleControllerTest.class,
 		UserControllerTest.class,
 
 		JobServiceImplTest.class,
+		JsonServiceImplTest.class,
 		MachineServiceImplTest.class,
 		MachineTypeServiceImplTest.class,
 		ScheduleServiceImplTest.class,

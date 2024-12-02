@@ -1,23 +1,29 @@
 package unical.demacs.rdm.persistence.service.implementation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import unical.demacs.rdm.config.exception.JsonException;
 import unical.demacs.rdm.persistence.dto.*;
-import unical.demacs.rdm.persistence.repository.*;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class JsonServiceImpl implements IJsonService {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonServiceImpl.class);
-
     private final ObjectMapper objectMapper;
+
+    public List<ScheduleDTO> readScheduleFile(String fileName) {
+        File file = new File(fileName);
+        try {
+            return objectMapper.readValue(file,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, ScheduleDTO.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
