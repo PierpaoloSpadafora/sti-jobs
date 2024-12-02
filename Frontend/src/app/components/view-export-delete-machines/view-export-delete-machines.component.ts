@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import { JsonControllerService} from "../../generated-api";
-import { MachineControllerService} from "../../generated-api";
+import { JsonControllerService } from "../../generated-api";
+import { MachineControllerService } from "../../generated-api";
 import { Machine, MachineDTO, MachineTypeDTO, MachineType } from '../../interfaces/interfaces';
 import { EditMachineDialogComponent } from '../edit-machine-dialog/edit-machine-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';

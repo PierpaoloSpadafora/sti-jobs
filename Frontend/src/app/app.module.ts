@@ -22,13 +22,6 @@ import { CreateImportMachineTypeComponent } from './components/create-import-mac
 import { ViewExportDeleteJobsComponent } from './components/view-export-delete-jobs/view-export-delete-jobs.component';
 import { ViewExportDeleteMachinesComponent } from './components/view-export-delete-machines/view-export-delete-machines.component';
 import { ViewExportDeleteMachineTypesComponent } from './components/view-export-delete-machine-types/view-export-delete-machine-types.component';
-import {
-  JobControllerService,
-  MachineTypeControllerService,
-  ScheduleControllerService,
-  UserControllerService,
-  JsonControllerService, MachineControllerService
-} from "./generated-api";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {MatIconModule} from "@angular/material/icon";
 import { MatDialogModule } from '@angular/material/dialog';
@@ -36,7 +29,7 @@ import {MatMenuModule, MatMenuTrigger} from "@angular/material/menu";
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
 import { EditJobDialogComponent } from './components/edit-job-dialog/edit-job-dialog.component';
@@ -53,6 +46,12 @@ import {MatNativeDateModule} from "@angular/material/core";
 import {MatTableModule} from "@angular/material/table";
 import {ShowJobComponent} from "./components/show-job/show-job.component";
 import { GoogleChartsModule } from 'angular-google-charts';
+import {
+  JobControllerService, JsonControllerService, MachineControllerService,
+  MachineTypeControllerService,
+  ScheduleControllerService,
+  UserControllerService
+} from "./generated-api";
 
 @NgModule({
   declarations: [

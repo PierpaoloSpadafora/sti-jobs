@@ -17,5 +17,15 @@ export interface ScheduleDTO {
     dueDate?: Date;
     startTime?: Date;
     duration?: number;
-    status?: string;
+    status?: ScheduleDTO.StatusEnum;
+}
+export namespace ScheduleDTO {
+    export type StatusEnum = 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    export const StatusEnum = {
+        PENDING: 'PENDING' as StatusEnum,
+        SCHEDULED: 'SCHEDULED' as StatusEnum,
+        INPROGRESS: 'IN_PROGRESS' as StatusEnum,
+        COMPLETED: 'COMPLETED' as StatusEnum,
+        CANCELLED: 'CANCELLED' as StatusEnum
+    };
 }

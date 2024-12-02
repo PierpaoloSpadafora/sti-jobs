@@ -17,7 +17,6 @@ import { CustomHttpUrlEncodingCodec }                        from '../encoder';
 
 import { Observable }                                        from 'rxjs';
 
-import { ScheduleViewDTO } from '../model/scheduleViewDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -54,47 +53,6 @@ export class SchedulerEngineService {
         return false;
     }
 
-
-    /**
-     * Schedule jobs by priority for a machine type
-     * 
-     * @param machineType 
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public scheduleByPriority(machineType: number, observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleViewDTO>>;
-    public scheduleByPriority(machineType: number, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleViewDTO>>>;
-    public scheduleByPriority(machineType: number, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleViewDTO>>>;
-    public scheduleByPriority(machineType: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        if (machineType === null || machineType === undefined) {
-            throw new Error('Required parameter machineType was null or undefined when calling scheduleByPriority.');
-        }
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            '*/*'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.request<Array<ScheduleViewDTO>>('post',`${this.basePath}/api/v1/scheduler/schedule/${encodeURIComponent(String(machineType))}`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
 
     /**
      * 
