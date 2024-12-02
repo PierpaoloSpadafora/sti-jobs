@@ -176,7 +176,8 @@ export class GraphsComponent implements OnInit {
 
         const types = this.transformMachineTypes(response.types);
         this.machineTypes = types;
-        this.pieChart.data = this.aggregateMachineTypes(jobDTOs, types);
+        const scheduledJobs = combinedJobs.filter(job => job.status === 'SCHEDULED');
+        this.pieChart.data = this.aggregateMachineTypes(scheduledJobs, types);
         this.barChart.data = this.prepareBarChartData(combinedJobs);
         this.statusChart.data = this.prepareStatusChartData(combinedJobs);
 
