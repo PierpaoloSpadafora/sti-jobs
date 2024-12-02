@@ -3,7 +3,7 @@ import { ChartType } from 'angular-google-charts';
 import { forkJoin } from 'rxjs';
 import { JobControllerService, JsonControllerService} from '../../generated-api';
 import { JobDTO,ScheduleDTO  } from '../../generated-api';
-import { LoginService } from '../../services/login.service'; // Servizio per `getUserEmail`.
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-graphs',
@@ -17,23 +17,23 @@ export class GraphsComponent implements OnInit {
     columns: ['Type', 'Usage'],
     options: {
       title: 'Most Utilized Machine Types',
-      width: 550,        
-      height: 500,       
+      width: 550,
+      height: 500,
       chartArea: {
-        width: '85%',      
-        height: '85%'      
+        width: '85%',
+        height: '85%'
       },
-      pieHole: 0.4,        
+      pieHole: 0.4,
       fontSize: 14,
       fontName: 'Roboto',
-      colors: ['#6A5ACD', '#4169E1', '#1E90FF', '#00BFFF', '#87CEFA'], 
+      colors: ['#6A5ACD', '#4169E1', '#1E90FF', '#00BFFF', '#87CEFA'],
       titleTextStyle: {
         fontSize: 18,
         bold: true,
         color: '#2C3E50'
       },
       backgroundColor: {
-        fill: '#FFFFFF' 
+        fill: '#FFFFFF'
       },
       legend: {
         position: 'right',
@@ -53,7 +53,7 @@ export class GraphsComponent implements OnInit {
       seriesType: 'bars',
       series: {
         0: { color: '#2ECC71' },
-        1: { color: '#3498DB' }  
+        1: { color: '#3498DB' }
       },
       fontSize: 12,
       fontName: 'Roboto',
@@ -92,7 +92,7 @@ export class GraphsComponent implements OnInit {
       width: 650,
       height: 450,
       bars: 'horizontal',
-      colors: ['#F39C12', '#3498DB', '#2980B9', '#2ECC71', '#E74C3C'], 
+      colors: ['#F39C12', '#3498DB', '#2980B9', '#2ECC71', '#E74C3C'],
       isStacked: true,
       fontSize: 12,
       fontName: 'Roboto',
@@ -102,7 +102,7 @@ export class GraphsComponent implements OnInit {
         color: '#2C3E50'
       },
       backgroundColor: {
-        fill: '#FFFFFF' 
+        fill: '#FFFFFF'
       },
       hAxis: {
         title: 'Number of Jobs',
@@ -146,7 +146,7 @@ export class GraphsComponent implements OnInit {
       next: async (response) => {
         const jobDTOs = Array.isArray(response.jobs) ? (response.jobs as JobDTO[]) : [];
         const scheduledJobDTOs = Array.isArray(response.scheduledJobs) ? (response.scheduledJobs as ScheduleDTO[]) : [];
-        
+
         const combinedJobs = [
           ...jobDTOs.map(dto => ({
             id: dto.id!,
@@ -160,11 +160,11 @@ export class GraphsComponent implements OnInit {
           })),
           ...scheduledJobDTOs.map(scheduleDto => {
             const matchingJob = jobDTOs.find(job => job.id === scheduleDto.jobId);
-            
+
             return {
               id: scheduleDto.id!,
               title: matchingJob?.title || 'Scheduled Job',
-              status: 'SCHEDULED', 
+              status: 'SCHEDULED',
               priority: matchingJob?.priority,
               duration: scheduleDto.duration,
               idMachineType: scheduleDto.machineTypeId,
@@ -173,13 +173,13 @@ export class GraphsComponent implements OnInit {
             };
           })
         ];
-  
+
         const types = this.transformMachineTypes(response.types);
         this.machineTypes = types;
         this.pieChart.data = this.aggregateMachineTypes(jobDTOs, types);
         this.barChart.data = this.prepareBarChartData(combinedJobs);
         this.statusChart.data = this.prepareStatusChartData(combinedJobs);
-  
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -222,7 +222,7 @@ export class GraphsComponent implements OnInit {
         }))
       : [];
   }
-  
+
   private prepareStatusChartData(jobs: any[]): [string, number, number, number, number, number][] {
     const statusCounts: { [key: string]: number } = {
       'PENDING': 0,
@@ -247,7 +247,7 @@ export class GraphsComponent implements OnInit {
     ];
   }
 
-  private aggregateMachineTypes(jobs: any[], types: any[]): [string, number][] { 
+  private aggregateMachineTypes(jobs: any[], types: any[]): [string, number][] {
     const machineTypeUsage: { [key: string]: number } = {};
     jobs.forEach(job => {
       if (job.idMachineType) {
@@ -260,14 +260,14 @@ export class GraphsComponent implements OnInit {
         }
       }
     });
-  
+
     const aggregatedData: [string, number][] = Object.entries(machineTypeUsage)
       .map(([name, count]) => [name, count]);
     if (aggregatedData.length === 0) {
       aggregatedData.push(['No data available', 1]);
     }
     return aggregatedData;
-  } 
+  }
 
   private showMessage(message: string): void {
     alert(message);

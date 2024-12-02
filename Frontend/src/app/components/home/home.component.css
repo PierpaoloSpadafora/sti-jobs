@@ -126,7 +126,6 @@
   background-color: #dcdde1;
 }
 
-/* Stili per i controlli di paginazione */
 .pagination-controls {
   display: flex;
   justify-content: center;
@@ -173,7 +172,6 @@
     margin-top: 0.5rem;
   }
 
-  /* Rendere la tabella responsiva */
   .schedule-table,
   .schedule-table thead,
   .schedule-table tbody,

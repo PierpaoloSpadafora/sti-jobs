@@ -17,27 +17,12 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class Scheduler {
+
     private final ScheduleRepository scheduleRepository;
     private final ModelMapperExtended modelMapperExtended;
     private final ObjectMapper objectMapper;
 
-    public void scheduleByEveryType() {
-        List<Schedule> originalSchedules = scheduleRepository.findAll();
-
-        List<Schedule> prioritySchedules = cloneSchedules(originalSchedules);
-        List<Schedule> dueDateSchedules = cloneSchedules(originalSchedules);
-        List<Schedule> durationSchedules = cloneSchedules(originalSchedules);
-
-        List<Schedule> priorityResult = scheduleByPriority(prioritySchedules);
-        List<Schedule> dueDateResult = scheduleByDueDate(dueDateSchedules);
-        List<Schedule> durationResult = scheduleByDuration(durationSchedules);
-
-        saveSchedulesToFile(priorityResult, "priority");
-        saveSchedulesToFile(dueDateResult, "due-date");
-        saveSchedulesToFile(durationResult, "duration");
-    }
-
-    private List<Schedule> cloneSchedules(List<Schedule> schedules) {
+    private List<Schedule> copiaProfonda(List<Schedule> schedules) {
         return schedules.stream()
                 .map(s -> Schedule.scheduleBuilder()
                         .id(s.getId())
@@ -51,13 +36,44 @@ public class Scheduler {
                 .collect(Collectors.toList());
     }
 
+    public void scheduleByEveryType() {
+        List<Schedule> originalSchedules = scheduleRepository.findAll();
+
+        List<Schedule> prioritySchedules = copiaProfonda(originalSchedules);
+        List<Schedule> dueDateSchedules = copiaProfonda(originalSchedules);
+        List<Schedule> durationSchedules = copiaProfonda(originalSchedules);
+
+        List<Schedule> priorityResult = scheduleByPriority(prioritySchedules);
+        List<Schedule> dueDateResult = scheduleByDueDate(dueDateSchedules);
+        List<Schedule> durationResult = scheduleByDuration(durationSchedules);
+
+        saveSchedulesToFile(priorityResult, "priority");
+        saveSchedulesToFile(dueDateResult, "due-date");
+        saveSchedulesToFile(durationResult, "duration");
+    }
+
+    private Map<MachineType, List<Schedule>> groupSchedulesByMachineType(List<Schedule> schedules) {
+        return schedules.stream()
+                .filter(schedule -> schedule.getMachineType() != null)
+                .collect(Collectors.groupingBy(Schedule::getMachineType));
+    }
+
+    private void reorganizeScheduleTimes(List<Schedule> schedules) {
+        if (schedules.isEmpty()) return;
+
+        LocalDateTime currentTime = schedules.get(0).getStartTime();
+
+        for (Schedule schedule : schedules) {
+            schedule.setStartTime(currentTime);
+            currentTime = currentTime.plusSeconds(schedule.getDuration());
+        }
+    }
+
     private List<Schedule> scheduleByPriority(List<Schedule> schedules) {
         Map<MachineType, List<Schedule>> schedulesByType = groupSchedulesByMachineType(schedules);
         List<Schedule> result = new ArrayList<>();
 
-        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByType.entrySet()) {
-            List<Schedule> typeSchedules = entry.getValue();
-
+        for (List<Schedule> typeSchedules : schedulesByType.values()) {
             typeSchedules.sort((s1, s2) -> {
                 int priority1 = s1.getJob().getPriority().ordinal();
                 int priority2 = s2.getJob().getPriority().ordinal();
@@ -75,11 +91,8 @@ public class Scheduler {
         Map<MachineType, List<Schedule>> schedulesByType = groupSchedulesByMachineType(schedules);
         List<Schedule> result = new ArrayList<>();
 
-        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByType.entrySet()) {
-            List<Schedule> typeSchedules = entry.getValue();
-
-            typeSchedules.sort(Comparator.comparing(Schedule::getDueDate,
-                    Comparator.nullsLast(Comparator.naturalOrder())));
+        for (List<Schedule> typeSchedules : schedulesByType.values()) {
+            typeSchedules.sort(Comparator.comparing(Schedule::getDueDate, Comparator.nullsLast(Comparator.naturalOrder())));
 
             reorganizeScheduleTimes(typeSchedules);
             result.addAll(typeSchedules);
@@ -92,9 +105,7 @@ public class Scheduler {
         Map<MachineType, List<Schedule>> schedulesByType = groupSchedulesByMachineType(schedules);
         List<Schedule> result = new ArrayList<>();
 
-        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByType.entrySet()) {
-            List<Schedule> typeSchedules = entry.getValue();
-
+        for (List<Schedule> typeSchedules : schedulesByType.values()) {
             typeSchedules.sort(Comparator.comparing(Schedule::getDuration));
 
             reorganizeScheduleTimes(typeSchedules);
@@ -104,25 +115,11 @@ public class Scheduler {
         return result;
     }
 
-    private void reorganizeScheduleTimes(List<Schedule> schedules) {
-        if (schedules.isEmpty()) return;
-        LocalDateTime currentTime = schedules.get(0).getStartTime();
-        for (Schedule schedule : schedules) {
-            schedule.setStartTime(currentTime);
-            currentTime = currentTime.plusSeconds(schedule.getDuration());
-        }
-    }
-
-    private Map<MachineType, List<Schedule>> groupSchedulesByMachineType(List<Schedule> schedules) {
-        return schedules.stream()
-                .filter(schedule -> schedule.getMachineType() != null)
-                .collect(Collectors.groupingBy(Schedule::getMachineType));
-    }
-
     private void saveSchedulesToFile(List<Schedule> schedules, String type) {
         List<ScheduleDTO> scheduleDTOs = schedules.stream()
                 .map(schedule -> modelMapperExtended.map(schedule, ScheduleDTO.class))
                 .collect(Collectors.toList());
+
         String fileName = "./data/job-scheduled-by-" + type + ".json";
 
         try {

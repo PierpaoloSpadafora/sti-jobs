@@ -54,7 +54,6 @@
   text-align: right;
 }
 
-/* Common button styles */
 .button {
   background-color: #007bff;
   color: white;
@@ -125,7 +124,6 @@
   margin-bottom: 16px;
 }
 
-/* Pagination controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
