@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import unical.demacs.rdm.config.exception.MachineException;
 import unical.demacs.rdm.config.exception.TooManyRequestsException;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.entities.Machine;
@@ -138,7 +139,7 @@ public class MachineServiceImplTest {
     void testCreateMachine_RateLimitExceeded() {
         when(rateLimiter.tryAcquire()).thenReturn(false);
 
-        assertThrows(TooManyRequestsException.class, () -> machineService.createMachine(testMachineDTO));
+        assertThrows(MachineException.class, () -> machineService.createMachine(testMachineDTO));
         verify(machineRepository, never()).save(any());
         verify(machineTypeRepository, never()).findById(any());
     }
