@@ -168,7 +168,7 @@ export class ScheduleComponent implements OnInit {
       width: '600px',
       data: { job },
     });
-    this.onStartTimeChange(); // Aggiorna l'ora di fine all'apertura del dialog
+    this.onStartTimeChange();
   }
 
   onStartTimeChange() {
@@ -268,7 +268,7 @@ export class ScheduleComponent implements OnInit {
       width: '600px',
       data: { job: this.selectedJob },
     });
-    this.onStartTimeChange(); // Aggiorna l'ora di fine all'apertura del dialog di modifica
+    this.onStartTimeChange();
   }
 
   scheduleJob() {
