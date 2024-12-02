@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ChartType } from 'angular-google-charts';
 import { forkJoin } from 'rxjs';
 import { JobControllerService, JsonControllerService} from '../../generated-api';
-import { JobDTO  } from '../../generated-api';
+import { JobDTO,ScheduleDTO  } from '../../generated-api';
 import { LoginService } from '../../services/login.service'; // Servizio per `getUserEmail`.
 
 @Component({
@@ -33,7 +33,7 @@ export class GraphsComponent implements OnInit {
         color: '#2C3E50'
       },
       backgroundColor: {
-        fill: '#FFFFFF' // Sfondo bianco
+        fill: '#FFFFFF' 
       },
       legend: {
         position: 'right',
@@ -63,7 +63,7 @@ export class GraphsComponent implements OnInit {
         color: '#2C3E50'
       },
       backgroundColor: {
-        fill: '#FFFFFF' // Sfondo bianco
+        fill: '#FFFFFF'
       },
       hAxis: {
         title: 'Jobs',
@@ -102,7 +102,7 @@ export class GraphsComponent implements OnInit {
         color: '#2C3E50'
       },
       backgroundColor: {
-        fill: '#FFFFFF' // Sfondo bianco
+        fill: '#FFFFFF' 
       },
       hAxis: {
         title: 'Number of Jobs',
@@ -140,26 +140,45 @@ export class GraphsComponent implements OnInit {
     this.isLoading = true;
     forkJoin({
       jobs: this.jobService.getAllJobs(),
-      types: this.jsonService.exportMachineType()
+      types: this.jsonService.exportMachineType(),
+      scheduledJobs: this.jsonService.exportJobScheduledDueDate()
     }).subscribe({
-      next: (response) => {
+      next: async (response) => {
         const jobDTOs = Array.isArray(response.jobs) ? (response.jobs as JobDTO[]) : [];
-        this.jobs = jobDTOs.map(dto => ({
-          id: dto.id!,
-          title: dto.title,
-          description: dto.description,
-          status: dto.status,
-          priority: dto.priority,
-          duration: dto.duration,
-          idMachineType: dto.idMachineType,
-          assigneeEmail: this.loginService.getUserEmail()!
-        }));
+        const scheduledJobDTOs = Array.isArray(response.scheduledJobs) ? (response.scheduledJobs as ScheduleDTO[]) : [];
         
+        const combinedJobs = [
+          ...jobDTOs.map(dto => ({
+            id: dto.id!,
+            title: dto.title,
+            description: dto.description,
+            status: dto.status,
+            priority: dto.priority,
+            duration: dto.duration,
+            idMachineType: dto.idMachineType,
+            assigneeEmail: this.loginService.getUserEmail()!
+          })),
+          ...scheduledJobDTOs.map(scheduleDto => {
+            const matchingJob = jobDTOs.find(job => job.id === scheduleDto.jobId);
+            
+            return {
+              id: scheduleDto.id!,
+              title: matchingJob?.title || 'Scheduled Job',
+              status: 'SCHEDULED', 
+              priority: matchingJob?.priority,
+              duration: scheduleDto.duration,
+              idMachineType: scheduleDto.machineTypeId,
+              dueDate: scheduleDto.dueDate,
+              startTime: scheduleDto.startTime
+            };
+          })
+        ];
+  
         const types = this.transformMachineTypes(response.types);
         this.machineTypes = types;
-        this.pieChart.data = this.aggregateMachineTypes(this.jobs, types);
-        this.barChart.data = this.prepareBarChartData(this.jobs);
-        this.statusChart.data = this.prepareStatusChartData(this.jobs);
+        this.pieChart.data = this.aggregateMachineTypes(jobDTOs, types);
+        this.barChart.data = this.prepareBarChartData(combinedJobs);
+        this.statusChart.data = this.prepareStatusChartData(combinedJobs);
   
         this.isLoading = false;
       },
