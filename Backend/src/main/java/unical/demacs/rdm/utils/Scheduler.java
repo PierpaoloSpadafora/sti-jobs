@@ -61,13 +61,17 @@ public class Scheduler {
     private void reorganizeScheduleTimes(List<Schedule> schedules) {
         if (schedules.isEmpty()) return;
 
-        LocalDateTime currentTime = schedules.get(0).getStartTime();
+        LocalDateTime currentTime = LocalDateTime.now().isAfter(schedules.get(0).getStartTime())
+                ? LocalDateTime.now()
+                : schedules.get(0).getStartTime();
 
         for (Schedule schedule : schedules) {
             schedule.setStartTime(currentTime);
             currentTime = currentTime.plusSeconds(schedule.getDuration());
         }
     }
+
+
 
     private List<Schedule> scheduleByPriority(List<Schedule> schedules) {
         Map<MachineType, List<Schedule>> schedulesByType = groupSchedulesByMachineType(schedules);
