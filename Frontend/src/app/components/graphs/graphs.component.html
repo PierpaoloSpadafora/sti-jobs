@@ -1,1 +1,40 @@
-<p>graphs works!</p>
+<div *ngIf="isLoading" class="text-center p-4">
+    Caricamento in corso...
+</div>
+  
+<div *ngIf="!isLoading" class="grid-container">  
+    <div class="grid-item">
+      <google-chart
+        *ngIf="pieChart.data.length > 0"
+        [type]="pieChart.type"
+        [data]="pieChart.data"
+        [columns]="pieChart.columns"
+        [options]="pieChart.options">
+      </google-chart>
+      <p *ngIf="pieChart.data.length === 0">No data available for the pie chart.</p>
+    </div>
+
+    <div class="grid-item">
+      <google-chart
+        *ngIf="barChart.data.length > 0"
+        [type]="barChart.type"
+        [data]="barChart.data"
+        [columns]="barChart.columns"
+        [options]="barChart.options">
+      </google-chart>
+      <p *ngIf="barChart.data.length === 0">No data available for the bar chart.</p>
+    </div>
+  
+    <div class="grid-item">
+      <google-chart
+        *ngIf="statusChart.data.length > 0"
+        [type]="statusChart.type"
+        [data]="statusChart.data"
+        [columns]="statusChart.columns"
+        [options]="statusChart.options">
+      </google-chart>
+      <p *ngIf="statusChart.data.length === 0">No data available for the status chart.</p>
+    </div>
+  
+  </div>
+  
