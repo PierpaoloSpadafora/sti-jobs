@@ -12,8 +12,8 @@ import unical.demacs.rdm.service.*;
 @SelectClasses({
 		JobControllerTest.class,
 		MachineControllerTest.class,
-		ScheduleControllerTest.class,
 		MachineTypeControllerTest.class,
+		ScheduleControllerTest.class,
 		UserControllerTest.class,
 
 		JobServiceImplTest.class,
@@ -22,7 +22,7 @@ import unical.demacs.rdm.service.*;
 		ScheduleServiceImplTest.class,
 		UserServiceImplTest.class
 })
-@SpringBootTest a
+@SpringBootTest
 class StiJobsApplicationTests {
 
 	@Test
