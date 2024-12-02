@@ -14,7 +14,6 @@ import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor

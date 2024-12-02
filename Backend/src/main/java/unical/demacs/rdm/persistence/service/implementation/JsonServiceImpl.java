@@ -20,18 +20,4 @@ public class JsonServiceImpl implements IJsonService {
 
     private final ObjectMapper objectMapper;
 
-    public byte[] convertToJson(JsonDTO jsonDTO) {
-        try {
-            return objectMapper.writeValueAsBytes(jsonDTO);
-        } catch (JsonProcessingException e) {
-            logger.error("Errore durante la creazione del file JSON", e);
-            throw new JsonException("Errore durante la conversione del file JSON");
-        }
-    }
-
-    @Override
-    public void processImport(JsonDTO jsonDTO) {
-
-    }
-
 }

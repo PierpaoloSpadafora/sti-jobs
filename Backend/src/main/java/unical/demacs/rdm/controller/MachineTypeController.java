@@ -9,12 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ import java.util.List;
 @Tag(name = "machine-type-controller", description = "Operations related to machine type management.")
 public class MachineTypeController {
 
-    private final MachineTypeServiceImpl machineTypeServiceImpl;
+    private final IMachineTypeService machineTypeService;
     private final ModelMapper modelMapper;
     private final ModelMapperExtended modelMapperExtended;
 
@@ -41,7 +42,10 @@ public class MachineTypeController {
     })
     @PostMapping(path = "/create")
     public ResponseEntity<MachineTypeDTO> createMachineType(@Valid @RequestBody MachineTypeDTO machineTypeDTO) {
-        return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.createMachineType(machineTypeDTO), MachineTypeDTO.class));
+        MachineTypeDTO dto = modelMapper.map(machineTypeService.createMachineType(machineTypeDTO), MachineTypeDTO.class);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dto);
     }
 
     @Operation(summary = "Get machine type by id", description = "Retrieve a machine type using its id.",
@@ -57,7 +61,10 @@ public class MachineTypeController {
     @GetMapping(path="/by-id/{id}")
     public ResponseEntity<MachineTypeDTO> getMachineTypeById(@PathVariable("id") Long id) {
         try {
-            return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.getMachineTypeById(id), MachineTypeDTO.class));
+            MachineTypeDTO dto = modelMapper.map(machineTypeService.getMachineTypeById(id), MachineTypeDTO.class);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(dto);
         } catch (MachineNotFoundException e) {
             throw new MachineNotFoundException("Machine type not found.");
         }
@@ -73,7 +80,10 @@ public class MachineTypeController {
     })
     @GetMapping(path="/get-all")
     public ResponseEntity<List<MachineTypeDTO>> getAllMachineTypes() {
-        return ResponseEntity.ok(modelMapperExtended.mapList(machineTypeServiceImpl.getAllMachineTypes(), MachineTypeDTO.class));
+        List<MachineTypeDTO> dtos = modelMapperExtended.mapList(machineTypeService.getAllMachineTypes(), MachineTypeDTO.class);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dtos);
     }
 
     @Operation(summary = "Update machine type", description = "Update a machine type using its id.",
@@ -88,7 +98,10 @@ public class MachineTypeController {
     })
     @PutMapping(path="/{id}")
     public ResponseEntity<MachineTypeDTO> updateMachineType(@PathVariable("id") Long id, @Valid @RequestBody MachineTypeDTO machineTypeDTO) {
-        return ResponseEntity.ok(modelMapper.map(machineTypeServiceImpl.updateMachineType(id, machineTypeDTO), MachineTypeDTO.class));
+        MachineTypeDTO dto = modelMapper.map(machineTypeService.updateMachineType(id, machineTypeDTO), MachineTypeDTO.class);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(dto);
     }
 
     @Operation(summary = "Delete machine type", description = "Delete a machine type using its id.",
@@ -102,9 +115,9 @@ public class MachineTypeController {
     })
     @DeleteMapping(path="/{id}")
     public ResponseEntity<Boolean> deleteMachineType(@PathVariable("id") Long id) {
-        machineTypeServiceImpl.deleteMachineType(id);
-        return ResponseEntity.ok(true);
+        machineTypeService.deleteMachineType(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(true);
     }
-
-
 }
