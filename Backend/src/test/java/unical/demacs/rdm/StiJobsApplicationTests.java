@@ -22,7 +22,7 @@ import unical.demacs.rdm.service.*;
 		ScheduleServiceImplTest.class,
 		UserServiceImplTest.class
 })
-@SpringBootTest
+@SpringBootTest a
 class StiJobsApplicationTests {
 
 	@Test

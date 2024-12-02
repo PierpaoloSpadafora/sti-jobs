@@ -10,10 +10,7 @@ import unical.demacs.rdm.config.exception.JobException;
 import unical.demacs.rdm.config.exception.TooManyRequestsException;
 import unical.demacs.rdm.config.exception.UserException;
 import unical.demacs.rdm.persistence.dto.JobDTO;
-import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.dto.UserDTO;
 import unical.demacs.rdm.persistence.entities.Job;
-import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.entities.User;
 import unical.demacs.rdm.persistence.repository.JobRepository;
 import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
@@ -22,7 +19,6 @@ import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -33,7 +29,6 @@ public class JobServiceImpl implements IJobService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final MachineTypeRepository machineTypeRepository;
-
 
     @Override
     public List<Job> getAllJobs() {
@@ -104,6 +99,7 @@ public class JobServiceImpl implements IJobService {
             logger.info("++++++END REQUEST++++++");
         }
     }
+
     @Override
     public Job createJob(String email, JobDTO jobDTO) {
         logger.info("++++++START REQUEST++++++");

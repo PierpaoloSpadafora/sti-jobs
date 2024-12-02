@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ScheduleServiceImpl implements IScheduleService {
 
-
     private static final Logger logger = LoggerFactory.getLogger(ScheduleServiceImpl.class);
     private final RateLimiter rateLimiter;
     private final ScheduleRepository scheduleRepository;
@@ -274,7 +273,7 @@ public class ScheduleServiceImpl implements IScheduleService {
             }
             List<Schedule> schedules = scheduleRepository.findAll().stream()
                     .filter(schedule -> schedule.getMachineType().equals(machineType))
-                    .collect(Collectors.toList());
+                    .toList();
             for (Schedule schedule : schedules) {
                 if (schedule.getStartTime().isBefore(endTime) && schedule.getStartTime().plusMinutes(schedule.getDuration()).isAfter(startTime)) {
                     logger.info("Time slot not available for machine type: {}", machineType);
@@ -405,6 +404,5 @@ public class ScheduleServiceImpl implements IScheduleService {
             logger.info("++++++END REQUEST++++++");
         }
     }
-
 
 }

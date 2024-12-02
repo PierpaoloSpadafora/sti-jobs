@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
-import unical.demacs.rdm.persistence.service.implementation.MachineServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Tag(name = "machine-controller", description = "Operations related to machine management.")
 public class MachineController {
 
-    private final MachineServiceImpl machineServiceImpl;
+    private final IMachineService machineService;
     private final ModelMapper modelMapper;
 
     @Operation(summary = "Create a new machine", description = "Create a new machine with specified details.",
@@ -42,7 +42,7 @@ public class MachineController {
     })
     @PostMapping
     public ResponseEntity<MachineDTO> createMachine(@Valid @RequestBody MachineDTO machineDTO) {
-        MachineDTO createdMachine = modelMapper.map(machineServiceImpl.createMachine(machineDTO), MachineDTO.class);
+        MachineDTO createdMachine = modelMapper.map(machineService.createMachine(machineDTO), MachineDTO.class);
         return new ResponseEntity<>(createdMachine, HttpStatus.CREATED);
     }
 
@@ -62,7 +62,7 @@ public class MachineController {
     })
     @PutMapping(path = "/{id}")
     public ResponseEntity<MachineDTO> updateMachine(@PathVariable("id") Long id, @Valid @RequestBody MachineDTO machineDTO) {
-        MachineDTO updatedMachine = modelMapper.map(machineServiceImpl.updateMachine(id, machineDTO), MachineDTO.class);
+        MachineDTO updatedMachine = modelMapper.map(machineService.updateMachine(id, machineDTO), MachineDTO.class);
         return ResponseEntity.ok(updatedMachine);
     }
 
@@ -80,7 +80,7 @@ public class MachineController {
     })
     @GetMapping(path = "/{id}")
     public ResponseEntity<MachineDTO> getMachineById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(modelMapper.map(machineServiceImpl.getMachineById(id), MachineDTO.class));
+        return ResponseEntity.ok(modelMapper.map(machineService.getMachineById(id), MachineDTO.class));
     }
 
     @Operation(summary = "Get all machines", description = "Retrieve all machines.",
@@ -95,7 +95,7 @@ public class MachineController {
     })
     @GetMapping
     public ResponseEntity<List<MachineDTO>> getAllMachines() {
-        List<MachineDTO> machines = machineServiceImpl.getAllMachines()
+        List<MachineDTO> machines = machineService.getAllMachines()
                 .stream()
                 .map(machine -> modelMapper.map(machine, MachineDTO.class))
                 .collect(Collectors.toList());
@@ -115,7 +115,7 @@ public class MachineController {
     })
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<Void> deleteMachine(@PathVariable("id") Long id) {
-        machineServiceImpl.deleteMachine(id);
+        machineService.deleteMachine(id);
         return ResponseEntity.noContent().build();
     }
 }

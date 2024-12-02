@@ -17,7 +17,6 @@ import unical.demacs.rdm.config.exception.MachineNotFoundException;
 import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
-import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 
 import java.util.Collections;

@@ -19,7 +19,6 @@ import java.util.Optional;
 public class UserServiceImpl implements IUserService {
 
     public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
     private UserRepository userRepository;
     private final RateLimiter rateLimiter;
 

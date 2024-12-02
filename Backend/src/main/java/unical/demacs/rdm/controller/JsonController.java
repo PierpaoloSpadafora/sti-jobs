@@ -15,9 +15,9 @@ import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
-import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IJobService;
 import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
+import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 import unical.demacs.rdm.utils.JsonFileService;
 
 import java.io.IOException;
@@ -33,10 +33,10 @@ import java.util.Optional;
 public class JsonController {
 
     private final IJobService jobService;
-    private final ModelMapperExtended modelMapperExtended;
-    private final MachineTypeServiceImpl machineTypeService;
     private final IMachineService machineService;
-    private final JsonFileService jsonFileService;
+    private final IMachineTypeService machineTypeService;
+    private final JsonFileService jsonFileService; //FIXME
+    private final ModelMapperExtended modelMapperExtended;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
             tags = {"json-controller"})

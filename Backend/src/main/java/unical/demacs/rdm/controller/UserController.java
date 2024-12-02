@@ -1,6 +1,5 @@
 package unical.demacs.rdm.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,7 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.persistence.dto.UserDTO;
-import unical.demacs.rdm.persistence.service.implementation.UserServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IUserService;
 
 @RestController
 @RequestMapping(value = "/api/v1/user", produces = "application/json")
@@ -21,7 +20,7 @@ import unical.demacs.rdm.persistence.service.implementation.UserServiceImpl;
 @Tag(name = "user-controller", description = "Operations related to user management, include login.")
 public class UserController {
 
-    private final UserServiceImpl userServiceImpl;
+    private final IUserService userService;
     private final ModelMapper modelMapper;
 
 
@@ -35,7 +34,7 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(modelMapper.map(userServiceImpl.createUser(userDTO.getEmail()), UserDTO.class));
+        return ResponseEntity.ok(modelMapper.map(userService.createUser(userDTO.getEmail()), UserDTO.class));
     }
 
     @Operation(summary = "Get user by email", description = "Retrieve a user using their email address.",
@@ -50,7 +49,7 @@ public class UserController {
     })
     @GetMapping(path="/by-email/{email}")
     public ResponseEntity<UserDTO> getUserByEmail(@PathVariable("email") String email) {
-        return ResponseEntity.ok(modelMapper.map(userServiceImpl.getUserByEmail(email), UserDTO.class));
+        return ResponseEntity.ok(modelMapper.map(userService.getUserByEmail(email), UserDTO.class));
     }
 
     @Operation(summary = "Get user by id", description = "Retrieve a user using their id.",
@@ -65,7 +64,7 @@ public class UserController {
     })
     @GetMapping(path="/by-id/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable("id") String id) {
-        return ResponseEntity.ok(modelMapper.map(userServiceImpl.getUserById(id), UserDTO.class));
+        return ResponseEntity.ok(modelMapper.map(userService.getUserById(id), UserDTO.class));
     }
 
     @Operation(summary = "Delete user by id", description = "Delete a user using their id.",
@@ -79,7 +78,7 @@ public class UserController {
     })
     @DeleteMapping(path="/by-id/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable("id") String id) {
-        userServiceImpl.deleteUserById(id);
+        userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
 
