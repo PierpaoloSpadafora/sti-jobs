@@ -58,6 +58,7 @@ public class ScheduleServiceImplTest {
 
         machineType = MachineType.buildMachineType()
                 .id(TEST_ID)
+                .name("TestMachineType")
                 .build();
 
         schedule = Schedule.scheduleBuilder()
@@ -84,7 +85,12 @@ public class ScheduleServiceImplTest {
         when(rateLimiter.tryAcquire()).thenReturn(true);
         when(jobRepository.findById(TEST_ID)).thenReturn(Optional.of(job));
         when(machineTypeRepository.findById(TEST_ID)).thenReturn(Optional.of(machineType));
-        when(scheduleRepository.save(any(Schedule.class))).thenReturn(schedule);
+
+        when(scheduleRepository.save(any(Schedule.class))).thenAnswer(invocation -> {
+            Schedule savedSchedule = invocation.getArgument(0);
+            savedSchedule.setId(TEST_ID);
+            return savedSchedule;
+        });
 
         Schedule result = scheduleService.createSchedule(scheduleDTO);
 

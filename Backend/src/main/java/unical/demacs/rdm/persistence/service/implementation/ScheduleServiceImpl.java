@@ -227,7 +227,7 @@ public class ScheduleServiceImpl implements IScheduleService {
                 throw new RuntimeException("Rate limit exceeded");
             }
             List<Schedule> schedules = scheduleRepository.findAll().stream()
-                    .filter(schedule -> schedule.getMachineType().equals(machineType))
+                    .filter(schedule -> schedule.getMachineType().getName().equals(machineType))
                     .collect(Collectors.toList());
             logger.info("Schedules with machine type {} found successfully", machineType);
             return schedules;

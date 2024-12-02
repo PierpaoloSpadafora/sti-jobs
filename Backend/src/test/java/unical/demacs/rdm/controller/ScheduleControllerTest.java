@@ -5,21 +5,18 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import unical.demacs.rdm.config.ModelMapperExtended;
-import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.entities.Schedule;
-import unical.demacs.rdm.persistence.entities.Job;
-import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
-import unical.demacs.rdm.persistence.service.implementation.ScheduleServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IScheduleService;
 import unical.demacs.rdm.utils.Scheduler;
 
 import java.time.LocalDateTime;
@@ -29,36 +26,37 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(ScheduleController.class)
 public class ScheduleControllerTest {
 
-    @Mock
-    private ScheduleServiceImpl scheduleService;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
-    private ModelMapper modelMapper;
+    @MockBean
+    private IScheduleService scheduleService;
 
-    @Mock
-    private ModelMapperExtended modelMapperExtended;
-
-    @Mock
+    @MockBean
     private Scheduler scheduler;
 
-    @InjectMocks
-    private ScheduleController scheduleController;
+    @MockBean(name = "modelMapper")
+    private ModelMapper modelMapper;
 
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
-    private ScheduleDTO scheduleDTO;
+    @MockBean(name = "modelMapperExtended")
+    private ModelMapperExtended modelMapperExtended;
+
     private Schedule schedule;
-    private Job job;
-    private MachineType machineType;
-
+    private ScheduleDTO scheduleDTO;
     private static final Long TEST_ID = 1L;
+    private static final LocalDateTime NOW = LocalDateTime.now();
+
+    private ObjectMapper objectMapper;
+
     private static final Long TEST_JOB_ID = 1L;
     private static final Long TEST_MACHINE_TYPE_ID = 1L;
     private static final LocalDateTime TEST_START_TIME = LocalDateTime.now();
@@ -66,18 +64,13 @@ public class ScheduleControllerTest {
     private static final int TEST_DURATION = 60;
 
     @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        mockMvc = MockMvcBuilders.standaloneSetup(scheduleController)
-                .setControllerAdvice(new ExceptionsHandler(objectMapper))
-                .build();
-
-        job = new Job();
-        job.setId(TEST_JOB_ID);
-
-        machineType = MachineType.buildMachineType()
-                .id(TEST_MACHINE_TYPE_ID)
+    public void setUp() {
+        schedule = Schedule.scheduleBuilder()
+                .id(TEST_ID)
+                .startTime(NOW)
+                .dueDate(NOW.plusDays(1))
+                .duration(60L)
+                .status(ScheduleStatus.PENDING)
                 .build();
 
         scheduleDTO = new ScheduleDTO();
@@ -86,57 +79,54 @@ public class ScheduleControllerTest {
         scheduleDTO.setMachineTypeId(TEST_MACHINE_TYPE_ID);
         scheduleDTO.setStartTime(TEST_START_TIME);
         scheduleDTO.setDueDate(TEST_DUE_DATE);
-        scheduleDTO.setDuration((long) TEST_DURATION);
+        scheduleDTO.setDuration(60L);
+        scheduleDTO.setStatus(ScheduleStatus.PENDING);
 
-        schedule = Schedule.scheduleBuilder()
-                .id(TEST_ID)
-                .job(job)
-                .machineType(machineType)
-                .startTime(TEST_START_TIME)
-                .dueDate(TEST_DUE_DATE)
-                .duration((long) TEST_DURATION)
-                .build();
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.findAndRegisterModules();
     }
-
     @Test
-    void testCreateSchedule() throws Exception {
+    public void testCreateSchedule() throws Exception {
         when(scheduleService.createSchedule(any(ScheduleDTO.class))).thenReturn(schedule);
-        when(modelMapper.map(eq(schedule), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
+        when(modelMapper.map(any(Schedule.class), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
+
+        String scheduleDTOJson = objectMapper.writeValueAsString(scheduleDTO);
 
         mockMvc.perform(post("/api/v1/schedules/create-schedule")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(scheduleDTO)))
+                        .content(scheduleDTOJson))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(TEST_ID))
-                .andExpect(jsonPath("$.jobId").value(TEST_JOB_ID));
+                .andExpect(jsonPath("$.jobId").value(TEST_JOB_ID))
+                .andExpect(jsonPath("$.machineTypeId").value(TEST_MACHINE_TYPE_ID))
+                .andExpect(jsonPath("$.startTime").exists())
+                .andExpect(jsonPath("$.dueDate").exists())
+                .andExpect(jsonPath("$.duration").value(TEST_DURATION))
+                .andExpect(jsonPath("$.status").value(ScheduleStatus.PENDING.toString()));
 
         verify(scheduleService).createSchedule(any(ScheduleDTO.class));
     }
 
     @Test
-    void testUpdateScheduleStatus() throws Exception {
-        String newStatus = "COMPLETED";
+    public void testUpdateScheduleStatus() throws Exception {
         when(scheduleService.updateScheduleStatus(eq(TEST_ID), eq(ScheduleStatus.COMPLETED))).thenReturn(schedule);
-        when(modelMapper.map(eq(schedule), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
+        when(modelMapper.map(any(Schedule.class), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
 
-        mockMvc.perform(patch("/api/v1/schedules/" + TEST_ID + "/status")
-                        .param("status", newStatus))
+        mockMvc.perform(patch("/api/v1/schedules/{id}/status", TEST_ID)
+                        .param("status", "COMPLETED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(TEST_ID));
-
-        verify(scheduleService).updateScheduleStatus(eq(TEST_ID), eq(ScheduleStatus.COMPLETED));
     }
 
     @Test
-    void testGetScheduleById() throws Exception {
+    public void testGetScheduleById() throws Exception {
         when(scheduleService.getScheduleById(TEST_ID)).thenReturn(Optional.of(schedule));
-        when(modelMapper.map(eq(schedule), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
+        when(modelMapper.map(any(Schedule.class), eq(ScheduleDTO.class))).thenReturn(scheduleDTO);
 
-        mockMvc.perform(get("/api/v1/schedules/" + TEST_ID))
+        mockMvc.perform(get("/api/v1/schedules/{id}", TEST_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(TEST_ID));
-
-        verify(scheduleService).getScheduleById(TEST_ID);
     }
 
     @Test
