@@ -17,7 +17,11 @@
           <td>{{ job.description }}</td>
           <td>{{ secondsToDuration(Number(job.duration)) }}</td>
           <td class="actions-cell">
-            <button class="action-button edit" title="Schedula" (click)="openScheduleDialog(job)">
+            <button
+              class="action-button edit"
+              title="Schedula"
+              (click)="openScheduleDialog(job)"
+            >
               <i class="fas fa-calendar-plus"></i>
             </button>
           </td>
@@ -30,14 +34,16 @@
       <button
         class="pagination-button"
         (click)="previousJobPage()"
-        [disabled]="currentJobPage === 1">
+        [disabled]="currentJobPage === 1"
+      >
         Precedente
       </button>
-      <span>Pagina {{currentJobPage}} di {{totalJobPages}}</span>
+      <span>Pagina {{ currentJobPage }} di {{ totalJobPages }}</span>
       <button
         class="pagination-button"
         (click)="nextJobPage()"
-        [disabled]="currentJobPage === totalJobPages">
+        [disabled]="currentJobPage === totalJobPages"
+      >
         Successiva
       </button>
     </div>
@@ -67,10 +73,18 @@
           <td>{{ secondsToDuration(schedule.duration) }}</td>
           <td>{{ schedule.status }}</td>
           <td class="actions-cell">
-            <button class="action-button edit" title="Modifica" (click)="openEditScheduleDialog(schedule)">
+            <button
+              class="action-button edit"
+              title="Modifica"
+              (click)="openEditScheduleDialog(schedule)"
+            >
               <i class="fas fa-edit"></i>
             </button>
-            <button class="action-button delete" title="Elimina" (click)="confirmDeleteSchedule(schedule)">
+            <button
+              class="action-button delete"
+              title="Elimina"
+              (click)="confirmDeleteSchedule(schedule)"
+            >
               <i class="fas fa-trash"></i>
             </button>
           </td>
@@ -83,14 +97,18 @@
       <button
         class="pagination-button"
         (click)="previousSchedulePage()"
-        [disabled]="currentSchedulePage === 1">
+        [disabled]="currentSchedulePage === 1"
+      >
         Precedente
       </button>
-      <span>Pagina {{currentSchedulePage}} di {{totalSchedulePages}}</span>
+      <span>
+        Pagina {{ currentSchedulePage }} di {{ totalSchedulePages }}
+      </span>
       <button
         class="pagination-button"
         (click)="nextSchedulePage()"
-        [disabled]="currentSchedulePage === totalSchedulePages">
+        [disabled]="currentSchedulePage === totalSchedulePages"
+      >
         Successiva
       </button>
     </div>
@@ -165,7 +183,10 @@
               required
               (selectionChange)="onStartTimeChange()"
             >
-              <mat-option *ngFor="let minute of minuteOptions" [value]="minute">
+              <mat-option
+                *ngFor="let minute of minuteOptions"
+                [value]="minute"
+              >
                 {{ minute | number: '2.0' }}
               </mat-option>
             </mat-select>

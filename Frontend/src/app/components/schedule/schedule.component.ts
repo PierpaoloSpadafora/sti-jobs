@@ -48,9 +48,9 @@ export class ScheduleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.scheduleForm = this.fb.group({
-      startDate: [null, Validators.required],
-      startHour: [null, Validators.required],
-      startMinute: [null, Validators.required],
+      startDate: [new Date(), Validators.required],
+      startHour: [8, Validators.required],
+      startMinute: [0, Validators.required],
       dueDate: [null, Validators.required],
     });
   }
@@ -157,24 +157,31 @@ export class ScheduleComponent implements OnInit {
 
   openScheduleDialog(job: JobDTO) {
     this.selectedJob = job;
-    this.scheduleForm.reset();
+    this.scheduleForm.reset({
+      startDate: new Date(),
+      startHour: 8,
+      startMinute: 0,
+      dueDate: null,
+    });
     this.calculatedEndTime = null;
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
       width: '600px',
       data: { job },
     });
+    this.onStartTimeChange(); // Aggiorna l'ora di fine all'apertura del dialog
   }
 
   onStartTimeChange() {
-    const startDate = this.scheduleForm.value.startDate;
+    let startDate = this.scheduleForm.value.startDate;
     const startHour = this.scheduleForm.value.startHour;
     const startMinute = this.scheduleForm.value.startMinute;
 
-    if (
-      startDate !== null &&
-      startHour !== null &&
-      startMinute !== null
-    ) {
+    if (startDate == null) {
+      startDate = new Date();
+      this.scheduleForm.patchValue({ startDate });
+    }
+
+    if (startHour !== null && startMinute !== null) {
       const startDateTime = new Date(startDate);
       startDateTime.setHours(startHour, startMinute, 0, 0);
 
@@ -187,7 +194,6 @@ export class ScheduleComponent implements OnInit {
       this.calculatedEndTime = null;
     }
   }
-
 
   confirmDeleteSchedule(schedule: ScheduleDTO): void {
     Swal.fire({
@@ -244,9 +250,9 @@ export class ScheduleComponent implements OnInit {
       : null;
 
     this.scheduleForm.patchValue({
-      startDate: startDateTime,
-      startHour: startDateTime ? startDateTime.getHours() : null,
-      startMinute: startDateTime ? startDateTime.getMinutes() : null,
+      startDate: startDateTime || new Date(),
+      startHour: startDateTime ? startDateTime.getHours() : 8,
+      startMinute: startDateTime ? startDateTime.getMinutes() : 0,
       dueDate: schedule.dueDate ? new Date(schedule.dueDate) : null,
     });
 
@@ -262,6 +268,7 @@ export class ScheduleComponent implements OnInit {
       width: '600px',
       data: { job: this.selectedJob },
     });
+    this.onStartTimeChange(); // Aggiorna l'ora di fine all'apertura del dialog di modifica
   }
 
   scheduleJob() {
