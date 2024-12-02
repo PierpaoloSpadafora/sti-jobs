@@ -5,6 +5,17 @@
 <div *ngIf="!isLoading" class="grid-container">  
     <div class="grid-item">
       <google-chart
+        *ngIf="pieChart.data.length > 0"
+        [type]="pieChart.type"
+        [data]="pieChart.data"
+        [columns]="pieChart.columns"
+        [options]="pieChart.options">
+      </google-chart>
+      <p *ngIf="pieChart.data.length === 0">No data available for the pie chart.</p>
+    </div>
+
+    <div class="grid-item">
+      <google-chart
         *ngIf="barChart.data.length > 0"
         [type]="barChart.type"
         [data]="barChart.data"
