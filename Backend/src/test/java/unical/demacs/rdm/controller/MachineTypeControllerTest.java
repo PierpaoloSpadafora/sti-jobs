@@ -18,6 +18,7 @@ import unical.demacs.rdm.config.exception.handler.ExceptionsHandler;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
+import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MachineTypeControllerTest {
 
     @Mock
-    private MachineTypeServiceImpl machineTypeService;
+    private IMachineTypeService machineTypeService;
 
     @Mock
     private ModelMapper modelMapper;
@@ -136,21 +137,37 @@ public class MachineTypeControllerTest {
 
     @Test
     void testUpdateMachineType() throws Exception {
-        given(machineTypeService.updateMachineType(eq(TEST_ID), any(MachineTypeDTO.class))).willReturn(machineType);
-        given(modelMapper.map(any(MachineType.class), eq(MachineTypeDTO.class))).willReturn(machineTypeDTO);
+        MachineTypeDTO updatedDTO = new MachineTypeDTO(TEST_ID, "Updated Name", "Updated Description");
+        MachineType updatedMachineType = MachineType.buildMachineType()
+                .id(TEST_ID)
+                .name("Updated Name")
+                .description("Updated Description")
+                .build();
+
+        when(machineTypeService.updateMachineType(eq(TEST_ID), any(MachineTypeDTO.class))).thenReturn(updatedMachineType);
+        when(modelMapper.map(eq(updatedMachineType), eq(MachineTypeDTO.class))).thenReturn(updatedDTO);
 
         mockMvc.perform(put("/api/v1/machine-type/{id}", TEST_ID)
-                        .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(machineTypeDTO)))
+                        .content(asJsonString(updatedDTO)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(TEST_ID))
-                .andExpect(jsonPath("$.name").value(TEST_NAME))
-                .andExpect(jsonPath("$.description").value(TEST_DESCRIPTION));
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.description").value("Updated Description"));
 
-        verify(machineTypeService).updateMachineType(eq(TEST_ID), any(MachineTypeDTO.class));
+        verify(machineTypeService, times(1)).updateMachineType(eq(TEST_ID), any(MachineTypeDTO.class));
+        verify(modelMapper, times(1)).map(eq(updatedMachineType), eq(MachineTypeDTO.class));
     }
+
+    private static String asJsonString(final Object obj) {
+        try {
+            return new ObjectMapper().writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Test
     void testDeleteMachineType() throws Exception {
