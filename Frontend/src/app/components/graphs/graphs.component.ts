@@ -11,7 +11,36 @@ import { LoginService } from '../../services/login.service'; // Servizio per `ge
   styleUrls: ['./graphs.component.css']
 })
 export class GraphsComponent implements OnInit {
-  
+  pieChart = {
+    type: ChartType.PieChart,
+    data: [] as [string, number][],
+    columns: ['Type', 'Usage'],
+    options: {
+      title: 'Most Utilized Machine Types',
+      width: 550,        
+      height: 500,       
+      chartArea: {
+        width: '85%',      
+        height: '85%'      
+      },
+      pieHole: 0.4,        
+      fontSize: 14,
+      fontName: 'Roboto',
+      colors: ['#6A5ACD', '#4169E1', '#1E90FF', '#00BFFF', '#87CEFA'], 
+      titleTextStyle: {
+        fontSize: 18,
+        bold: true,
+        color: '#2C3E50'
+      },
+      backgroundColor: {
+        fill: '#FFFFFF' // Sfondo bianco
+      },
+      legend: {
+        position: 'right',
+        textStyle: { color: '#2C3E50', fontSize: 12 }
+      }
+    }
+  };
 
   barChart = {
     type: ChartType.ColumnChart,
@@ -128,7 +157,7 @@ export class GraphsComponent implements OnInit {
         
         const types = this.transformMachineTypes(response.types);
         this.machineTypes = types;
-        
+        this.pieChart.data = this.aggregateMachineTypes(this.jobs, types);
         this.barChart.data = this.prepareBarChartData(this.jobs);
         this.statusChart.data = this.prepareStatusChartData(this.jobs);
   
@@ -198,6 +227,28 @@ export class GraphsComponent implements OnInit {
       ['CANCELLED', 0, 0, 0, 0, statusCounts['CANCELLED']],
     ];
   }
+
+  private aggregateMachineTypes(jobs: any[], types: any[]): [string, number][] { 
+    const machineTypeUsage: { [key: string]: number } = {};
+    jobs.forEach(job => {
+      if (job.idMachineType) {
+        const machineType = types.find(type => type.id === job.idMachineType);
+        if (machineType) {
+          const typeName = machineType.name;
+          machineTypeUsage[typeName] = (machineTypeUsage[typeName] || 0) + 1;
+        } else {
+          console.warn(`No machine type found for id: ${job.idMachineType}`);
+        }
+      }
+    });
+  
+    const aggregatedData: [string, number][] = Object.entries(machineTypeUsage)
+      .map(([name, count]) => [name, count]);
+    if (aggregatedData.length === 0) {
+      aggregatedData.push(['No data available', 1]);
+    }
+    return aggregatedData;
+  } 
 
   private showMessage(message: string): void {
     alert(message);
