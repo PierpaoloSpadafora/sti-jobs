@@ -2,7 +2,8 @@
   padding: 20px;
 }
 
-.jobs-container, .schedules-container {
+.jobs-container,
+.schedules-container {
   padding: 24px;
   background-color: #fff;
   border-radius: 16px;
@@ -11,7 +12,8 @@
   transition: box-shadow 0.2s ease;
 }
 
-.jobs-container:hover, .schedules-container:hover {
+.jobs-container:hover,
+.schedules-container:hover {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -20,7 +22,8 @@
   margin: 0 -8px;
 }
 
-.jobs-table, .schedules-table {
+.jobs-table,
+.schedules-table {
   width: 100%;
   border-collapse: collapse;
   margin: 8px;
@@ -154,4 +157,17 @@
 .pagination-controls span {
   font-size: 1em;
   color: #333;
+}
+
+.form-field-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-field-row .form-field {
+  flex: 1;
+}
+
+.hour{
+  max-width: 7em;
 }

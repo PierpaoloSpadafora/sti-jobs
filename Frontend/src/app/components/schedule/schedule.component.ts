@@ -1,23 +1,31 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { JobDTO, ScheduleDTO, ScheduleControllerService, JobControllerService } from '../../generated-api';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  TemplateRef,
+} from '@angular/core';
+import {
+  JobDTO,
+  ScheduleDTO,
+  ScheduleControllerService,
+  JobControllerService,
+} from '../../generated-api';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-schedule',
   templateUrl: './schedule.component.html',
-  styleUrls: ['./schedule.component.css']
+  styleUrls: ['./schedule.component.css'],
 })
 export class ScheduleComponent implements OnInit {
   jobs: JobDTO[] = [];
   schedules: ScheduleDTO[] = [];
-  displayedColumns: string[] = ['title', 'description', 'actions'];
   scheduleForm: FormGroup;
   dialogRef!: MatDialogRef<any>;
   selectedJob!: JobDTO;
   calculatedEndTime!: Date | null;
-  availableStartTimes: Date[] = [];
   selectedSchedule?: ScheduleDTO;
 
   currentJobPage: number = 1;
@@ -28,6 +36,9 @@ export class ScheduleComponent implements OnInit {
   schedulePageSize: number = 5;
   totalSchedulePages: number = 1;
 
+  hourOptions: number[] = [];
+  minuteOptions: number[] = [0, 15, 30, 45];
+
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
 
   constructor(
@@ -37,19 +48,27 @@ export class ScheduleComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.scheduleForm = this.fb.group({
-      startTime: [null, Validators.required],
-      dueDate: [null, Validators.required]
+      startDate: [null, Validators.required],
+      startHour: [null, Validators.required],
+      startMinute: [null, Validators.required],
+      dueDate: [null, Validators.required],
     });
-    this.generateAvailableStartTimes();
-  }
-
-  compareDate(d1: Date, d2: Date): boolean {
-    return d1 && d2 && d1.getTime() === d2.getTime();
   }
 
   ngOnInit() {
     this.getJobs();
-    this.scheduleForm.get('startTime')?.valueChanges.subscribe(() => this.onStartTimeChange());
+    this.initializeTimeOptions();
+
+    this.scheduleForm
+      .get('startHour')
+      ?.valueChanges.subscribe(() => this.onStartTimeChange());
+    this.scheduleForm
+      .get('startMinute')
+      ?.valueChanges.subscribe(() => this.onStartTimeChange());
+  }
+
+  initializeTimeOptions() {
+    this.hourOptions = Array.from({ length: 24 }, (_, i) => i);
   }
 
   getJobs() {
@@ -57,13 +76,15 @@ export class ScheduleComponent implements OnInit {
       next: (response: any) => {
         this.jobs = Array.isArray(response) ? response : [response];
         console.log('Jobs retrieved:', this.jobs);
-        this.totalJobPages = Math.ceil(this.jobs.length / this.jobPageSize);
+        this.totalJobPages = Math.ceil(
+          this.jobs.length / this.jobPageSize
+        );
         this.currentJobPage = 1;
         this.getAllSchedules();
       },
       error: (error: any) => {
         console.error('Error while retrieving jobs:', error);
-      }
+      },
     });
   }
 
@@ -90,28 +111,35 @@ export class ScheduleComponent implements OnInit {
         this.schedules = response;
         console.log('Schedules retrieved:', this.schedules);
 
-        this.totalSchedulePages = Math.ceil(this.schedules.length / this.schedulePageSize);
+        this.totalSchedulePages = Math.ceil(
+          this.schedules.length / this.schedulePageSize
+        );
         this.currentSchedulePage = 1;
 
-        this.schedules.forEach(schedule => {
+        this.schedules.forEach((schedule) => {
           if (schedule.jobId) {
-            const job = this.jobs.find(j => j.id === schedule.jobId);
+            const job = this.jobs.find(
+              (j) => j.id === schedule.jobId
+            );
             if (job) {
               // schedule.jobTitle = job.title; // Se necessario
             } else {
-              console.warn(`Job with ID ${schedule.jobId} not found.`);
+              console.warn(
+                `Job with ID ${schedule.jobId} not found.`
+              );
             }
           }
         });
       },
       error: (error: any) => {
         console.error('Error while retrieving schedules:', error);
-      }
+      },
     });
   }
 
   get paginatedSchedules(): ScheduleDTO[] {
-    const start = (this.currentSchedulePage - 1) * this.schedulePageSize;
+    const start =
+      (this.currentSchedulePage - 1) * this.schedulePageSize;
     return this.schedules.slice(start, start + this.schedulePageSize);
   }
 
@@ -127,45 +155,39 @@ export class ScheduleComponent implements OnInit {
     }
   }
 
-  generateAvailableStartTimes() {
-    const startHour = 8;
-    const endHour = 18;
-    const interval = 30;
-    this.availableStartTimes = [];
-
-    const today = new Date();
-    today.setSeconds(0, 0);
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minutes = 0; minutes < 60; minutes += interval) {
-        const time = new Date(today.getTime());
-        time.setHours(hour, minutes, 0, 0);
-        this.availableStartTimes.push(time);
-      }
-    }
-  }
-
   openScheduleDialog(job: JobDTO) {
     this.selectedJob = job;
     this.scheduleForm.reset();
     this.calculatedEndTime = null;
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
       width: '600px',
-      data: { job }
+      data: { job },
     });
   }
 
   onStartTimeChange() {
-    const startTime = this.scheduleForm.value.startTime;
-    const jobDuration = this.selectedJob.duration ?? 0;
+    const startDate = this.scheduleForm.value.startDate;
+    const startHour = this.scheduleForm.value.startHour;
+    const startMinute = this.scheduleForm.value.startMinute;
 
-    if (startTime && jobDuration) {
-      const start = new Date(startTime);
+    if (
+      startDate !== null &&
+      startHour !== null &&
+      startMinute !== null
+    ) {
+      const startDateTime = new Date(startDate);
+      startDateTime.setHours(startHour, startMinute, 0, 0);
+
+      const jobDuration = this.selectedJob.duration ?? 0;
       const durationInMilliseconds = jobDuration * 1000;
-      this.calculatedEndTime = new Date(start.getTime() + durationInMilliseconds);
+      this.calculatedEndTime = new Date(
+        startDateTime.getTime() + durationInMilliseconds
+      );
     } else {
       this.calculatedEndTime = null;
     }
   }
+
 
   confirmDeleteSchedule(schedule: ScheduleDTO): void {
     Swal.fire({
@@ -176,7 +198,7 @@ export class ScheduleComponent implements OnInit {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sì, elimina!',
-      cancelButtonText: 'Annulla'
+      cancelButtonText: 'Annulla',
     }).then((result) => {
       if (result.isConfirmed) {
         this.deleteSchedule(schedule);
@@ -207,90 +229,114 @@ export class ScheduleComponent implements OnInit {
           'Non è stato possibile eliminare il job schedulato. Per favore, riprova più tardi.',
           'error'
         );
-      }
+      },
     });
   }
 
   openEditScheduleDialog(schedule: ScheduleDTO) {
     this.selectedSchedule = schedule;
-    this.selectedJob = this.jobs.find(job => job.id === schedule.jobId)!;
+    this.selectedJob = this.jobs.find(
+      (job) => job.id === schedule.jobId
+    )!;
+
+    const startDateTime = schedule.startTime
+      ? new Date(schedule.startTime)
+      : null;
 
     this.scheduleForm.patchValue({
-      startTime: schedule.startTime ? new Date(schedule.startTime) : null,
-      dueDate: schedule.dueDate ? new Date(schedule.dueDate) : null
+      startDate: startDateTime,
+      startHour: startDateTime ? startDateTime.getHours() : null,
+      startMinute: startDateTime ? startDateTime.getMinutes() : null,
+      dueDate: schedule.dueDate ? new Date(schedule.dueDate) : null,
     });
 
-    if (schedule.duration) {
-      // @ts-ignore //FIXME
-      this.calculatedEndTime = new Date(new Date(schedule.startTime).getTime() + schedule.duration * 1000);
+    if (schedule.duration && schedule.startTime) {
+      this.calculatedEndTime = new Date(
+        startDateTime!.getTime() + schedule.duration * 1000
+      );
     } else {
       this.calculatedEndTime = null;
     }
 
     this.dialogRef = this.dialog.open(this.scheduleDialog, {
       width: '600px',
-      data: { job: this.selectedJob }
+      data: { job: this.selectedJob },
     });
   }
 
   scheduleJob() {
-    const startTime = this.scheduleForm.value.startTime;
+    const startDate = this.scheduleForm.value.startDate;
+    const startHour = this.scheduleForm.value.startHour;
+    const startMinute = this.scheduleForm.value.startMinute;
     const dueDate = this.scheduleForm.value.dueDate;
 
-    const jobDuration = this.selectedJob.duration ?? 0;
+    if (
+      startDate !== null &&
+      startHour !== null &&
+      startMinute !== null &&
+      dueDate !== null
+    ) {
+      const startDateTime = new Date(startDate);
+      startDateTime.setHours(startHour, startMinute, 0, 0);
 
-    const scheduleData: ScheduleDTO = {
-      id: this.selectedSchedule?.id,
-      jobId: this.selectedJob.id,
-      machineTypeId: this.selectedJob.idMachineType,
-      dueDate: dueDate.toISOString(),
-      startTime: startTime.toISOString(),
-      duration: jobDuration,
-      status: 'SCHEDULED'
-    };
+      const jobDuration = this.selectedJob.duration ?? 0;
 
-    if (this.selectedSchedule) {
-      this.scheduleService.updateSchedule(scheduleData, this.selectedSchedule.id!).subscribe({
-        next: (response) => {
-          console.log('Schedule updated successfully:', response);
-          this.dialogRef.close();
-          this.getAllSchedules();
-          Swal.fire(
-            'Aggiornato!',
-            `Il job schedulato con ID "${scheduleData.jobId}" è stato aggiornato.`,
-            'success'
-          );
-        },
-        error: (error) => {
-          console.error('Error updating schedule:', error);
-          Swal.fire(
-            'Errore!',
-            'Non è stato possibile aggiornare il job schedulato. Per favore, riprova più tardi.',
-            'error'
-          );
-        }
-      });
-    } else {
-      this.scheduleService.createSchedule(scheduleData).subscribe({
-        next: (response) => {
-          console.log('Schedule created successfully:', response);
-          this.dialogRef.close();
-          this.getAllSchedules();
-          Swal.fire(
-            'Creato!',
-            `Il job schedulato con ID "${scheduleData.jobId}" è stato creato.`,
-            'success'
-          );
-        },
-        error: (error) => {
-          console.error('Error creating schedule:', error);
-          Swal.fire(
-            'Errore!',
-            'Non è stato possibile creare il job schedulato. Per favore, riprova più tardi.',
-            'error'
-          );
-        }
-      });
+      const scheduleData: ScheduleDTO = {
+        id: this.selectedSchedule?.id,
+        jobId: this.selectedJob.id,
+        machineTypeId: this.selectedJob.idMachineType,
+        dueDate: dueDate.toISOString(),
+        //@ts-ignore
+        startTime: startDateTime.toISOString(),
+        duration: jobDuration,
+        status: 'SCHEDULED',
+      };
+
+      if (this.selectedSchedule) {
+        this.scheduleService
+          .updateSchedule(scheduleData, this.selectedSchedule.id!)
+          .subscribe({
+            next: (response) => {
+              console.log('Schedule updated successfully:', response);
+              this.dialogRef.close();
+              this.getAllSchedules();
+              Swal.fire(
+                'Aggiornato!',
+                `Il job schedulato con ID "${scheduleData.jobId}" è stato aggiornato.`,
+                'success'
+              );
+            },
+            error: (error) => {
+              console.error('Error updating schedule:', error);
+              Swal.fire(
+                'Errore!',
+                'Non è stato possibile aggiornare il job schedulato. Per favore, riprova più tardi.',
+                'error'
+              );
+            },
+          });
+      } else {
+        this.scheduleService.createSchedule(scheduleData).subscribe({
+          next: (response) => {
+            console.log('Schedule created successfully:', response);
+            this.dialogRef.close();
+            this.getAllSchedules();
+            Swal.fire(
+              'Creato!',
+              `Il job schedulato con ID "${scheduleData.jobId}" è stato creato.`,
+              'success'
+            );
+          },
+          error: (error) => {
+            console.error('Error creating schedule:', error);
+            Swal.fire(
+              'Errore!',
+              'Non è stato possibile creare il job schedulato. Per favore, riprova più tardi.',
+              'error'
+            );
+          },
+        });
+      }
     }
   }
 

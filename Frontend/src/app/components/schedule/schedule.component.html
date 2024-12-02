@@ -100,35 +100,101 @@
 <ng-template #scheduleDialog let-data>
   <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
   <mat-dialog-content [formGroup]="scheduleForm">
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Ora di Inizio</mat-label>
-        <mat-select formControlName="startTime" (selectionChange)="onStartTimeChange()" required [compareWith]="compareDate">
-          <mat-option *ngFor="let time of availableStartTimes" [value]="time">
-            {{ time | date: 'shortTime' }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div class="form-field-row">
+      <!-- Data di inizio-->
+      <div class="form-field">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Data di Inizio</mat-label>
+          <input
+            matInput
+            [matDatepicker]="startDatePicker"
+            formControlName="startDate"
+            required
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="startDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <!-- Data di Scadenza-->
+      <div class="form-field">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Data di Scadenza</mat-label>
+          <input
+            matInput
+            [matDatepicker]="dueDatePicker"
+            formControlName="dueDate"
+            required
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="dueDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #dueDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
     </div>
 
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Ora di Fine</mat-label>
-        <input matInput [value]="calculatedEndTime | date: 'shortTime'" readonly>
-      </mat-form-field>
-    </div>
+    <div class="form-field-row">
+      <!-- Ora di Inizio -->
+      <div class="form-field-row">
+        <!-- Select per le ore -->
+        <div class="form-field">
+          <mat-form-field appearance="fill" class="full-width hour">
+            <mat-label>Ore</mat-label>
+            <mat-select
+              formControlName="startHour"
+              required
+              (selectionChange)="onStartTimeChange()"
+            >
+              <mat-option *ngFor="let hour of hourOptions" [value]="hour">
+                {{ hour }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-    <div class="form-field">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Data di Scadenza</mat-label>
-        <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" required>
-        <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #dueDatePicker></mat-datepicker>
-      </mat-form-field>
+        <!-- Select per i minuti -->
+        <div class="form-field">
+          <mat-form-field appearance="fill" class="full-width hour">
+            <mat-label>Minuti</mat-label>
+            <mat-select
+              formControlName="startMinute"
+              required
+              (selectionChange)="onStartTimeChange()"
+            >
+              <mat-option *ngFor="let minute of minuteOptions" [value]="minute">
+                {{ minute | number: '2.0' }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Ora di Fine -->
+      <div class="form-field">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Ora di Fine</mat-label>
+          <input
+            matInput
+            [value]="calculatedEndTime | date: 'shortTime'"
+            readonly
+          />
+        </mat-form-field>
+      </div>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button (click)="dialogRef.close()">Cancella</button>
-    <button mat-button color="primary" [disabled]="scheduleForm.invalid" (click)="scheduleJob()">Schedula</button>
+    <button
+      mat-button
+      color="primary"
+      [disabled]="scheduleForm.invalid"
+      (click)="scheduleJob()"
+    >
+      Schedula
+    </button>
   </mat-dialog-actions>
 </ng-template>
