@@ -1,6 +1,7 @@
 package unical.demacs.rdm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,9 +20,10 @@ import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.service.implementation.ScheduleServiceImpl;
+import unical.demacs.rdm.utils.Scheduler;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +45,9 @@ public class ScheduleControllerTest {
     @Mock
     private ModelMapperExtended modelMapperExtended;
 
+    @Mock
+    private Scheduler scheduler;
+
     @InjectMocks
     private ScheduleController scheduleController;
 
@@ -63,6 +68,7 @@ public class ScheduleControllerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(scheduleController)
                 .setControllerAdvice(new ExceptionsHandler(objectMapper))
                 .build();
@@ -135,8 +141,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetAllSchedules() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
 
         when(scheduleService.getAllSchedules()).thenReturn(schedules);
         when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
@@ -150,8 +156,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetSchedulesByStatus() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
 
         when(scheduleService.getSchedulesByStatus(eq(ScheduleStatus.PENDING))).thenReturn(schedules);
         when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
@@ -165,8 +171,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetSchedulesByJobId() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
 
         when(scheduleService.getSchedulesByJobId(TEST_JOB_ID)).thenReturn(schedules);
         when(modelMapperExtended.mapList(eq(schedules), eq(ScheduleDTO.class))).thenReturn(scheduleDTOs);
@@ -180,8 +186,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetSchedulesInTimeRange() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
         LocalDateTime startTime = LocalDateTime.now();
         LocalDateTime endTime = LocalDateTime.now().plusDays(1);
 
@@ -217,8 +223,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetUpcomingSchedules() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
         LocalDateTime from = LocalDateTime.now();
 
         when(scheduleService.getUpcomingSchedules(any())).thenReturn(schedules);
@@ -234,8 +240,8 @@ public class ScheduleControllerTest {
 
     @Test
     void testGetPastSchedules() throws Exception {
-        List<Schedule> schedules = Arrays.asList(schedule);
-        List<ScheduleDTO> scheduleDTOs = Arrays.asList(scheduleDTO);
+        List<Schedule> schedules = Collections.singletonList(schedule);
+        List<ScheduleDTO> scheduleDTOs = Collections.singletonList(scheduleDTO);
         LocalDateTime until = LocalDateTime.now();
 
         when(scheduleService.getPastSchedules(any())).thenReturn(schedules);

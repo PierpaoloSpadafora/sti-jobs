@@ -18,12 +18,11 @@ import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.entities.MachineType;
 import unical.demacs.rdm.persistence.service.implementation.MachineTypeServiceImpl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -72,6 +71,20 @@ public class MachineTypeControllerTest {
     }
 
     @Test
+    void testGetMachineTypeById() throws Exception {
+        when(machineTypeService.getMachineTypeById(TEST_ID)).thenReturn(Optional.of(machineType));
+        when(modelMapper.map(eq(machineType), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTO);
+
+        mockMvc.perform(get("/api/v1/machine-type/by-id/" + TEST_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(TEST_ID))
+                .andExpect(jsonPath("$.name").value(TEST_NAME))
+                .andExpect(jsonPath("$.description").value(TEST_DESCRIPTION));
+
+        verify(machineTypeService).getMachineTypeById(TEST_ID);
+    }
+
+    @Test
     void testCreateMachineType() throws Exception {
         when(machineTypeService.createMachineType(any(MachineTypeDTO.class))).thenReturn(machineType);
         when(modelMapper.map(eq(machineType), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTO);
@@ -88,20 +101,6 @@ public class MachineTypeControllerTest {
     }
 
     @Test
-    void testGetMachineTypeById() throws Exception {
-        when(machineTypeService.getMachineTypeById(TEST_ID)).thenReturn(Optional.of(machineType));
-        when(modelMapper.map(any(MachineType.class), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTO);
-
-        mockMvc.perform(get("/api/v1/machine-type/by-id/" + TEST_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(TEST_ID))
-                .andExpect(jsonPath("$.name").value(TEST_NAME))
-                .andExpect(jsonPath("$.description").value(TEST_DESCRIPTION));
-
-        verify(machineTypeService).getMachineTypeById(TEST_ID);
-    }
-
-    @Test
     void testGetMachineTypeById_NotFound() throws Exception {
         when(machineTypeService.getMachineTypeById(TEST_ID))
                 .thenThrow(new MachineNotFoundException("Machine type not found."));
@@ -113,8 +112,8 @@ public class MachineTypeControllerTest {
     }
     @Test
     void testGetAllMachineTypes() throws Exception {
-        List<MachineType> machineTypes = Arrays.asList(machineType);
-        List<MachineTypeDTO> machineTypeDTOs = Arrays.asList(machineTypeDTO);
+        List<MachineType> machineTypes = Collections.singletonList(machineType);
+        List<MachineTypeDTO> machineTypeDTOs = Collections.singletonList(machineTypeDTO);
 
         when(machineTypeService.getAllMachineTypes()).thenReturn(machineTypes);
         when(modelMapperExtended.mapList(eq(machineTypes), eq(MachineTypeDTO.class))).thenReturn(machineTypeDTOs);
