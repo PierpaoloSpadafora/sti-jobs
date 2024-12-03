@@ -46,4 +46,17 @@ public class Schedule {
     protected void onCreate() {
         status = ScheduleStatus.SCHEDULED;
     }
+
+    @Override
+    public String toString() {
+        return "Schedule{" +
+                "id=" + id +
+                ", job=" + job +
+                ", machineType=" + machineType +
+                ", dueDate=" + dueDate +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", status=" + status +
+                '}';
+    }
 }

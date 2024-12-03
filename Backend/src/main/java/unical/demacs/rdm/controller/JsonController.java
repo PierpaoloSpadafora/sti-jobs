@@ -132,4 +132,12 @@ public class JsonController {
         List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
         return ResponseEntity.ok(schedules);
     }
+
+    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
+            tags = {"json-controller"})
+    @GetMapping(value = "/export-job-scheduled-ro", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ScheduleDTO>> exportJobScheduledRO() {
+        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
+        return ResponseEntity.ok(schedules);
+    }
 }

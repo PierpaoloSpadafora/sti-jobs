@@ -42,14 +42,17 @@ public class Scheduler {
         List<Schedule> prioritySchedules = copiaProfonda(originalSchedules);
         List<Schedule> dueDateSchedules = copiaProfonda(originalSchedules);
         List<Schedule> durationSchedules = copiaProfonda(originalSchedules);
+        List<Schedule> priorityRO = copiaProfonda(originalSchedules);
 
         List<Schedule> priorityResult = scheduleByPriority(prioritySchedules);
         List<Schedule> dueDateResult = scheduleByDueDate(dueDateSchedules);
         List<Schedule> durationResult = scheduleByDuration(durationSchedules);
+        List<Schedule> priorityROResults = scheduleRO(priorityRO);
 
         saveSchedulesToFile(priorityResult, "priority");
         saveSchedulesToFile(dueDateResult, "due-date");
         saveSchedulesToFile(durationResult, "duration");
+        saveSchedulesToFile(priorityROResults, "priorityRO");
     }
 
     private Map<MachineType, List<Schedule>> groupSchedulesByMachineType(List<Schedule> schedules) {
@@ -116,6 +119,22 @@ public class Scheduler {
             result.addAll(typeSchedules);
         }
 
+        return result;
+    }
+
+    private List<Schedule> scheduleRO(List<Schedule> schedules) {
+        Map<MachineType, List<Schedule>> schedulesByType = groupSchedulesByMachineType(schedules);
+
+        List<Schedule> result = new ArrayList<>();
+
+        System.out.println("Schedules by MachineType:");
+        for (Map.Entry<MachineType, List<Schedule>> entry : schedulesByType.entrySet()) {
+            System.out.println("MachineType: " + entry.getKey().getName());
+            for (Schedule schedule : entry.getValue()) {
+                System.out.println("Job: " + schedule.getJob().getTitle() + " - Duration: " + schedule.getDuration() + " - DueDate: " + schedule.getDueDate());
+                System.out.println(schedule);
+            }
+        }
         return result;
     }
 

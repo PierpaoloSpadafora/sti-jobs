@@ -29,4 +29,13 @@ public class MachineType {
 
     @OneToMany(mappedBy = "requiredMachineType", fetch = FetchType.LAZY)
     private List<Job> jobs;
+
+    @Override
+    public String toString() {
+        return "MachineType{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }
