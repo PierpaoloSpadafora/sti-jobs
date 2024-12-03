@@ -31,26 +31,22 @@ public class ScheduleController {
     private final IScheduleService scheduleService;
     private final ModelMapper modelMapper;
     private final ModelMapperExtended modelMapperExtended;
-    private final Scheduler scheduler;
 
     @PostMapping("/create-schedule")
     public ResponseEntity<ScheduleDTO> createSchedule(@Valid @RequestBody ScheduleDTO scheduleDTO) {
         Schedule createdSchedule = scheduleService.createSchedule(scheduleDTO);
-        scheduler.scheduleByEveryType();
         return new ResponseEntity<>(modelMapper.map(createdSchedule, ScheduleDTO.class), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDTO scheduleDTO) {
         Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDTO);
-        scheduler.scheduleByEveryType();
         return new ResponseEntity<>(modelMapper.map(updatedSchedule, ScheduleDTO.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
         boolean deleted = scheduleService.deleteSchedule(id);
-        scheduler.scheduleByEveryType();
         return new ResponseEntity<>(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
     }
 
@@ -58,7 +54,6 @@ public class ScheduleController {
     public ResponseEntity<ScheduleDTO> updateScheduleStatus(@PathVariable Long id, @RequestParam String status) {
         ScheduleStatus scheduleStatus = ScheduleStatus.valueOf(status.toUpperCase());
         Schedule updatedSchedule = scheduleService.updateScheduleStatus(id, scheduleStatus);
-        scheduler.scheduleByEveryType();
         return new ResponseEntity<>(modelMapper.map(updatedSchedule, ScheduleDTO.class), HttpStatus.OK);
     }
 

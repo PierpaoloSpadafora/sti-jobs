@@ -10,7 +10,6 @@ import java.time.Duration;
 @Configuration
 public class RateLimiterConfig {
     @Bean
-    // FIXME - meno richieste
     public RateLimiter rateLimiter(){
         return RateLimiter.create(500000d, Duration.ofSeconds(15));
     }

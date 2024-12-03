@@ -1,5 +1,5 @@
 <div class="schedule-container">
-  <h2>Jobs da schedulare</h2>
+  <h2>Tutti i Job</h2>
   <div class="jobs-container">
     <div class="table-responsive">
       <table class="jobs-table">
@@ -50,7 +50,12 @@
   </div>
 
   <div class="schedules-container">
-    <h2>Elenco dei Job Schedulati</h2>
+    <div class="schedules-header">
+      <h2>Job partecipanti alla schedulazione</h2>
+      <div class="schedule-actions">
+        <button class="button" (click)="openSchedulingDialog()">Avvia Scheduling</button>
+      </div>
+    </div>
     <div class="table-responsive">
       <table class="schedules-table">
         <thead>
@@ -113,6 +118,29 @@
       </button>
     </div>
   </div>
+</div>
+
+
+<!-- Dialog per selezionare il tipo di scheduling -->
+<ng-template #schedulingDialog>
+  <h2 mat-dialog-title>Seleziona Tipo di Scheduling</h2>
+  <mat-dialog-content>
+    <mat-radio-group [(ngModel)]="selectedSchedulingType">
+      <mat-radio-button value="scheduleAll">Schedule All</mat-radio-button><br>
+      <mat-radio-button value="scheduleDueDate">Schedule by Due Date</mat-radio-button><br>
+      <mat-radio-button value="scheduleDuration">Schedule by Duration</mat-radio-button><br>
+      <mat-radio-button value="schedulePriority">Schedule by Priority</mat-radio-button>
+    </mat-radio-group>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="schedulingDialogRef.close()">Annulla</button>
+    <button mat-button color="primary" (click)="startScheduling()">Avvia</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Indicatore di caricamento -->
+<div *ngIf="loading" class="loading-overlay">
+  <mat-spinner></mat-spinner>
 </div>
 
 <ng-template #scheduleDialog let-data>

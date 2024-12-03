@@ -18,6 +18,8 @@ export interface ScheduleDTO {
     startTime?: Date;
     duration?: number;
     status?: ScheduleDTO.StatusEnum;
+    assignedMachineId?: number;
+    assignedMachineName?: string;
 }
 export namespace ScheduleDTO {
     export type StatusEnum = 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';

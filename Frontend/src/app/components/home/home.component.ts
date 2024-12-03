@@ -19,7 +19,8 @@ export class HomeComponent implements OnInit {
     { label: 'All Jobs', value: 'ALL' },
     { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
     { label: 'Scheduled by Priority', value: 'PRIORITY' },
-    { label: 'Scheduled by Duration', value: 'DURATION' }
+    { label: 'Scheduled by Duration', value: 'DURATION' },
+    { label: 'Scheduler di RICERCA OPERATIVA', value: 'RO' }
   ];
   selectedScheduleType = 'ALL';
 
@@ -60,6 +61,9 @@ export class HomeComponent implements OnInit {
         break;
       case 'DURATION':
         scheduleObservable = this.jsonService.exportJobScheduledDuration();
+        break;
+      case 'RO':
+        scheduleObservable = this.jsonService.exportJobScheduledRO();
         break;
       default:
         scheduleObservable = this.scheduleService.getAllSchedules();

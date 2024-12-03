@@ -1,25 +1,18 @@
 package unical.demacs.rdm.persistence.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ScheduleDTO {
-
+public class ScheduleWithMachineDTO {
     private Long id;
     private Long jobId;
     private long machineTypeId;
-    private LocalDateTime dueDate;
+    private Long machineId;
     private LocalDateTime startTime;
+    private LocalDateTime dueDate;
     private Long duration;
     private ScheduleStatus status;
-    private Long assignedMachineId;
-    private String assignedMachineName;
-
 }

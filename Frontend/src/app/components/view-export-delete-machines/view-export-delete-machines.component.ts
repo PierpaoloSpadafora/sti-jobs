@@ -51,11 +51,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
-    return dtos.filter(dto =>
-      dto.id != null &&
-      dto.name != null &&
-      dto.description != null
-    ).map(dto => ({
+    return dtos.map(dto => ({
       id: dto.id as number,
       name: dto.name as string,
       description: dto.description as string
@@ -63,12 +59,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   private transformMachines(dtos: MachineDTO[]): Machine[] {
-    return dtos.filter(dto =>
-      dto.id != null &&
-      dto.name != null &&
-      dto.status != null &&
-      dto.typeId != null
-    ).map(dto => ({
+    return dtos.map(dto => ({
       id: dto.id as number,
       name: dto.name as string,
       status: dto.status as string,
@@ -80,6 +71,8 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   getMachineTypeName(typeId: number): string {
+    console.log('typeId:', typeId);
+    console.log(this.machineTypes);
     const machineType = this.machineTypes.find(type => type.id === typeId);
     return machineType ? machineType.name : 'Unknown Type';
   }

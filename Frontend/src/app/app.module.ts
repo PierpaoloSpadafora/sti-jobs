@@ -50,8 +50,11 @@ import {
   JobControllerService, JsonControllerService, MachineControllerService,
   MachineTypeControllerService,
   ScheduleControllerService,
-  UserControllerService
+  UserControllerService,
+  SchedulerEngineService
 } from "./generated-api";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @NgModule({
   declarations: [
@@ -105,6 +108,9 @@ import {
     MatDatepickerModule,
     MatNativeDateModule,
     GoogleChartsModule.forRoot(),
+    MatRadioGroup,
+    MatRadioButton,
+    MatProgressSpinner,
   ],
   providers: [
     MachineTypeControllerService,
@@ -113,6 +119,7 @@ import {
     ScheduleControllerService,
     JsonControllerService,
     MachineControllerService,
+    SchedulerEngineService,
     provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })

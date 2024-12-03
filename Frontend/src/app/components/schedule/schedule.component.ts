@@ -9,10 +9,12 @@ import {
   ScheduleDTO,
   ScheduleControllerService,
   JobControllerService,
+  SchedulerEngineService,
 } from '../../generated-api';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-schedule',
@@ -40,12 +42,18 @@ export class ScheduleComponent implements OnInit {
   minuteOptions: number[] = [0, 15, 30, 45];
 
   @ViewChild('scheduleDialog') scheduleDialog!: TemplateRef<any>;
+  @ViewChild('schedulingDialog') schedulingDialog!: TemplateRef<any>;  // Aggiungi questa riga
+
+  selectedSchedulingType: string = '';
+  schedulingDialogRef!: MatDialogRef<any>;
+  loading: boolean = false;
 
   constructor(
     private jobService: JobControllerService,
     private scheduleService: ScheduleControllerService,
     private dialog: MatDialog,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private schedulerEngineService: SchedulerEngineService
   ) {
     this.scheduleForm = this.fb.group({
       startDate: [new Date(), Validators.required],
@@ -284,7 +292,17 @@ export class ScheduleComponent implements OnInit {
       dueDate !== null
     ) {
       const startDateTime = new Date(startDate);
-      startDateTime.setHours(startHour, startMinute, 0, 0);
+      startDateTime.setHours(startHour+1, startMinute, 0, 0);
+
+      const dueDateTime = new Date(dueDate);
+      dueDateTime.setHours(1, 0, 0, 0);
+      /*
+      I +1 SONO CONCETTUALMENTE SBAGLIATI MA NECESSARI.
+      NON HA UN CAZZO DI SENSO CHE toISOString() TOLGA UN'ORA ALL'ORARIO PERCHÈ IL CALENDARIO SI BASA SU UTC+1 E ISOSTRING NO
+      FACCIA TORNARE LA DATA INDIETRO DI UN GIORNO, SPERO CHE GLI SVILUPPATORI DI MOZILLA ESPLODANO COME IN UN FILM DI MICHAEL BAY
+      */
+      console.log(startDateTime.toISOString())
+      console.log(dueDateTime.toISOString())
 
       const jobDuration = this.selectedJob.duration ?? 0;
 
@@ -292,7 +310,8 @@ export class ScheduleComponent implements OnInit {
         id: this.selectedSchedule?.id,
         jobId: this.selectedJob.id,
         machineTypeId: this.selectedJob.idMachineType,
-        dueDate: dueDate.toISOString(),
+        //@ts-ignore
+        dueDate: dueDateTime.toISOString(),
         //@ts-ignore
         startTime: startDateTime.toISOString(),
         duration: jobDuration,
@@ -323,6 +342,7 @@ export class ScheduleComponent implements OnInit {
             },
           });
       } else {
+        console.log(scheduleData)
         this.scheduleService.createSchedule(scheduleData).subscribe({
           next: (response) => {
             console.log('Schedule created successfully:', response);
@@ -345,6 +365,51 @@ export class ScheduleComponent implements OnInit {
         });
       }
     }
+  }
+
+  openSchedulingDialog() {
+    this.selectedSchedulingType = '';
+    this.schedulingDialogRef = this.dialog.open(this.schedulingDialog, {
+      width: '400px',
+    });
+  }
+
+  startScheduling() {
+    this.loading = true;
+    this.schedulingDialogRef.close();
+    let schedulingObservable: Observable<any>;  // Modifica il tipo qui
+
+    switch (this.selectedSchedulingType) {
+      case 'scheduleAll':
+        schedulingObservable = this.schedulerEngineService.scheduleAll();
+        break;
+      case 'scheduleDueDate':
+        schedulingObservable = this.schedulerEngineService.scheduleDueDate();
+        break;
+      case 'scheduleDuration':
+        schedulingObservable = this.schedulerEngineService.scheduleDuration();
+        break;
+      case 'schedulePriority':
+        schedulingObservable = this.schedulerEngineService.schedulePriority();
+        break;
+      default:
+        this.loading = false;
+        return;
+    }
+
+    schedulingObservable.subscribe({
+      next: (response) => {
+        this.loading = false;
+        Swal.fire('Successo', 'Scheduling completato con successo.', 'success');
+        // Aggiorna i dati se necessario
+        this.getAllSchedules();
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Errore durante lo scheduling:', error);
+        Swal.fire('Errore', 'Si è verificato un errore durante lo scheduling.', 'error');
+      },
+    });
   }
 
   secondsToDuration(seconds?: number): string {
