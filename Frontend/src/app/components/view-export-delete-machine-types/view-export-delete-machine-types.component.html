@@ -15,7 +15,7 @@
         <td>{{ type.name }}</td>
         <td>{{ type.description }}</td>
         <td class="actions-cell">
-          <button class="action-button" title="Export">
+          <button class="action-button" title="Export" (click)="exportMachineType(type)">
             <i class="fas fa-file-export"></i>
           </button>
           <button class="action-button edit" title="Edit" (click)="openEditDialog(type)">
