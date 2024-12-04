@@ -209,4 +209,20 @@ export class ViewExportDeleteJobsComponent implements OnInit {
         return 'status-unknown';
     }
   }
+
+  exportJob(job: JobDTO): void {
+    const enrichedJob = {
+      ...job,
+      machineTypeName: this.getMachineTypeName(job.idMachineType)
+    };
+    const jsonContent = JSON.stringify(enrichedJob, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `job_${job.id}_export.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.showMessage(`Job ${job.id} exported successfully`);
+  }
 }
