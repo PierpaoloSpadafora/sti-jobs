@@ -184,4 +184,20 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
       verticalPosition: 'top'
     });
   }
+
+  exportMachine(machine: Machine): void {
+    const enrichedMachine = {
+      ...machine,
+      machineTypeName: this.getMachineTypeName(machine.typeId)
+    };
+    const jsonContent = JSON.stringify(enrichedMachine, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `machine_${machine.id}_export.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.showMessage(`Machine ${machine.id} exported successfully`);
+  }
 }
