@@ -40,11 +40,12 @@ public class JobAssignment {
 
     @Override
     public String toString() {
-        return String.format("JobAssignment{id=%d, scheduleId=%d, machine=%s, startTime=%s}",
+        return String.format("JobAssignment{id=%d, scheduleId=%d, machineId=%s, startTime=%s, endTime=%s}",
                 id,
                 schedule != null ? schedule.getId() : null,
                 assignedMachine != null ? assignedMachine.getId() : "unassigned",
-                startTimeGrain != null ? startTimeGrain.getStartTimeInSeconds() : "unscheduled");
+                startTimeGrain != null ? startTimeGrain.getStartTimeInSeconds() : "unscheduled",
+                getEndTimeInSeconds() != null ? getEndTimeInSeconds() : "unknown");
     }
 }
 

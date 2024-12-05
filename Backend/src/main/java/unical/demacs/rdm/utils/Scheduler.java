@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.*;
+import org.optaplanner.core.config.constructionheuristic.ConstructionHeuristicPhaseConfig;
+import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
+import org.optaplanner.core.config.localsearch.decider.acceptor.LocalSearchAcceptorConfig;
+import org.optaplanner.core.config.localsearch.decider.forager.LocalSearchForagerConfig;
 import org.optaplanner.core.config.solver.SolverConfig;
 import org.optaplanner.core.config.solver.termination.TerminationConfig;
 import org.springframework.stereotype.Service;
@@ -32,63 +36,57 @@ public class Scheduler {
     private final ObjectMapper objectMapper;
 
     public void scheduleByEveryType() {
+        log.debug("Inizio schedulazione per ogni tipo");
         scheduleByPriority();
         scheduleByDueDate();
         scheduleByDuration();
     }
 
     public void scheduleByPriority() {
+        log.debug("Schedulazione basata sulla priorità");
         List<Schedule> schedules = scheduleRepository.findAll();
+        log.debug("Schedules recuperate: {}", schedules.size());
         List<Schedule> priorityResult = scheduleWithOptaPlanner(schedules, "priority");
         saveSchedulesToFile(priorityResult, "priority");
     }
 
-
-
     public void scheduleByDueDate() {
+        log.debug("Schedulazione basata sulla data di scadenza");
         List<Schedule> schedules = scheduleRepository.findAll();
+        log.debug("Schedules recuperate: {}", schedules.size());
         List<Schedule> dueDateResult = scheduleWithOptaPlanner(schedules, "due-date");
         saveSchedulesToFile(dueDateResult, "due-date");
     }
 
     public void scheduleByDuration() {
+        log.debug("Schedulazione basata sulla durata");
         List<Schedule> schedules = scheduleRepository.findAll();
+        log.debug("Schedules recuperate: {}", schedules.size());
         List<Schedule> durationResult = scheduleWithOptaPlanner(schedules, "duration");
         saveSchedulesToFile(durationResult, "duration");
     }
 
     // -------------------- SCHEDULE LOGIC 'NAGG RO' CAZZ --------------------
 
-    private List<JobAssignment> createPossibleAssignments(List<Schedule> schedules, List<Machine> machines) {
+    private List<JobAssignment> createPossibleAssignments(List<Schedule> schedules, List<Machine> availableMachines) {
+        log.debug("Creazione delle possibili assegnazioni");
         List<JobAssignment> assignments = new ArrayList<>();
-        log.info("Creating assignments for {} schedules and {} machines", schedules.size(), machines.size());
-
-        Map<Long, List<Machine>> machinesByType = machines.stream()
-                .collect(Collectors.groupingBy(m -> m.getMachine_type_id().getId()));
+        log.debug("Numero di schedules: {}, Macchine disponibili: {}", schedules.size(), availableMachines.size());
 
         for (Schedule schedule : schedules) {
-            Long requiredTypeId = schedule.getMachineType().getId();
-            List<Machine> compatibleMachines = machinesByType.getOrDefault(requiredTypeId, Collections.emptyList());
-
-            if (compatibleMachines.isEmpty()) {
-                log.warn("No compatible machines found for schedule {} (type {})", schedule.getId(), requiredTypeId);
-                continue;
-            }
-
-            for (Machine machine : compatibleMachines) {
-                JobAssignment assignment = new JobAssignment(schedule);
-                assignment.setAssignedMachine(machine);
-                assignments.add(assignment);
-                log.debug("Created assignment: Schedule {} -> Machine {}", schedule.getId(), machine.getId());
-            }
+            JobAssignment assignment = new JobAssignment(schedule);
+            assignments.add(assignment);
+            log.debug("Creata assegnazione per schedule {} con macchine disponibili", schedule.getId());
         }
 
+        log.debug("Numero totale di assegnazioni: {}", assignments.size());
         return assignments;
     }
 
     private TimeWindow calculateTimeWindow(List<Schedule> schedules) {
+        log.debug("Calcolo della finestra temporale");
         if (schedules.isEmpty()) {
-            throw new IllegalArgumentException("No schedules provided for time window calculation");
+            throw new IllegalArgumentException("Nessuna schedule fornita per il calcolo della finestra temporale");
         }
 
         LocalDateTime earliestStart = schedules.stream()
@@ -96,17 +94,19 @@ public class Scheduler {
                 .filter(Objects::nonNull)
                 .min(LocalDateTime::compareTo)
                 .orElseGet(LocalDateTime::now);
+        log.debug("Earliest start time: {}", earliestStart);
 
         LocalDateTime latestDue = schedules.stream()
                 .map(Schedule::getDueDate)
                 .filter(Objects::nonNull)
                 .max(LocalDateTime::compareTo)
                 .orElseGet(() -> earliestStart.plusDays(7));
+        log.debug("Latest due date: {}", latestDue);
 
         long startTime = earliestStart.toEpochSecond(ZoneOffset.UTC);
         long endTime = latestDue.toEpochSecond(ZoneOffset.UTC);
 
-        log.info("Time window: {} to {}",
+        log.info("Finestra temporale: {} - {}",
                 earliestStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 latestDue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
@@ -114,35 +114,40 @@ public class Scheduler {
     }
 
     private List<TimeGrain> createTimeGrains(TimeWindow timeWindow) {
+        log.debug("Creazione dei TimeGrains");
         List<TimeGrain> timeGrains = new ArrayList<>();
         int grainIndex = 0;
         long currentTime = timeWindow.getStartTime();
         int grainLengthInSeconds = 60;
+        log.debug("TimeWindow start: {}, end: {}", timeWindow.getStartTime(), timeWindow.getEndTime());
 
         while (currentTime <= timeWindow.getEndTime()) {
             timeGrains.add(new TimeGrain(grainIndex++, currentTime));
+            log.debug("Creato TimeGrain index: {}, startTimeInSeconds: {}", grainIndex - 1, currentTime);
             currentTime += grainLengthInSeconds;
         }
 
-        log.info("Created {} time grains", timeGrains.size());
+        log.info("Creati {} TimeGrains", timeGrains.size());
         return timeGrains;
     }
 
     private List<Schedule> processSolution(ScheduleSolution solution) {
         if (solution == null || solution.getScore() == null) {
-            log.error("Invalid solution or score");
+            log.error("Soluzione o score non valido");
             return Collections.emptyList();
         }
 
-        log.info("Processing solution with score: {}", solution.getScore());
+        log.info("Elaborazione della soluzione con score: {}", solution.getScore());
 
         if (!solution.getScore().isFeasible()) {
-            log.warn("Solution is not feasible!");
+            log.warn("La soluzione non è fattibile!");
         }
 
         Map<Long, Schedule> finalSchedules = new HashMap<>();
 
         for (JobAssignment assignment : solution.getJobAssignments()) {
+            System.out.println("Assignment:" + assignment);
+            log.debug("Elaborazione di JobAssignment: {}", assignment);
             if (assignment.getAssignedMachine() != null && assignment.getStartTimeGrain() != null) {
                 Schedule schedule = assignment.getSchedule();
                 Long scheduleId = schedule.getId();
@@ -159,15 +164,14 @@ public class Scheduler {
                     schedule.setMachine(assignment.getAssignedMachine());
                     schedule.setStatus(ScheduleStatus.SCHEDULED);
                     finalSchedules.put(scheduleId, schedule);
-
-                    log.info("Scheduled: {} on machine {} at {}",
-                            scheduleId, assignment.getAssignedMachine().getId(), startTime);
+                    log.info("Schedule {} assegnata alla macchina {} all'orario {}", scheduleId, assignment.getAssignedMachine().getId(), startTime);
                 }
             } else {
-                log.warn("Job {} not fully assigned", assignment.getSchedule().getId());
+                log.warn("Job {} non completamente assegnato (macchina o startTimeGrain null)", assignment.getSchedule().getId());
             }
         }
 
+        log.debug("Numero totale di schedules elaborate: {}", finalSchedules.size());
         return new ArrayList<>(finalSchedules.values());
     }
 
@@ -236,7 +240,6 @@ public class Scheduler {
                 timeGrainRange,
                 constraintConfiguration
         );
-
         return processSolution(solution);
     }
 
@@ -247,7 +250,16 @@ public class Scheduler {
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
                         .withBestScoreFeasible(true)
-                        .withSecondsSpentLimit(30L));
+                        .withSecondsSpentLimit(60L))
+                .withPhases(
+                        new ConstructionHeuristicPhaseConfig(),
+                        new LocalSearchPhaseConfig()
+                                .withAcceptorConfig(new LocalSearchAcceptorConfig()
+                                        .withEntityTabuSize(7)
+                                        .withLateAcceptanceSize(400))
+                                .withForagerConfig(new LocalSearchForagerConfig()
+                                        .withAcceptedCountLimit(4))
+                );
     }
 
     private ScheduleSolution createAndSolveProblem(
@@ -256,14 +268,11 @@ public class Scheduler {
             List<TimeGrain> timeGrainRange,
             ScheduleConstraintConfiguration constraintConfiguration) {
 
-        for(JobAssignment ja : jobAssignments){
-            System.out.println(ja.toString());
-        }
-
-        System.out.println("\n=== Starting Scheduling Process ===");
-        System.out.printf("Jobs to schedule: %d%n", jobAssignments.size());
-        System.out.printf("Available machines: %d%n", machines.size());
-        System.out.printf("Time grains: %d%n", timeGrainRange.size());
+        log.debug("Creazione del problema di schedulazione");
+        log.debug("Numero di jobAssignments: {}", jobAssignments.size());
+        log.debug("Numero di macchine: {}", machines.size());
+        log.debug("Numero di timeGrains: {}", timeGrainRange.size());
+        log.debug("Configurazione vincoli: {}", constraintConfiguration);
 
         ScheduleSolution problem = new ScheduleSolution(
                 jobAssignments,
@@ -276,13 +285,13 @@ public class Scheduler {
         Solver<ScheduleSolution> solver = solverFactory.buildSolver();
 
         try {
-            System.out.println("\nSolver starting...");
+            log.info("Avvio del solver...");
             ScheduleSolution solution = solver.solve(problem);
-            System.out.printf("\nSolver finished with score: %s%n", solution.getScore());
+            log.info("Solver terminato con score: {}", solution.getScore());
             return solution;
         } catch (Exception e) {
-            System.err.println("Solver failed with error: " + e.getMessage());
-            throw new RuntimeException("Failed to solve scheduling problem", e);
+            log.error("Solver fallito con errore: {}", e.getMessage(), e);
+            throw new RuntimeException("Impossibile risolvere il problema di schedulazione", e);
         }
     }
 
@@ -304,20 +313,4 @@ public class Scheduler {
                 })
                 .collect(Collectors.toList());
 
-        String fileName = "./data/job-scheduled-by-" + type + ".json";
-        File dataDir = new File("./data");
-
-        if (!dataDir.exists() && !dataDir.mkdirs()) {
-            log.error("Failed to create directory: {}", dataDir.getAbsolutePath());
-            throw new RuntimeException("Unable to create data directory");
-        }
-
-        try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), scheduleDTOs);
-            log.info("Successfully saved {} schedules to {}", schedules.size(), fileName);
-        } catch (IOException e) {
-            log.error("Failed to write schedule to file: {}", fileName, e);
-            throw new RuntimeException("Failed to save schedule to file", e);
-        }
-    }
-}
+        String fileName = "./data/job-scheduled-by-" + type + ".json";        File dataDir = new File("./data");        if (!dataDir.exists() && !dataDir.mkdirs()) {            log.error("Failed to create directory: {}", dataDir.getAbsolutePath());            throw new RuntimeException("Unable to create data directory");        }        try {            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), scheduleDTOs);            log.info("Successfully saved {} schedules to {}", schedules.size(), fileName);        } catch (IOException e) {            log.error("Failed to write schedule to file: {}", fileName, e);            throw new RuntimeException("Failed to save schedule to file", e);        }    }}

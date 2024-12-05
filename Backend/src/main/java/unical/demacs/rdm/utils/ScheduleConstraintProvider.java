@@ -2,25 +2,36 @@ package unical.demacs.rdm.utils;
 
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.*;
+import org.optaplanner.core.api.score.stream.Joiners;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZoneOffset;
 import static org.optaplanner.core.api.score.stream.ConstraintCollectors.sum;
 
 public class ScheduleConstraintProvider implements ConstraintProvider {
+    private static final Logger log = LoggerFactory.getLogger(ScheduleConstraintProvider.class);
+
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
+        log.debug("Definizione dei vincoli di schedulazione");
         return new Constraint[]{
-                machineConflict(constraintFactory),       // Impedire la sovrapposizione di lavori sulla stessa macchina
-                respectDueDates(constraintFactory),       // I lavori devono essere completati prima della scadenza
-                jobsStartAfterStartDate(constraintFactory), // I lavori non possono iniziare prima della data di inizio.
-
-                balanceMachineLoad(constraintFactory),    // Distribuire il lavoro in modo uniforme
-                prioritizeHighPriorityJobs(constraintFactory), // Pianificare prima i lavori ad alta priorità
-                prioritizeShortDurationJobs(constraintFactory), // Preferire lavori più brevi
-                encourageParallelExecution(constraintFactory),  // Massimizzare l'utilizzo della macchina
-                //oneAssignmentPerSchedule(constraintFactory)
+                // Hard constraints
+                machineConflict(constraintFactory), //ho provato a commentare gli altri constraint e lasciare solo questo
+                machineTypeCompatibility(constraintFactory),
+                respectDueDates(constraintFactory),
+                jobsStartAfterStartDate(constraintFactory),
+                assignmentRequired(constraintFactory),
+                
+                // Soft constraints
+                balanceMachineLoad(constraintFactory), // e questo, ma continua a non switchare le macchine
+                prioritizeHighPriorityJobs(constraintFactory),
+                prioritizeShortDurationJobs(constraintFactory),
+                distributeJobsAcrossMachines(constraintFactory)
         };
     }
+
+    // ---------------------- Hard ----------------------
 
     private Constraint machineConflict(ConstraintFactory constraintFactory) {
         return constraintFactory
@@ -30,14 +41,29 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                     if (ja1.getStartTimeInSeconds() == null || ja2.getStartTimeInSeconds() == null) {
                         return false;
                     }
-                    // qui penalizzo la scelta di usare la stessa macchina nello stesso lasso di tempo
-                    // MA NON FA NIENTE, continua a scegliere la stessa macchina e a spostare i lavori
-                    return ja1.getStartTimeInSeconds() <= ja2.getStartTimeInSeconds() &&
-                            ja1.getEndTimeInSeconds() > ja2.getStartTimeInSeconds() &&
-                            ja1.getAssignedMachine() == ja2.getAssignedMachine();
+                    long ja1Start = ja1.getStartTimeInSeconds();
+                    long ja1End = ja1.getEndTimeInSeconds();
+                    long ja2Start = ja2.getStartTimeInSeconds();
+                    long ja2End = ja2.getEndTimeInSeconds();
+                    boolean isOverlapping = (ja1Start <= ja2Start && ja1End > ja2Start) ||
+                            (ja2Start <= ja1Start && ja2End > ja1Start);
+                    if (isOverlapping) {
+                        log.debug("Conflitto macchina tra JobAssignment {} e {} sulla macchina {}",
+                                ja1.getId(), ja2.getId(), ja1.getAssignedMachine().getId());
+                    }
+                    return isOverlapping;
                 })
                 .penalize(HardSoftScore.ONE_HARD.multiply(1000))
                 .asConstraint("Machine conflict");
+    }
+
+    private Constraint machineTypeCompatibility(ConstraintFactory constraintFactory) {
+        return constraintFactory
+                .forEach(JobAssignment.class)
+                .filter(ja -> ja.getAssignedMachine() != null &&
+                        !ja.getAssignedMachine().getMachine_type_id().equals(ja.getSchedule().getMachineType()))
+                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
+                .asConstraint("Machine type compatibility");
     }
 
     private Constraint respectDueDates(ConstraintFactory constraintFactory) {
@@ -65,13 +91,27 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .asConstraint("Jobs must start after start date");
     }
 
+    private Constraint assignmentRequired(ConstraintFactory constraintFactory) {
+        return constraintFactory
+                .forEach(JobAssignment.class)
+                .filter(ja -> ja.getAssignedMachine() == null || ja.getStartTimeGrain() == null)
+                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
+                .asConstraint("Assignment required");
+    }
+
+    // ---------------------- Soft ----------------------
+
     private Constraint balanceMachineLoad(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(JobAssignment.class)
                 .groupBy(JobAssignment::getAssignedMachine,
                         sum(ja -> Math.toIntExact(ja.getSchedule().getDuration())))
-                .penalize(HardSoftScore.ONE_SOFT.multiply(5),
-                        (machine, totalDuration) -> (totalDuration * totalDuration / 3600))
+                .penalize(HardSoftScore.ONE_SOFT.multiply(1000),
+                        (machine, totalDuration) -> {
+                            int penalty = (totalDuration * totalDuration) / 3600;
+                            log.debug("Penalità bilanciamento carico per macchina {}: {}", machine.getId(), penalty);
+                            return penalty;
+                        })
                 .asConstraint("Balance machine load");
     }
 
@@ -91,32 +131,14 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .asConstraint("Short duration jobs first");
     }
 
-    private Constraint encourageParallelExecution(ConstraintFactory constraintFactory) {
-        return constraintFactory
-                .forEachUniquePair(JobAssignment.class)
-                .filter((ja1, ja2) ->
-                        ja1.getSchedule().getMachineType().getId().equals(
-                                ja2.getSchedule().getMachineType().getId()))
-                .filter((ja1, ja2) -> ja1.getAssignedMachine() == ja2.getAssignedMachine())
-                .filter((ja1, ja2) -> {
-                    if (ja1.getStartTimeInSeconds() == null || ja2.getStartTimeInSeconds() == null) {
-                        return false;
-                    }
-                    return Math.abs(ja1.getStartTimeInSeconds() - ja2.getStartTimeInSeconds()) < 3600;
-                })
-                .penalize(HardSoftScore.ONE_SOFT.multiply(10),
-                        (ja1, ja2) -> 1000)
-                .asConstraint("Encourage parallel execution");
-    }
-
-    private Constraint oneAssignmentPerSchedule(ConstraintFactory constraintFactory) {
+    private Constraint distributeJobsAcrossMachines(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(JobAssignment.class)
-                .groupBy(JobAssignment::getSchedule, ConstraintCollectors.count())
-                .filter((schedule, count) -> count > 1)
-                .penalize(HardSoftScore.ONE_HARD,
-                        (schedule, count) -> count - 1)
-                .asConstraint("One assignment per schedule");
+                .groupBy(
+                    ja -> ja.getSchedule().getMachineType().getId()
+                )
+                .reward(HardSoftScore.ONE_SOFT.multiply(1000))
+                .asConstraint("Distribute jobs across machines");
     }
 
 }
