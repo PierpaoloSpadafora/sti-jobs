@@ -16,14 +16,13 @@ public class JsonServiceImpl implements IJsonService {
 
     private final ObjectMapper objectMapper;
 
-    public List<ScheduleDTO> readScheduleFile(String fileName) {
+    public List<ScheduleWithMachineDTO> readScheduleFile(String fileName) {
         File file = new File(fileName);
         try {
             return objectMapper.readValue(file,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, ScheduleDTO.class));
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, ScheduleWithMachineDTO.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

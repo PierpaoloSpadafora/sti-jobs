@@ -11,6 +11,7 @@ import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
+import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
@@ -112,32 +113,32 @@ public class JsonController {
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-priority", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleDTO>> exportJobScheduledPriority() {
-        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-priority.json");
+    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledPriority() {
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-priority.json");
         return ResponseEntity.ok(schedules);
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleDTO>> exportJobScheduledDueDate() {
-        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-due-date.json");
+    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledDueDate() {
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-due-date.json");
         return ResponseEntity.ok(schedules);
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-duration", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleDTO>> exportJobScheduledDuration() {
-        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
+    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledDuration() {
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
         return ResponseEntity.ok(schedules);
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-ro", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleDTO>> exportJobScheduledRO() {
-        List<ScheduleDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
+    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledRO() {
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
         return ResponseEntity.ok(schedules);
     }
 }

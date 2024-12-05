@@ -20,7 +20,7 @@ import { Observable }                                        from 'rxjs';
 import { JobDTO } from '../model/jobDTO';
 import { MachineDTO } from '../model/machineDTO';
 import { MachineTypeDTO } from '../model/machineTypeDTO';
-import { ScheduleDTO } from '../model/scheduleDTO';
+import { ScheduleWithMachineDTO } from '../model/scheduleWithMachineDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -100,9 +100,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledDueDate(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
-    public exportJobScheduledDueDate(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
-    public exportJobScheduledDueDate(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public exportJobScheduledDueDate(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
+    public exportJobScheduledDueDate(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledDueDate(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
     public exportJobScheduledDueDate(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -120,7 +120,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-due-date`,
+        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-due-date`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -136,9 +136,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledDuration(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
-    public exportJobScheduledDuration(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
-    public exportJobScheduledDuration(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public exportJobScheduledDuration(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
+    public exportJobScheduledDuration(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledDuration(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
     public exportJobScheduledDuration(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -156,7 +156,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-duration`,
+        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-duration`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -172,9 +172,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledPriority(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
-    public exportJobScheduledPriority(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
-    public exportJobScheduledPriority(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public exportJobScheduledPriority(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
+    public exportJobScheduledPriority(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledPriority(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
     public exportJobScheduledPriority(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -192,7 +192,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
+        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -208,9 +208,9 @@ export class JsonControllerService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public exportJobScheduledRO(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
-    public exportJobScheduledRO(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
-    public exportJobScheduledRO(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public exportJobScheduledRO(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
+    public exportJobScheduledRO(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledRO(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
     public exportJobScheduledRO(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
 
         let headers = this.defaultHeaders;
@@ -228,7 +228,7 @@ export class JsonControllerService {
         const consumes: string[] = [
         ];
 
-        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-ro`,
+        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-ro`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

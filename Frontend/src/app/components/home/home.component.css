@@ -157,6 +157,22 @@
   font-size: 1rem;
 }
 
+.machine-type-header {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 1.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #3498db;
+}
+
+.machine-header {
+  color: #34495e;
+  font-size: 1.2rem;
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid #3498db;
+}
+
 @media (max-width: 768px) {
   .page-container {
     padding: 1rem;
@@ -209,5 +225,15 @@
 
   .schedule-table tr:nth-child(even) {
     background-color: transparent;
+  }
+
+  .machine-type-header {
+    font-size: 1.3rem;
+    margin: 1rem 0 0.5rem;
+  }
+
+  .machine-header {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
   }
 }

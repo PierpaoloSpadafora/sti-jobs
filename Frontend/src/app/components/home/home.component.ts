@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ScheduleControllerService } from '../../generated-api';
-import { JobDTO } from '../../generated-api';
-import { ScheduleDTO } from '../../generated-api';
-import { JsonControllerService } from '../../generated-api';
+import { ScheduleControllerService, JobDTO,
+  JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { ScheduleWithMachineDTO } from '../../generated-api/model/scheduleWithMachineDTO';
 
 @Component({
   selector: 'app-home',
@@ -11,9 +11,10 @@ import { Router } from '@angular/router';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  scheduleData: ScheduleDTO[] = [];
+  scheduleData: ScheduleWithMachineDTO[] = [];
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
   machinesMap: Map<number, string> = new Map<number, string>();
+  machineNamesMap: Map<number, string> = new Map<number, string>(); // New map for machine names
 
   scheduleTypes = [
     { label: 'All Jobs', value: 'ALL' },
@@ -32,7 +33,7 @@ export class HomeComponent implements OnInit {
   hasScheduledJobs = false;
   loading = true;
 
-  schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map<string, Map<number, ScheduleDTO[]>>();
+  schedulesByDateAndMachine: Map<string, Map<number, ScheduleWithMachineDTO[]>> = new Map<string, Map<number, ScheduleWithMachineDTO[]>>();
 
   constructor(
     private scheduleService: ScheduleControllerService,
@@ -51,7 +52,7 @@ export class HomeComponent implements OnInit {
   fetchData() {
     this.loading = true;
 
-    let scheduleObservable;
+    let scheduleObservable: Observable<ScheduleWithMachineDTO[]>;
     switch (this.selectedScheduleType) {
       case 'PRIORITY':
         scheduleObservable = this.jsonService.exportJobScheduledPriority();
@@ -70,11 +71,11 @@ export class HomeComponent implements OnInit {
     }
 
     scheduleObservable.subscribe({
-      next: (scheduleData: ScheduleDTO[]) => {
+      next: (scheduleData: ScheduleWithMachineDTO[]) => {
         this.scheduleData = scheduleData;
 
         this.jsonService.exportJob().subscribe({
-          next: (jobs) => {
+          next: (jobs: JobDTO[]) => {
             this.jobsMap.clear();
             jobs.forEach(job => {
               if (job.id !== undefined) {
@@ -91,22 +92,38 @@ export class HomeComponent implements OnInit {
                   }
                 });
 
-                this.processData();
-                this.loading = false;
+                // Fetch machine names
+                this.jsonService.exportMachine().subscribe({
+                  next: (machines) => {
+                    this.machineNamesMap.clear();
+                    machines.forEach(machine => {
+                      if (machine.id !== undefined && machine.name !== undefined) {
+                        this.machineNamesMap.set(machine.id, machine.name);
+                      }
+                    });
+                    
+                    this.processData();
+                    this.loading = false;
+                  },
+                  error: (error: unknown) => {
+                    console.error('Error fetching machines data', error);
+                    this.loading = false;
+                  }
+                });
               },
-              error: (error: any) => {
+              error: (error: unknown) => {
                 console.error('Error fetching machine types data', error);
                 this.loading = false;
               }
             });
           },
-          error: (error: any) => {
+          error: (error: unknown) => {
             console.error('Error fetching jobs data', error);
             this.loading = false;
           }
         });
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         console.error('Error fetching schedule data', error);
         this.loading = false;
       }
@@ -120,14 +137,14 @@ export class HomeComponent implements OnInit {
     }
     this.hasScheduledJobs = true;
 
-    const schedulesByDateAndMachine: Map<string, Map<number, ScheduleDTO[]>> = new Map();
+    const schedulesByDateAndMachine: Map<string, Map<number, ScheduleWithMachineDTO[]>> = new Map();
 
     this.scheduleData.forEach(schedule => {
       const date = schedule.startTime ? new Date(schedule.startTime).toDateString() : 'Unknown Date';
       const machineTypeId = schedule.machineTypeId || 0;
 
       if (!schedulesByDateAndMachine.has(date)) {
-        schedulesByDateAndMachine.set(date, new Map<number, ScheduleDTO[]>());
+        schedulesByDateAndMachine.set(date, new Map<number, ScheduleWithMachineDTO[]>());
       }
 
       const machineMap = schedulesByDateAndMachine.get(date)!;
@@ -157,6 +174,40 @@ export class HomeComponent implements OnInit {
         });
       });
     });
+  }
+
+  getUniqueMachineTypes(date: string): string[] {
+    const machineTypeIds = Array.from(this.schedulesByDateAndMachine.get(date)?.keys() || []);
+    const uniqueTypes = new Set<string>();
+    
+    machineTypeIds.forEach(id => {
+      const machineName = this.machinesMap.get(id) || 'Unknown Machine Type';
+      uniqueTypes.add(machineName);
+    });
+    
+    return Array.from(uniqueTypes);
+  }
+
+  getSchedulesForMachineType(date: string, machineTypeName: string): ScheduleWithMachineDTO[][] {
+    const machineTypeId = Array.from(this.machinesMap.entries())
+      .find(([_, name]) => name === machineTypeName)?.[0];
+    
+    if (!machineTypeId) return [];
+
+    const schedules = this.schedulesByDateAndMachine.get(date)?.get(machineTypeId) || [];
+    
+    // Group schedules by machineId
+    const groupedSchedules = new Map<number, ScheduleWithMachineDTO[]>();
+    
+    schedules.forEach(schedule => {
+      const machineId = schedule.machineId || 0;
+      if (!groupedSchedules.has(machineId)) {
+        groupedSchedules.set(machineId, []);
+      }
+      groupedSchedules.get(machineId)?.push(schedule);
+    });
+
+    return Array.from(groupedSchedules.values());
   }
 
   get visibleDates(): string[] {
@@ -197,6 +248,11 @@ export class HomeComponent implements OnInit {
       year: 'numeric'
     };
     return new Intl.DateTimeFormat('it-IT', options).format(date);
+  }
+
+  getMachineName(machineId: number | undefined): string {
+    if (!machineId) return 'Unknown Machine';
+    return `${this.machineNamesMap.get(machineId) || 'Unknown'} - ${machineId}`;
   }
 
   protected readonly Array = Array;
