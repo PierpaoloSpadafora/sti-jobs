@@ -95,6 +95,36 @@ export class JsonControllerService {
     }
 
     /**
+     * Download schedules as a JSON file
+     * This method triggers the download of the schedules JSON file.
+     * @param observe set whether or not to return the data Observable as the body, response or events.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public downloadSchedules(observe?: 'body', reportProgress?: boolean): Observable<any>;
+    public downloadSchedules(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
+    public downloadSchedules(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
+    public downloadSchedules(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        return this.httpClient.request('get', `${this.basePath}/api/v1/json/download-schedules`, {
+            withCredentials: this.configuration.withCredentials,
+            headers: headers,
+            observe: observe,
+            responseType: 'blob',
+            reportProgress: reportProgress
+        });
+    }
+
+    /**
      * Export Job data to JSON
      * Export all Job data to JSON.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

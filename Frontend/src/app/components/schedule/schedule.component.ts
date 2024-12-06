@@ -10,6 +10,7 @@ import {
   ScheduleControllerService,
   JobControllerService,
   SchedulerEngineService,
+  JsonControllerService,
 } from '../../generated-api';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -51,6 +52,7 @@ export class ScheduleComponent implements OnInit {
   constructor(
     private jobService: JobControllerService,
     private scheduleService: ScheduleControllerService,
+    private jsonService: JsonControllerService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private schedulerEngineService: SchedulerEngineService
@@ -427,4 +429,15 @@ export class ScheduleComponent implements OnInit {
   }
 
   protected readonly Number = Number;
+
+  downloadSchedules() {
+    this.jsonService.downloadSchedules().subscribe(response => {
+      const blob = new Blob([response], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'schedules.json';
+      link.click();
+    });
+  }  
+  
 }
