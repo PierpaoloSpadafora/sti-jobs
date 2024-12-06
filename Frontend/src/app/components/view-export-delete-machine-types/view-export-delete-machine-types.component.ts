@@ -122,4 +122,16 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
       }
     });
   }
+
+  exportMachineType(machineType: MachineType): void {
+    const jsonContent = JSON.stringify(machineType, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `machine_type_${machineType.id}_export.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.showMessage(`Machine Type ${machineType.id} exported successfully`);
+  }
 }
