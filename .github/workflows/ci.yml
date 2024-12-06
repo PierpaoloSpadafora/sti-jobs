@@ -1,11 +1,11 @@
 name: Java CI
 on:
   push:
-    branches: [main, dev, RSJ-75]
+    branches: [main, dev]
   pull_request:
-    branches: [main, dev, RSJ-75]
+    branches: [main, dev]
   schedule:
-    - cron: '26 11 * * *'  # Esegue alle 11:02 ogni giorno
+    - cron: '0 0 * * *'  
 jobs:
   build:
     runs-on: ubuntu-latest
