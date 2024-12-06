@@ -27,17 +27,12 @@ export class CreateImportMachineTypeComponent implements OnInit {
 
   ngOnInit(): void {
     this.jsonExample = `
-  [
-    {
-      "id": 1, // Aggiungi questo campo se desideri specificare l'ID
-      "name": "MachineTypeName",
-      "description": "Esempio Descrizione"
-    },
-    {
-      "name": "AnotherMachineType",
-      "description": "Un altro esempio senza ID"
-    }
-  ]`;
+    [
+      {
+        "name": "MachineTypeName",
+        "description": "Esempio Descrizione"
+      }
+    ]`;
     this.jsonInputContent = this.jsonExample;
   }
 
@@ -68,7 +63,7 @@ export class CreateImportMachineTypeComponent implements OnInit {
       }
     }
 
-    let machineTypesToSubmit: Array<MachineTypeDTO>;
+    let machineTypesToSubmit: Array<Omit<MachineTypeDTO, 'id'>>;
 
     if (this.showJsonInput) {
       try {
@@ -106,10 +101,15 @@ export class CreateImportMachineTypeComponent implements OnInit {
       machineTypesToSubmit = [this.machineType];
     }
 
-    console.log('machineTypesToSubmit:', machineTypesToSubmit);
+    const machineTypesToSubmitWithId: MachineTypeDTO[] = machineTypesToSubmit.map(machineType => ({
+      ...machineType,
+      id: 0
+    }));
 
-    const requests = machineTypesToSubmit.map(machineType =>
-      this.machineService.createOrUpdateMachineType(machineType)
+    console.log('machineTypesToSubmitWithId:', machineTypesToSubmitWithId);
+
+    const requests = machineTypesToSubmitWithId.map(machineType =>
+      this.machineService.createMachineType(machineType)
     );
 
     forkJoin(requests).subscribe({
@@ -140,7 +140,6 @@ export class CreateImportMachineTypeComponent implements OnInit {
       }
     });
   }
-
 
   resetForm() {
     this.machineType = {
