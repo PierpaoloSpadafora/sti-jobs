@@ -43,6 +43,7 @@ public class ScheduleServiceImpl implements IScheduleService {
                 logger.error("Job with id {} not found", scheduleDTO.getJobId());
                 throw new RuntimeException("Job not found");
             }
+
             Schedule schedule = Schedule.scheduleBuilder()
                     .job(jobRepository.findById(scheduleDTO.getJobId()).orElse(null))
                     .machineType(machineTypeRepository.findById(scheduleDTO.getMachineTypeId()).orElse(null))
@@ -50,7 +51,20 @@ public class ScheduleServiceImpl implements IScheduleService {
                     .startTime(scheduleDTO.getStartTime())
                     .duration(scheduleDTO.getDuration())
                     .build();
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime endTime = schedule.getStartTime().plusSeconds(schedule.getDuration());
+
+            if (now.isBefore(schedule.getStartTime())) {
+                schedule.setStatus(ScheduleStatus.SCHEDULED);
+            } else if (now.isAfter(schedule.getStartTime()) && now.isBefore(endTime)) {
+                schedule.setStatus(ScheduleStatus.IN_PROGRESS);
+            } else if (now.isAfter(endTime)) {
+                schedule.setStatus(ScheduleStatus.COMPLETED);
+            }
+
             scheduleRepository.save(schedule);
+            updateScheduleStatuses();
             logger.info("Schedule for job with id {} created successfully", scheduleDTO.getJobId());
             return schedule;
         } catch (Exception e) {
@@ -402,6 +416,35 @@ public class ScheduleServiceImpl implements IScheduleService {
             throw new RuntimeException("Error getting schedules due after the specified date");
         } finally {
             logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+
+    @Transactional
+    private void updateScheduleStatuses() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Schedule> activeSchedules = scheduleRepository.findByStatusNotInAndStartTimeBefore(
+                List.of(ScheduleStatus.COMPLETED, ScheduleStatus.CANCELLED),
+                now
+        );
+
+        for (Schedule schedule : activeSchedules) {
+            updateScheduleStatus(schedule, now);
+        }
+
+        scheduleRepository.saveAll(activeSchedules);
+    }
+
+    private void updateScheduleStatus(Schedule schedule, LocalDateTime now) {
+        LocalDateTime endTime = schedule.getStartTime().plusSeconds(schedule.getDuration());
+
+        if (now.isBefore(schedule.getStartTime())) {
+            schedule.setStatus(ScheduleStatus.SCHEDULED);
+        } else if (now.isAfter(schedule.getStartTime()) && now.isBefore(endTime)) {
+            schedule.setStatus(ScheduleStatus.IN_PROGRESS);
+        } else if (now.isAfter(endTime)) {
+            schedule.setStatus(ScheduleStatus.COMPLETED);
         }
     }
 

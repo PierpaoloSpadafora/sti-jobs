@@ -21,7 +21,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
     List<Schedule> findByMachineType_IdAndStatus(long machineTypeId, ScheduleStatus scheduleStatus);
-
+    List<Schedule> findByStatusNotInAndStartTimeBefore(List<ScheduleStatus> statuses, LocalDateTime dateTime);
     List<Schedule> findAll();
 
     @Query(value = "SELECT MAX(start_time + (duration * INTERVAL '1 second')) " +
