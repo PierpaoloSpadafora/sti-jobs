@@ -1,16 +1,14 @@
 name: Java CI
-
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, RSJ-75]
   pull_request:
-    branches: [main, dev]
-
-
+    branches: [main, dev, RSJ-75]
+  schedule:
+    - cron: '26 11 * * *'  # Esegue alle 11:02 ogni giorno
 jobs:
   build:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:13
@@ -25,11 +23,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
@@ -42,9 +38,7 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         path: ~/.m2/repository
         restore-keys: '${{ runner.os }}-maven-'
-
     - name: Install dependencies and run tests
       run: mvn -f Backend/pom.xml clean install
-
     - name: Run tests
       run: mvn -f Backend/pom.xml test
