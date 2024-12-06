@@ -119,7 +119,7 @@ public class JsonControllerTest {
                 .id(1L)
                 .name("Test Machine")
                 .description("Test Machine Description")
-                .machine_type_id(machineType) // Corretto da .type() a .machine_type_id()
+                .machine_type_id(machineType)
                 .status(MachineStatus.AVAILABLE)
                 .build();
     }
