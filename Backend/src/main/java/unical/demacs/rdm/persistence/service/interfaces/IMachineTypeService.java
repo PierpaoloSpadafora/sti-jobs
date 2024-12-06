@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface IMachineTypeService {
     MachineType createMachineType(MachineTypeDTO machineTypeDTO);
+    MachineType updateMachineType(Long id, MachineTypeDTO machineTypeDTO);
     Optional<MachineType> getMachineTypeById(Long id);
     List<MachineType> getAllMachineTypes();
     void deleteMachineType(Long id);
-    MachineType updateMachineType(Long id, MachineTypeDTO machineTypeDTO);
 }
