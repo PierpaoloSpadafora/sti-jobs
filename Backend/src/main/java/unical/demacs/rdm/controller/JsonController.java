@@ -73,11 +73,13 @@ public class JsonController {
     @PostMapping(value = "/importMachineType", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> importMachineType(@RequestBody List<MachineTypeDTO> machineTypes) {
         try {
-            machineTypes.forEach(machineTypeService::createMachineType);
-            Map<String, String> response = Map.of("message", "MachineTypes imported successfully.");
+            for (MachineTypeDTO machineTypeDTO : machineTypes) {
+                machineTypeService.createMachineType(machineTypeDTO);
+            }
+            Map<String, String> response = Map.of("message", "MachineTypes importati con successo.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "Error importing MachineTypes: " + e.getMessage()));
+            return ResponseEntity.status(400).body(Map.of("message", "Errore durante l'importazione dei MachineTypes: " + e.getMessage()));
         }
     }
 

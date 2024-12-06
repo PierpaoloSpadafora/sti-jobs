@@ -13,19 +13,19 @@
     "status": "PENDING",
     "priority": "URGENT",
     "duration": 3600,
-    "idMachineType": 1
+    "idMachineType": 2
   },
   {
     "title": "Taglio Legno di Precisione",
-    "description": "Operazione di taglio su larga scala utilizzando la Sega a Nastro Industriale per legno massiccio.",
+    "description": "Operazione di taglio su larga scala utilizzando la Pialla Automatica per legno massiccio.",
     "status": "PENDING",
     "priority": "HIGH",
     "duration": 5400,
-    "idMachineType": 1
+    "idMachineType": 6
   },
   {
     "title": "Stampaggio Parti in Plastica",
-    "description": "Produzione di componenti in plastica mediante Macchina per Stampaggio a Iniezione ad alta efficienza.",
+    "description": "Produzione di componenti in plastica mediante Pressa Idraulica ad alta efficienza.",
     "status": "PENDING",
     "priority": "URGENT",
     "duration": 3600,
@@ -37,7 +37,7 @@
     "status": "PENDING",
     "priority": "LOW",
     "duration": 3600,
-    "idMachineType": 5
+    "idMachineType": 3
   },
   {
     "title": "Formatura Materiali Metallici",
@@ -45,38 +45,118 @@
     "status": "PENDING",
     "priority": "MEDIUM",
     "duration": 5400,
+    "idMachineType": 4
+  },
+  {
+    "title": "Taglio Laser Acciaio",
+    "description": "Taglio preciso di acciaio in fogli spessi utilizzando la Segatrice Laser.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 4800,
+    "idMachineType": 5
+  },
+  {
+    "title": "Rifinitura Superfici Legno",
+    "description": "Rifinitura delle superfici di legno con la Pialla Automatica per garantire una finitura liscia.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 3000,
     "idMachineType": 6
   },
   {
-    "title": "Taglio Laser di Alta Precisione",
-    "description": "Taglio di materiali metallici e non mediante la Segatrice Laser ad alta precisione.",
+    "title": "Produzione Componenti Leggeri",
+    "description": "Lavorazione di leghe leggere con il Tornio Meccanico per componenti automobilistici.",
     "status": "PENDING",
     "priority": "HIGH",
-    "duration": 7200,
-    "idMachineType": 7
+    "duration": 4200,
+    "idMachineType": 1
   },
   {
-    "title": "Rifinitura Superfici in Legno",
-    "description": "Livellamento e rifinitura delle superfici in legno utilizzando la Pialla Automatica.",
+    "title": "Assemblaggio Preciso CNC",
+    "description": "Assemblaggio di componenti complessi utilizzando la Fresatrice CNC per garantire precisione.",
+    "status": "PENDING",
+    "priority": "URGENT",
+    "duration": 3900,
+    "idMachineType": 2
+  },
+  {
+    "title": "Taglio Legno su Richiesta",
+    "description": "Operazioni di taglio personalizzate su legno con la Pialla Automatica per progetti specifici.",
+    "status": "PENDING",
+    "priority": "LOW",
+    "duration": 2500,
+    "idMachineType": 6
+  },
+  {
+    "title": "Stampaggio Serie Limitata",
+    "description": "Produzione di piccole serie di componenti in plastica con la Pressa Idraulica.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 4000,
+    "idMachineType": 4
+  },
+  {
+    "title": "Foratura Multipla",
+    "description": "Esecuzione di forature multiple in materiali diversi utilizzando il Trapano a Colonna.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 3300,
+    "idMachineType": 3
+  },
+  {
+    "title": "Taglio Laser Materiali Non Metallici",
+    "description": "Taglio di materiali non metallici con la Segatrice Laser per applicazioni artistiche.",
+    "status": "PENDING",
+    "priority": "LOW",
+    "duration": 2700,
+    "idMachineType": 5
+  },
+  {
+    "title": "Rifinitura Avanzata Legno",
+    "description": "Rifinitura avanzata delle superfici in legno con la Pialla Automatica per qualità superiore.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 3100,
+    "idMachineType": 6
+  },
+  {
+    "title": "Produzione Acciaio Preciso",
+    "description": "Lavorazione precisa dell'acciaio con il Tornio Meccanico per componenti di alta qualità.",
+    "status": "PENDING",
+    "priority": "URGENT",
+    "duration": 4500,
+    "idMachineType": 1
+  },
+  {
+    "title": "Assemblaggio Componenti CNC",
+    "description": "Assemblaggio di componenti complessi prodotti con la Fresatrice CNC.",
+    "status": "PENDING",
+    "priority": "MEDIUM",
+    "duration": 3800,
+    "idMachineType": 2
+  },
+  {
+    "title": "Stampaggio Grande Formato",
+    "description": "Stampaggio di grandi componenti in plastica con la Pressa Idraulica ad alta capacità.",
+    "status": "PENDING",
+    "priority": "HIGH",
+    "duration": 5000,
+    "idMachineType": 4
+  },
+  {
+    "title": "Foratura Profonda",
+    "description": "Esecuzione di forature profonde in materiali duri con il Trapano a Colonna.",
     "status": "PENDING",
     "priority": "MEDIUM",
     "duration": 3600,
-    "idMachineType": 8
+    "idMachineType": 3
   },
   {
-    "title": "Compattazione Materiali Granulari",
-    "description": "Compattazione uniforme di materiali granulari e sabbie con il Compattatore Vibroassiale.",
+    "title": "Taglio Laser Precisione Fine",
+    "description": "Taglio di precisione fine di materiali metallici con la Segatrice Laser.",
     "status": "PENDING",
-    "priority": "LOW",
-    "duration": 7200,
-    "idMachineType": 9
-  },
-  {
-    "title": "Miscelazione Materiali in Polvere",
-    "description": "Mescolamento omogeneo di materiali in polvere o liquidi in grandi quantità con il Miscelatore Industriale.",
-    "status": "PENDING",
-    "priority": "HIGH",
-    "duration": 5400,
-    "idMachineType": 10
+    "priority": "URGENT",
+    "duration": 2900,
+    "idMachineType": 5
   }
 ]
