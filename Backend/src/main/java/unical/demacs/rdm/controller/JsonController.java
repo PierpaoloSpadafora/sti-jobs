@@ -43,19 +43,15 @@ public class JsonController {
     public ResponseEntity<Map<String, String>> importJob(@RequestBody List<JobDTO> jobs, @RequestParam("assigneeEmail") String assigneeEmail) {
         try {
             jobs.forEach(job -> {
-                if (job.getId() != null) {
-                    Optional<Job> existingJob = jobService.getJobById(job.getId());
-                    if (existingJob.isEmpty()) {
-                        jobService.createJob(assigneeEmail, job);
-                    }
-                } else {
+                if (job.getId() != null && jobService.getJobById(job.getId()).isEmpty()) {
+                    jobService.createJob(assigneeEmail, job);
+                } else if (job.getId() == null) {
                     jobService.createJob(assigneeEmail, job);
                 }
             });
-            Map<String, String> response = Map.of("message", "Jobs imported successfully.");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of("message", "Jobs imported successfully."));
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "Error importing jobs: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", "Error importing jobs: " + e.getMessage()));
         }
     }
 
@@ -136,8 +132,7 @@ public class JsonController {
         return ResponseEntity.ok(schedules);
     }
 
-    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
-            tags = {"json-controller"})
+    @Operation(summary = "Export RO scheduled jobs", description = "Export all RO scheduled jobs to JSON.")
     @GetMapping(value = "/export-job-scheduled-ro", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledRO() {
         List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
