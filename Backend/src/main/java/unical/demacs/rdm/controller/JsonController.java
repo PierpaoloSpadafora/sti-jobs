@@ -3,14 +3,12 @@ package unical.demacs.rdm.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.persistence.dto.JobDTO;
 import unical.demacs.rdm.persistence.dto.MachineDTO;
 import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
@@ -137,5 +135,20 @@ public class JsonController {
     public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledRO() {
         List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
         return ResponseEntity.ok(schedules);
+    }
+
+    @Operation(summary = "Download all Schedules as JSON", description = "Download all Schedules as a JSON file.",
+            tags = {"json-controller"})
+    @GetMapping(value = "/download-schedules", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<byte[]> downloadSchedules() {
+        try {
+            byte[] jsonContent = jsonService.exportSchedulesToJson();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename("schedules.json").build());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<>(jsonContent, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error exporting schedules: ".getBytes());
+        }
     }
 }
