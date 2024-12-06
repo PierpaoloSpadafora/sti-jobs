@@ -119,7 +119,7 @@ public class JsonControllerTest {
                 .id(1L)
                 .name("Test Machine")
                 .description("Test Machine Description")
-                .type(machineType)
+                .machine_type_id(machineType) // Corretto da .type() a .machine_type_id()
                 .status(MachineStatus.AVAILABLE)
                 .build();
     }
@@ -272,7 +272,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledPriority() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 
@@ -286,7 +286,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledDueDate() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 
@@ -300,7 +300,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledDuration() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 

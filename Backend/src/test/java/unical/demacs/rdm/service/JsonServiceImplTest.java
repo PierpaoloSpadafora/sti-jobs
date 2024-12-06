@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
+import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
 import unical.demacs.rdm.persistence.service.implementation.JsonServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
@@ -43,11 +44,11 @@ public class JsonServiceImplTest {
             writer.write(jsonContent);
         }
 
-        List<ScheduleDTO> schedules = jsonService.readScheduleFile(tempFile.getAbsolutePath());
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile(tempFile.getAbsolutePath());
 
         assertNotNull(schedules);
         assertEquals(1, schedules.size());
-        ScheduleDTO schedule = schedules.get(0);
+        ScheduleWithMachineDTO schedule = schedules.get(0);
         assertEquals(1L, schedule.getId());
         assertEquals(1L, schedule.getJobId());
         assertEquals(2L, schedule.getMachineTypeId());
