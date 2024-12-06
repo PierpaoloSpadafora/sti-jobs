@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import unical.demacs.rdm.controller.*;
 import unical.demacs.rdm.service.*;
+import unical.demacs.rdm.utils.SchedulerTest;
 
 @Suite
 @SelectClasses({
@@ -22,7 +23,9 @@ import unical.demacs.rdm.service.*;
 		MachineServiceImplTest.class,
 		MachineTypeServiceImplTest.class,
 		ScheduleServiceImplTest.class,
-		UserServiceImplTest.class
+		UserServiceImplTest.class,
+
+		SchedulerTest.class
 })
 @SpringBootTest
 class StiJobsApplicationTests {

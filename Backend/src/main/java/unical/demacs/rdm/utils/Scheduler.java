@@ -35,6 +35,8 @@ public class Scheduler {
     private final ModelMapperExtended modelMapperExtended;
     private final ObjectMapper objectMapper;
 
+    private static final long SECONDS_SPENT_LIMIT = 15L;
+
     public void scheduleByEveryType() {
         log.debug("Inizio schedulazione per ogni tipo");
         scheduleByPriority();
@@ -250,7 +252,7 @@ public class Scheduler {
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
                         .withBestScoreFeasible(true)
-                        .withSecondsSpentLimit(60L))
+                        .withSecondsSpentLimit(SECONDS_SPENT_LIMIT))
                 .withPhases(
                         new ConstructionHeuristicPhaseConfig(),
                         new LocalSearchPhaseConfig()
