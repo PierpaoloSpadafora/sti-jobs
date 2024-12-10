@@ -55,6 +55,8 @@ import {
 } from "./generated-api";
 import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+import {ThemeService} from "./services/theme.service";
 
 @NgModule({
   declarations: [
@@ -77,6 +79,7 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
     EditJobDialogComponent,
     EditMachineTypesDialogComponent,
     EditMachineDialogComponent,
+    ThemeToggleComponent,
   ],
   imports: [
     BrowserModule,
@@ -113,6 +116,7 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
     MatProgressSpinner,
   ],
   providers: [
+    ThemeService,
     MachineTypeControllerService,
     UserControllerService,
     JobControllerService,

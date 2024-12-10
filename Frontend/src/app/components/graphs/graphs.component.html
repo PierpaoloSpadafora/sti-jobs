@@ -1,8 +1,8 @@
-<div *ngIf="isLoading" class="text-center p-4">
+<div *ngIf="isLoading" class="text-center p-4 theme-background theme-text">
     Caricamento in corso...
 </div>
-  
-<div *ngIf="!isLoading" class="grid-container">  
+
+<div *ngIf="!isLoading" class="grid-container theme-background theme-text">
     <div class="grid-item">
       <google-chart
         *ngIf="pieChart.data.length > 0"
@@ -24,7 +24,7 @@
       </google-chart>
       <p *ngIf="barChart.data.length === 0">No data available for the bar chart.</p>
     </div>
-  
+
     <div class="grid-item">
       <google-chart
         *ngIf="statusChart.data.length > 0"
@@ -35,6 +35,5 @@
       </google-chart>
       <p *ngIf="statusChart.data.length === 0">No data available for the status chart.</p>
     </div>
-  
+
   </div>
-  

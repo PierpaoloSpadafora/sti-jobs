@@ -1,8 +1,8 @@
-<div class="login-container">
+<div class="login-container theme-background theme-text">
   <div class="login-card">
-    
+
     <h2 class="login-title">Accedi a STI JOBS</h2>
-    
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <label for="email" class="form-label">Email aziendale</label>
       <div class="form-group">
@@ -10,8 +10,8 @@
           <span class="input-group-text">
             <i class="bi bi-envelope"></i>
           </span>
-          <input 
-            type="email" 
+          <input
+            type="email"
             class="form-control"
             id="email"
             formControlName="email"
@@ -22,10 +22,10 @@
           Inserisci un'email valida
         </div>
       </div>
-      
-      <button 
-        type="submit" 
-        class="btn btn-primary" 
+
+      <button
+        type="submit"
+        class="btn btn-primary"
         [disabled]="!loginForm.valid || isLoading">
         <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
         {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}

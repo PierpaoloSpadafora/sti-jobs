@@ -11,7 +11,7 @@
 .section-title {
   font-size: 2em;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 20px 0 20px;
   text-align: center;
 }
@@ -44,8 +44,47 @@
   margin-right: 5px;
 }
 
+small {
+  color: var(--text-color) !important;
+}
+
 pre {
-  max-height: 200px;
-  overflow: auto;
-  font-size: 0.9rem;
+  background-color: var(--background-color) !important; /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo basato sul tema */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 4px; /* Arrotonda i bordi */
+  padding: 0.75rem; /* Spaziatura interna */
+  font-family: monospace; /* Font per codice */
+  font-size: 0.9rem; /* Dimensione del font */
+  overflow: auto; /* Scroll per contenuto lungo */
+  max-height: 200px; /* Altezza massima */
+  margin-top: 1rem; /* Margine sopra il <pre> */
+}
+
+input.form-control {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem;
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+#name {
+  background-color: var(--background-color); /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 8px; /* Arrotonda i bordi */
+  padding: 0.5rem; /* Spaziatura interna */
+  width: 100%; /* Assicura che l'input occupi l'intera larghezza */
+  box-sizing: border-box; /* Gestisce correttamente padding e bordi */
+}
+
+/* Stile per il focus */
+#name:focus {
+  border-color: var(--primary-color); /* Cambia il colore del bordo al focus */
+  box-shadow: 0 0 4px var(--primary-color); /* Effetto glow al focus */
+  outline: none; /* Rimuove il bordo predefinito */
 }
