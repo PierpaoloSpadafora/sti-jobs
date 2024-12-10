@@ -1,6 +1,6 @@
 .jobs-container {
   padding: 24px;
-  background-color: #fff;
+  background-color: var(--background-color);
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin: 20px;
@@ -32,13 +32,13 @@
 
 .jobs-table th {
   font-weight: 600;
-  color: #333;
-  background-color: #f8f9fa;
+  color: var(--text-color);
+  background-color: var(--background-color);
   white-space: nowrap;
 }
 
 .jobs-table tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--hover-background-color);
 }
 
 .actions-cell {

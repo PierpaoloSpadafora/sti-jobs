@@ -44,8 +44,54 @@
   margin-right: 5px;
 }
 
+small {
+  color: var(--text-color) !important;
+}
+
 pre {
-  max-height: 200px;
-  overflow: auto;
-  font-size: 0.9rem;
+  background-color: var(--background-color) !important; /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo basato sul tema */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 4px; /* Arrotonda i bordi */
+  padding: 0.75rem; /* Spaziatura interna */
+  font-family: monospace; /* Font per codice */
+  font-size: 0.9rem; /* Dimensione del font */
+  overflow: auto; /* Scroll per contenuto lungo */
+  max-height: 200px; /* Altezza massima */
+  margin-top: 1rem; /* Margine sopra il <pre> */
+}
+
+#status {
+  background-color: var(--background-color); /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 8px; /* Arrotonda i bordi */
+  padding: 0.5rem; /* Spaziatura interna */
+  width: 100%; /* Larghezza completa */
+  box-sizing: border-box; /* Padding incluso nella larghezza */
+}
+
+/* Focus sul select "status" */
+#status:focus {
+  border-color: var(--primary-color); /* Colore del bordo al focus */
+  box-shadow: 0 0 4px var(--primary-color); /* Effetto glow */
+  outline: none; /* Rimuove l'outline predefinito */
+}
+
+/* Stile per il select con ID "typeName" */
+#typeName {
+  background-color: var(--background-color); /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo */
+  border: 1px solid var(--border-color); /* Bordo coerente con il tema */
+  border-radius: 8px; /* Arrotonda i bordi */
+  padding: 0.5rem; /* Spaziatura interna */
+  width: 100%; /* Larghezza completa */
+  box-sizing: border-box; /* Padding incluso nella larghezza */
+}
+
+/* Focus sul select "typeName" */
+#typeName:focus {
+  border-color: var(--primary-color); /* Colore del bordo al focus */
+  box-shadow: 0 0 4px var(--primary-color); /* Effetto glow */
+  outline: none; /* Rimuove l'outline predefinito */
 }

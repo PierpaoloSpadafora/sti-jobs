@@ -1,6 +1,6 @@
 .machine-types-container {
   padding: 24px;
-  background-color: #fff;
+  background-color: var(--background-color);
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin: 20px;
@@ -20,23 +20,29 @@
   width: 100%;
   border-collapse: collapse;
   margin: 8px;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 .machine-types-table th,
 .machine-types-table td {
   padding: 16px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 .machine-types-table th {
   font-weight: 600;
-  color: #333;
-  background-color: #f8f9fa;
+}
+
+.machine-types-table tr:nth-child(even) {
+  background-color: var(--background-color); /* Sfondo per righe pari */
 }
 
 .machine-types-table tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--primary-color);
 }
 
 .actions-cell {

@@ -15,7 +15,7 @@
 .section-title {
   font-size: 2em;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 20px 0 20px;
   text-align: center;
 }
@@ -49,7 +49,24 @@
 }
 
 pre {
-  max-height: 200px;
-  overflow: auto;
-  font-size: 0.9rem;
+  background-color: var(--background-color) !important; /* Sfondo basato sul tema */
+  color: var(--text-color); /* Colore del testo basato sul tema */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 4px; /* Arrotonda i bordi */
+  padding: 0.75rem; /* Spaziatura interna */
+  font-family: monospace; /* Font per codice */
+  font-size: 0.9rem; /* Dimensione del font */
+  overflow: auto; /* Scroll per contenuto lungo */
+  max-height: 200px; /* Altezza massima */
+  margin-top: 1rem; /* Margine sopra il <pre> */
+}
+
+small {
+  color: var(--text-color) !important;
+}
+
+.form-select {
+  color: var(--text-color);
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
 }

@@ -1,23 +1,23 @@
-<div class="page-container">
+<div class="page-container theme-background theme-text">
   <div class="page-header">
     <h1>Scheduled Jobs</h1>
     <div class="schedule-selector">
       <label for="scheduleType">Select scheduling type:</label>
-      <select id="scheduleType" [(ngModel)]="selectedScheduleType" (change)="onScheduleTypeChange()">
+      <select id="scheduleType" [(ngModel)]="selectedScheduleType" class="theme-background theme-text" (change)="onScheduleTypeChange()">
         <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
       </select>
     </div>
 
     <div class="days-selector">
       <label for="daysPerPage">Giorni per pagina:</label>
-      <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" (change)="onDaysPerPageChange()">
+      <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" class="theme-background theme-text" (change)="onDaysPerPageChange()">
         <option *ngFor="let option of daysPerPageOptions" [value]="option">{{ option }}</option>
       </select>
     </div>
   </div>
 
-  <div class="content-container">
-    <div class="chart-wrapper">
+  <div class="content-container theme-background theme-text">
+    <div class="chart-wrapper theme-background theme-text">
       <div *ngIf="loading" class="loading-overlay">
         <div class="spinner"></div>
         <p>Loading data...</p>
@@ -32,7 +32,7 @@
         <div *ngIf="hasScheduledJobs">
           <div *ngFor="let date of visibleDates">
             <h2>{{ formatDate(date) }}</h2>
-            
+
             <!-- Different layout based on schedule type -->
             <ng-container *ngIf="selectedScheduleType === 'ALL'; else groupedView">
               <div *ngFor="let machineTypeId of Array.from(schedulesByDateAndMachine.get(date)?.keys() || [])">
