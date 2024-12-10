@@ -35,5 +35,14 @@
       </google-chart>
       <p *ngIf="statusChart.data.length === 0">No data available for the status chart.</p>
     </div>
-
+  <div class="grid-item">
+    <google-chart
+      *ngIf="machineJobsChart.data.length > 0"
+      [type]="machineJobsChart.type"
+      [data]="machineJobsChart.data"
+      [columns]="machineJobsChart.columns"
+      [options]="machineJobsChart.options">
+    </google-chart>
+    <p *ngIf="machineJobsChart.data.length === 0">No data available for the machine jobs chart.</p>
   </div>
+</div>
