@@ -102,11 +102,7 @@ public class JsonController {
     @GetMapping(value = "/exportMachine", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<MachineDTO>> exportMachine() {
         List<Machine> machines = machineService.getAllMachines();
-        List <MachineDTO> list =  modelMapperExtended.mapList(machines, MachineDTO.class);
-        for(int i = 0; i< list.size(); i++){
-            list.get(i).setTypeId(machines.get(i).getMachine_type_id().getId());
-        }
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(modelMapperExtended.mapList(machines, MachineDTO.class));
     }
 
 
