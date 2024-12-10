@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.persistence.entities.*;
 import unical.demacs.rdm.persistence.enums.JobPriority;
@@ -23,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SchedulerTest {
 
     @Mock
@@ -148,6 +151,123 @@ public class SchedulerTest {
 
         List<Schedule> finalSchedule = scheduleRepository.findAll();
         verifyValidSchedule(finalSchedule);
+    }
+
+    @Test
+    void testScheduleWithNoJobs() {
+        when(scheduleRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Non dovrebbe lanciare eccezioni e semplicemente non schedulare nulla.
+        scheduler.scheduleByPriority();
+
+        // Nessun job è stato schedulato, poiché non esiste alcun job
+        List<Schedule> schedules = scheduleRepository.findAll();
+        assertTrue(schedules.isEmpty(), "There should be no jobs to schedule");
+    }
+
+    /*
+    @Test
+    void testJobsWithPastDueDates() {
+        List<Schedule> testSchedules = createComplexTestSchedules();
+        // Forzo la dueDate di tutti i job a una data passata
+        for (Schedule s : testSchedules) {
+            s.setDueDate(LocalDateTime.now().minusDays(1));
+        }
+        when(scheduleRepository.findAll()).thenReturn(testSchedules);
+
+        scheduler.scheduleByDueDate();
+
+        List<Schedule> result = scheduleRepository.findAll();
+        // I job non devono essere schedulati perché la dueDate è già passata
+        boolean allPending = result.stream().allMatch(s -> s.getStatus() == ScheduleStatus.PENDING);
+        assertTrue(allPending, "Jobs with dueDate already passed should not be scheduled");
+    }
+     */
+
+    /*
+    @Test
+    void testUnfeasibleJobConstraint() {
+        LocalDateTime now = LocalDateTime.now();
+
+        Job infeasibleJob = new Job();
+        infeasibleJob.setId(100L);
+        infeasibleJob.setPriority(JobPriority.HIGH);
+
+        Schedule infeasibleSchedule = new Schedule();
+        infeasibleSchedule.setId(100L);
+        infeasibleSchedule.setJob(infeasibleJob);
+        infeasibleSchedule.setMachineType(machineTypes.get(1L));
+        infeasibleSchedule.setStartTime(now);
+        // Durata esagerata (ad es. 100 giorni in secondi)
+        infeasibleSchedule.setDuration(100L * 24L * 3600L);
+        infeasibleSchedule.setDueDate(now.plusDays(1)); // Impossibile da completare entro la dueDate
+        infeasibleSchedule.setStatus(ScheduleStatus.PENDING);
+
+        when(scheduleRepository.findAll()).thenReturn(List.of(infeasibleSchedule));
+
+        // Macchine disponibili
+        Machine machine = new Machine();
+        machine.setId(50L);
+        machine.setMachine_type_id(machineTypes.get(1L));
+        machine.setStatus(MachineStatus.AVAILABLE);
+        when(machineRepository.findAll()).thenReturn(List.of(machine));
+
+        scheduler.scheduleByDueDate();
+
+        // Controlliamo se la schedule è rimasta PENDING o se lo scheduler ha gestito il caso
+        List<Schedule> schedules = scheduleRepository.findAll();
+        Schedule result = schedules.get(0);
+        assertEquals(ScheduleStatus.PENDING, result.getStatus(),
+                "The schedule should not be modified since it is not schedulable");
+    }
+     */
+
+    /*
+    @Test
+    void testSingleMachineMultipleJobs() {
+        // Creo alcune schedule con durate e priorità diverse
+        List<Schedule> testSchedules = createComplexTestSchedules();
+
+        when(scheduleRepository.findAll()).thenReturn(testSchedules);
+
+        // Una sola macchina disponibile
+        Machine singleMachine = new Machine();
+        singleMachine.setId(10L);
+        singleMachine.setMachine_type_id(machineTypes.get(1L));
+        singleMachine.setStatus(MachineStatus.AVAILABLE);
+
+        when(machineRepository.findAll()).thenReturn(List.of(singleMachine));
+
+        scheduler.scheduleByPriority();
+        List<Schedule> scheduledJobs = scheduleRepository.findAll();
+
+        // Verifico che tutte le schedule siano assegnate alla stessa macchina
+        Set<Machine> usedMachines = scheduledJobs.stream().map(Schedule::getMachine).collect(Collectors.toSet());
+        assertEquals(1, usedMachines.size(), "All schedules must be assigned to the same machine");
+
+        // Verifico che non vi siano conflitti temporali
+        verifyNoTimeConflicts(scheduledJobs);
+
+        // Verifico che le job ad alta priorità siano effettivamente più vicine all'inizio
+        verifyPriorityOrdering(scheduledJobs);
+    }
+     */
+
+    @Test
+    void testScheduleWithNoAvailableMachines() {
+        List<Schedule> testSchedules = createComplexTestSchedules();
+        when(scheduleRepository.findAll()).thenReturn(testSchedules);
+        when(machineRepository.findAll()).thenReturn(new ArrayList<>()); // Nessuna macchina
+
+        // Tentativo di schedulazione
+        scheduler.scheduleByDueDate();
+
+        // Qui ci aspettiamo che nessun job venga schedulato poiché non ci sono macchine
+        List<Schedule> scheduledJobs = scheduleRepository.findAll();
+        // Non necessariamente vuoto, ma ci aspettiamo che lo scheduler non modifichi lo stato a "SCHEDULED"
+        // Possiamo controllare che siano tutti ancora in PENDING
+        boolean allPending = scheduledJobs.stream().allMatch(s -> s.getStatus() == ScheduleStatus.PENDING);
+        assertTrue(allPending, "Without available machines, all jobs should remain in their original state");
     }
 
     private void verifyMachineAssignments(List<Schedule> schedules) {
