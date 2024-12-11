@@ -1,5 +1,6 @@
 export * from './job';
 export * from './jobDTO';
+export * from './jsonUploadschedulesBody';
 export * from './machine';
 export * from './machineDTO';
 export * from './machineType';
