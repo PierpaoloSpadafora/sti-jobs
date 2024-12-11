@@ -36,12 +36,29 @@
       <p *ngIf="statusChart.data.length === 0">No data available for the status chart.</p>
     </div>
     <div class="grid-item">
+      <div class="chart-controls">
+        <label for="scheduledJobType">Select Scheduled Job Type:</label>
+        <select 
+          id="scheduledJobType" 
+          [(ngModel)]="selectedScheduledJobType" 
+          (change)="onScheduledJobTypeChange()"
+          class="form-control"
+        >
+          <option 
+            *ngFor="let type of scheduledJobTypes" 
+            [value]="type.value"
+          >
+            {{type.label}}
+          </option>
+        </select>
+      </div>
       <google-chart
-        *ngIf="machineJobsChart.data.length > 0"
-        [type]="machineJobsChart.type"
-        [data]="machineJobsChart.data"
-        [columns]="machineJobsChart.columns"
-        [options]="machineJobsChart.options">
+      *ngIf="machineJobsChart.data.length > 0"
+      [type]="machineJobsChart.type"
+      [data]="machineJobsChart.data"
+      [columns]="machineJobsChart.columns"
+      [options]="machineJobsChart.options"
+      >
       </google-chart>
       <p *ngIf="machineJobsChart.data.length === 0">No data available for the machine jobs chart.</p>
     </div>

@@ -5,6 +5,11 @@ import { JobControllerService, JsonControllerService} from '../../generated-api'
 import { JobDTO,ScheduleDTO  } from '../../generated-api';
 import { LoginService } from '../../services/login.service';
 
+interface ScheduledJobType {
+  value: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-graphs',
   templateUrl: './graphs.component.html',
@@ -47,7 +52,7 @@ export class GraphsComponent implements OnInit {
     data: [] as [string, number, number][],
     columns: ['Job', 'Completed', 'Scheduled'],
     options: {
-      title: 'Job Overview',
+      title: 'Scheduled jobs overview',
       width: 650,
       height: 450,
       seriesType: 'bars',
@@ -88,7 +93,7 @@ export class GraphsComponent implements OnInit {
     data: [] as [string, number, number, number, number, number][],
     columns: ['Status', 'PENDING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
     options: {
-      title: 'Jobs by Status',
+      title: 'Pending and Scheduled Jobs by Status',
       width: 650,
       height: 450,
       bars: 'horizontal',
@@ -125,9 +130,9 @@ export class GraphsComponent implements OnInit {
   machineJobsChart = {
     type: ChartType.LineChart,
     data: [] as [string, number, number, number][],
-    columns: ['Macchina', 'Schedulati', 'In Progresso', 'Completati'],
+    columns: ['Machine', 'Scheduled', 'In progress', 'Completed'],
     options: {
-      title: 'Job per Specifica Macchina',
+      title: 'Jobs on machines by scheduled type',
       width: 650,
       height: 450,
       colors: ['#F39C12', '#3498DB', '#2ECC71'],
@@ -162,6 +167,12 @@ export class GraphsComponent implements OnInit {
   isLoading = false;
   jobs: any[] = [];
   machineTypes: any[] = [];
+  private originalScheduledDueDateJobs: ScheduleDTO[] = [];
+  private originalScheduledDurationJobs: ScheduleDTO[] = [];
+  private originalScheduledPriorityJobs: ScheduleDTO[] = [];
+  private machines: any[] = [];
+  public selectedScheduledJobType!: string;
+  public scheduledJobTypes!: ScheduledJobType[];
 
   constructor(
     private jobService: JobControllerService,
@@ -175,78 +186,129 @@ export class GraphsComponent implements OnInit {
 
   loadJobs(): void { 
     this.isLoading = true;
-
+  
+    // Initialize scheduled job types
+    this.scheduledJobTypes = [
+      { value: 'dueDate', label: 'Due Date' },
+      { value: 'duration', label: 'Duration' },
+      { value: 'priority', label: 'Priority' }
+    ];
+    this.selectedScheduledJobType = 'dueDate'; // Set a default selection
+  
     forkJoin({
-        jobs: this.jobService.getAllJobs(),
-        types: this.jsonService.exportMachineType(),
-        machine: this.jsonService.exportMachine(),
-        scheduledDueDateJobs: this.jsonService.exportJobScheduledDueDate(),
-        scheduledDurationJobs: this.jsonService.exportJobScheduledDuration(),
-        scheduledPriorityJobs: this.jsonService.exportJobScheduledPriority()
+      jobs: this.jobService.getAllJobs(),
+      types: this.jsonService.exportMachineType(),
+      machine: this.jsonService.exportMachine(),
+      scheduledDueDateJobs: this.jsonService.exportJobScheduledDueDate(),
+      scheduledDurationJobs: this.jsonService.exportJobScheduledDuration(),
+      scheduledPriorityJobs: this.jsonService.exportJobScheduledPriority()
     }).subscribe({
-        next: async (response) => {
-            const jobDTOs = Array.isArray(response.jobs) ? (response.jobs as JobDTO[]) : [];
-            const scheduledDueDateJobs = Array.isArray(response.scheduledDueDateJobs) ? (response.scheduledDueDateJobs as ScheduleDTO[]) : [];
-            const scheduledDurationJobs = Array.isArray(response.scheduledDurationJobs) ? (response.scheduledDurationJobs as ScheduleDTO[]) : [];
-            const scheduledPriorityJobs = Array.isArray(response.scheduledPriorityJobs) ? (response.scheduledPriorityJobs as ScheduleDTO[]) : [];
-            const allScheduledJobs = [
-                ...scheduledDueDateJobs,
-                ...scheduledDurationJobs,
-                ...scheduledPriorityJobs
-            ];
-            const scheduledJobDTOs = Array.from(
-                new Map(allScheduledJobs.map(job => [job.jobId, job])).values()
-            );
-            const scheduledJobIds = new Set(scheduledJobDTOs.map(scheduleDto => scheduleDto.jobId));
-            const combinedJobs = [
-                ...jobDTOs
-                    .filter(dto => !scheduledJobIds.has(dto.id))
-                    .map(dto => ({
-                        id: dto.id!,
-                        title: dto.title,
-                        description: dto.description,
-                        status: dto.status,
-                        priority: dto.priority,
-                        duration: dto.duration,
-                        idMachineType: dto.idMachineType,
-                        assigneeEmail: this.loginService.getUserEmail()!
-                    })),
-                ...scheduledJobDTOs.map(scheduleDto => {
-                    const matchingJob = jobDTOs.find(job => job.id === scheduleDto.jobId);
-                    return {
-                        id: scheduleDto.id!,
-                        title: matchingJob?.title || 'Scheduled Job',
-                        status: scheduleDto.status || matchingJob?.status || 'SCHEDULED',
-                        priority: matchingJob?.priority,
-                        duration: scheduleDto.duration,
-                        machineId: scheduleDto.assignedMachineId, 
-                        machineName: scheduleDto.assignedMachineName,
-                        idMachineType: scheduleDto.machineTypeId,
-                        dueDate: scheduleDto.dueDate,
-                        startTime: scheduleDto.startTime
-                    };
-                })
-            ];
-
-            const types = this.transformMachineTypes(response.types);
-            const machines = this.transformMachine(response.machine);
-            this.machineTypes = types;
-            const scheduledJobs = combinedJobs.filter(job => job.status === 'SCHEDULED');
-            this.pieChart.data = this.aggregateMachineTypes(scheduledJobs, types);
-            this.barChart.data = this.prepareBarChartData(combinedJobs);
-            this.statusChart.data = this.prepareStatusChartData(combinedJobs);
-            this.machineJobsChart.data = this.prepareMachineJobsChartData(scheduledJobDTOs, machines);
-
-            this.isLoading = false;
-        },
-        error: (error) => {
-            console.error('Error while retrieving data:', error);
-            this.isLoading = false;
-            this.showMessage('Error loading data. Please try again later.');
-        }
+      next: async (response) => {
+        // Store original scheduled jobs
+        this.originalScheduledDueDateJobs = Array.isArray(response.scheduledDueDateJobs) 
+          ? response.scheduledDueDateJobs as ScheduleDTO[] 
+          : [];
+        this.originalScheduledDurationJobs = Array.isArray(response.scheduledDurationJobs) 
+          ? response.scheduledDurationJobs as ScheduleDTO[] 
+          : [];
+        this.originalScheduledPriorityJobs = Array.isArray(response.scheduledPriorityJobs) 
+          ? response.scheduledPriorityJobs as ScheduleDTO[] 
+          : [];
+  
+        const jobDTOs = Array.isArray(response.jobs) ? (response.jobs as JobDTO[]) : [];
+        const scheduledDueDateJobs = this.originalScheduledDueDateJobs;
+        const scheduledDurationJobs = this.originalScheduledDurationJobs;
+        const scheduledPriorityJobs = this.originalScheduledPriorityJobs;
+        
+        const allScheduledJobs = [
+          ...scheduledDueDateJobs,
+          ...scheduledDurationJobs,
+          ...scheduledPriorityJobs
+        ];
+        
+        const scheduledJobDTOs = Array.from(
+          new Map(allScheduledJobs.map(job => [job.jobId, job])).values()
+        );
+        
+        const scheduledJobIds = new Set(scheduledJobDTOs.map(scheduleDto => scheduleDto.jobId));
+        
+        const combinedJobs = [
+          ...jobDTOs
+            .filter(dto => !scheduledJobIds.has(dto.id))
+            .map(dto => ({
+              id: dto.id!,
+              title: dto.title,
+              description: dto.description,
+              status: dto.status,
+              priority: dto.priority,
+              duration: dto.duration,
+              idMachineType: dto.idMachineType,
+              assigneeEmail: this.loginService.getUserEmail()!
+            })),
+          ...scheduledJobDTOs.map(scheduleDto => {
+            const matchingJob = jobDTOs.find(job => job.id === scheduleDto.jobId);
+            return {
+              id: scheduleDto.id!,
+              title: matchingJob?.title || 'Scheduled Job',
+              status: scheduleDto.status || matchingJob?.status || 'SCHEDULED',
+              priority: matchingJob?.priority,
+              duration: scheduleDto.duration,
+              machineId: scheduleDto.assignedMachineId, 
+              machineName: scheduleDto.assignedMachineName,
+              idMachineType: scheduleDto.machineTypeId,
+              dueDate: scheduleDto.dueDate,
+              startTime: scheduleDto.startTime
+            };
+          })
+        ];
+        
+        const types = this.transformMachineTypes(response.types);
+        this.machines = this.transformMachine(response.machine);
+        const machines = this.transformMachine(response.machine);
+        
+        this.machineTypes = types;
+        const scheduledJobs = combinedJobs.filter(job => job.status === 'SCHEDULED');
+        
+        this.pieChart.data = this.aggregateMachineTypes(scheduledJobs, types);
+        this.barChart.data = this.prepareBarChartData(combinedJobs);
+        this.statusChart.data = this.prepareStatusChartData(combinedJobs);
+        
+        // Initially populate machine jobs chart with due date jobs
+        this.machineJobsChart.data = this.prepareMachineJobsChartData(
+          this.originalScheduledDueDateJobs, 
+          this.machines
+        );
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error while retrieving data:', error);
+        this.isLoading = false;
+        this.showMessage('Error loading data. Please try again later.');
+      }
     });
   }
 
+  // New method to handle job type selection
+  onScheduledJobTypeChange(): void {
+    let selectedJobs: ScheduleDTO[] = [];
+
+    switch (this.selectedScheduledJobType) {
+      case 'dueDate':
+        selectedJobs = this.originalScheduledDueDateJobs;
+        break;
+      case 'duration':
+        selectedJobs = this.originalScheduledDurationJobs;
+        break;
+      case 'priority':
+        selectedJobs = this.originalScheduledPriorityJobs;
+        break;
+      default:
+        selectedJobs = this.originalScheduledDueDateJobs;
+    }
+
+    this.machineJobsChart.data = this.prepareMachineJobsChartData(selectedJobs, this.machines);
+  }
 
   private prepareBarChartData(jobs: any[]): [string, number, number][] {
     const jobStatusCounts: { [key: string]: { completed: number, scheduled: number } } = {};
