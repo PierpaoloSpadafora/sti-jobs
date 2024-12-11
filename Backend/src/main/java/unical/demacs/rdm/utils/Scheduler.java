@@ -242,18 +242,17 @@ public class Scheduler {
                 .withEntityClasses(JobAssignment.class)
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
-                        .withBestScoreFeasible(true)
-                        .withSecondsSpentLimit(SECONDS_SPENT_LIMIT))
+                        .withBestScoreLimit("-0hard/*soft") // Modificato per accettare qualsiasi punteggio soft
+                        .withSecondsSpentLimit(60L)) // Aumentato il tempo limite
                 .withPhases(
                         new ConstructionHeuristicPhaseConfig()
-                            .withConstructionHeuristicType(
-                                ConstructionHeuristicType.FIRST_FIT),
+                                .withConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT_DECREASING),
                         new LocalSearchPhaseConfig()
                                 .withAcceptorConfig(new LocalSearchAcceptorConfig()
-                                        .withEntityTabuSize(5)
-                                        .withLateAcceptanceSize(200))
+                                        .withLateAcceptanceSize(500)
+                                        .withEntityTabuSize(7))
                                 .withForagerConfig(new LocalSearchForagerConfig()
-                                        .withAcceptedCountLimit(1000))
+                                        .withAcceptedCountLimit(4))
                 );
     }
 

@@ -17,14 +17,15 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
         log.debug("Definizione dei vincoli di schedulazione");
         return new Constraint[]{
                 // Hard constraints
-                machineConflict(constraintFactory), //ho provato a commentare gli altri constraint e lasciare solo questo
+                assignmentRequired(constraintFactory),
+                machineConflict(constraintFactory),
                 machineTypeCompatibility(constraintFactory),
                 respectDueDates(constraintFactory),
                 jobsStartAfterStartDate(constraintFactory),
-                assignmentRequired(constraintFactory),
                 
                 // Soft constraints
-                balanceMachineLoad(constraintFactory), // e questo, ma continua a non switchare le macchine
+                encourageAssignment(constraintFactory), // Aggiunto nuovo vincolo
+                balanceMachineLoad(constraintFactory),
                 prioritizeHighPriorityJobs(constraintFactory),
                 prioritizeShortDurationJobs(constraintFactory),
                 distributeJobsAcrossMachines(constraintFactory)
@@ -45,15 +46,9 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                     long ja1End = ja1.getEndTimeInSeconds();
                     long ja2Start = ja2.getStartTimeInSeconds();
                     long ja2End = ja2.getEndTimeInSeconds();
-                    boolean isOverlapping = (ja1Start <= ja2Start && ja1End > ja2Start) ||
-                            (ja2Start <= ja1Start && ja2End > ja1Start);
-                    if (isOverlapping) {
-                        log.debug("Conflitto macchina tra JobAssignment {} e {} sulla macchina {}",
-                                ja1.getId(), ja2.getId(), ja1.getAssignedMachine().getId());
-                    }
-                    return isOverlapping;
+                    return (ja1Start < ja2End && ja2Start < ja1End);
                 })
-                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(100000))
                 .asConstraint("Machine conflict");
     }
 
@@ -96,7 +91,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(JobAssignment.class)
                 .filter(ja -> ja.getAssignedMachine() == null || ja.getStartTimeGrain() == null)
-                .penalize(HardSoftScore.ONE_HARD.multiply(10000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(100000))
                 .asConstraint("Assignment required");
     }
 
@@ -136,6 +131,14 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 )
                 .reward(HardSoftScore.ONE_SOFT.multiply(1000))
                 .asConstraint("Distribute jobs across machines");
+    }
+
+    private Constraint encourageAssignment(ConstraintFactory constraintFactory) {
+        return constraintFactory
+                .forEach(JobAssignment.class)
+                .filter(ja -> ja.getAssignedMachine() != null && ja.getStartTimeGrain() != null)
+                .reward(HardSoftScore.ONE_SOFT.multiply(1000))
+                .asConstraint("Encourage assignment");
     }
 
 }
