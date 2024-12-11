@@ -16,15 +16,13 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         log.debug("Definizione dei vincoli di schedulazione");
         return new Constraint[]{
-                // Hard constraints
+                // Hard constraints - ridotti i pesi per permettere più flessibilità
                 assignmentRequired(constraintFactory),
                 machineConflict(constraintFactory),
                 machineTypeCompatibility(constraintFactory),
-                respectDueDates(constraintFactory),
-                jobsStartAfterStartDate(constraintFactory),
                 
-                // Soft constraints
-                encourageAssignment(constraintFactory), // Aggiunto nuovo vincolo
+                // Soft constraints - aumentati i pesi per incoraggiare l'assegnazione
+                encourageAssignment(constraintFactory),
                 balanceMachineLoad(constraintFactory),
                 prioritizeHighPriorityJobs(constraintFactory),
                 prioritizeShortDurationJobs(constraintFactory),
@@ -48,7 +46,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                     long ja2End = ja2.getEndTimeInSeconds();
                     return (ja1Start < ja2End && ja2Start < ja1End);
                 })
-                .penalize(HardSoftScore.ONE_HARD.multiply(100000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
                 .asConstraint("Machine conflict");
     }
 
@@ -58,7 +56,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .filter(ja -> ja.getAssignedMachine() != null &&
                         ja.getSchedule().getMachineType() != null &&
                         !ja.getAssignedMachine().getMachine_type_id().equals(ja.getSchedule().getMachineType()))
-                .penalize(HardSoftScore.ONE_HARD.multiply(10000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
                 .asConstraint("Machine type compatibility");
     }
 
@@ -137,7 +135,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(JobAssignment.class)
                 .filter(ja -> ja.getAssignedMachine() != null && ja.getStartTimeGrain() != null)
-                .reward(HardSoftScore.ONE_SOFT.multiply(1000))
+                .reward(HardSoftScore.ONE_SOFT.multiply(2000))
                 .asConstraint("Encourage assignment");
     }
 

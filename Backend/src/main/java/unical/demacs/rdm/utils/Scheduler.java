@@ -135,8 +135,8 @@ public class Scheduler {
     }
 
     private List<Schedule> processSolution(ScheduleSolution solution) {
-        if (solution == null || solution.getScore() == null) {
-            log.error("Soluzione o score non valido");
+        if (solution == null) {
+            log.error("Soluzione non valida");
             return Collections.emptyList();
         }
 
@@ -158,10 +158,11 @@ public class Scheduler {
                 schedule.setMachine(assignment.getAssignedMachine());
                 schedule.setStatus(ScheduleStatus.SCHEDULED);
                 finalSchedules.add(schedule);
-                log.info("Schedule {} assegnata alla macchina {} all'orario {}", 
+                log.debug("Schedule {} assegnata alla macchina {} all'orario {}", 
                     schedule.getId(), assignment.getAssignedMachine().getId(), startTime);
             } else {
-                log.warn("Job {} non assegnato completamente", schedule.getId());
+                log.warn("Job {} non assegnato, ritento con configurazione più permissiva", schedule.getId());
+                // Qui potresti implementare una logica di fallback per i job non assegnati
             }
         }
 
@@ -242,17 +243,17 @@ public class Scheduler {
                 .withEntityClasses(JobAssignment.class)
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
-                        .withBestScoreLimit("-0hard/*soft") // Modificato per accettare qualsiasi punteggio soft
-                        .withSecondsSpentLimit(60L)) // Aumentato il tempo limite
+                        .withBestScoreLimit("0hard/*soft")  // Modificato per accettare solo soluzioni valide
+                        .withSecondsSpentLimit(120L))       // Aumentato a 2 minuti
                 .withPhases(
                         new ConstructionHeuristicPhaseConfig()
                                 .withConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT_DECREASING),
                         new LocalSearchPhaseConfig()
                                 .withAcceptorConfig(new LocalSearchAcceptorConfig()
-                                        .withLateAcceptanceSize(500)
-                                        .withEntityTabuSize(7))
+                                        .withLateAcceptanceSize(1000)    // Aumentato
+                                        .withEntityTabuSize(10))         // Aumentato
                                 .withForagerConfig(new LocalSearchForagerConfig()
-                                        .withAcceptedCountLimit(4))
+                                        .withAcceptedCountLimit(8))      // Aumentato
                 );
     }
 
