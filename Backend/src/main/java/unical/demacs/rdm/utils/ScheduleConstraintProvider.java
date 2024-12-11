@@ -61,8 +61,9 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(JobAssignment.class)
                 .filter(ja -> ja.getAssignedMachine() != null &&
+                        ja.getSchedule().getMachineType() != null &&
                         !ja.getAssignedMachine().getMachine_type_id().equals(ja.getSchedule().getMachineType()))
-                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(10000))
                 .asConstraint("Machine type compatibility");
     }
 
@@ -95,7 +96,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
         return constraintFactory
                 .forEach(JobAssignment.class)
                 .filter(ja -> ja.getAssignedMachine() == null || ja.getStartTimeGrain() == null)
-                .penalize(HardSoftScore.ONE_HARD.multiply(1000))
+                .penalize(HardSoftScore.ONE_HARD.multiply(10000))
                 .asConstraint("Assignment required");
     }
 
@@ -106,12 +107,8 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .forEach(JobAssignment.class)
                 .groupBy(JobAssignment::getAssignedMachine,
                         sum(ja -> Math.toIntExact(ja.getSchedule().getDuration())))
-                .penalize(HardSoftScore.ONE_SOFT.multiply(1000),
-                        (machine, totalDuration) -> {
-                            int penalty = (totalDuration * totalDuration) / 3600;
-                            log.debug("Penalità bilanciamento carico per macchina {}: {}", machine.getId(), penalty);
-                            return penalty;
-                        })
+                .penalize(HardSoftScore.ONE_SOFT.multiply(100),
+                        (machine, totalDuration) -> totalDuration / 3600)
                 .asConstraint("Balance machine load");
     }
 

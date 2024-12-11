@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Data
 @NoArgsConstructor
-@PlanningEntity
+@PlanningEntity(difficultyComparatorClass = JobAssignmentDifficultyComparator.class)
 public class JobAssignment {
     private static final AtomicLong idCounter = new AtomicLong();
 

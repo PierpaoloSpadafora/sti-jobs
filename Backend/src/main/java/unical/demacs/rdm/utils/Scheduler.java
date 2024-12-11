@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.*;
 import org.optaplanner.core.config.constructionheuristic.ConstructionHeuristicPhaseConfig;
+import org.optaplanner.core.config.constructionheuristic.ConstructionHeuristicType;
 import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
 import org.optaplanner.core.config.localsearch.decider.acceptor.LocalSearchAcceptorConfig;
 import org.optaplanner.core.config.localsearch.decider.forager.LocalSearchForagerConfig;
@@ -35,7 +36,7 @@ public class Scheduler {
     private final ModelMapperExtended modelMapperExtended;
     private final ObjectMapper objectMapper;
 
-    private static final long SECONDS_SPENT_LIMIT = 15L;
+    private static final long SECONDS_SPENT_LIMIT = 30L; // Increase time limit
 
     public void scheduleByEveryType() {
         log.debug("Inizio schedulazione per ogni tipo");
@@ -140,41 +141,31 @@ public class Scheduler {
         }
 
         log.info("Elaborazione della soluzione con score: {}", solution.getScore());
-
-        if (!solution.getScore().isFeasible()) {
-            log.warn("La soluzione non è fattibile!");
-        }
-
-        Map<Long, Schedule> finalSchedules = new HashMap<>();
+        List<Schedule> finalSchedules = new ArrayList<>();
 
         for (JobAssignment assignment : solution.getJobAssignments()) {
-            System.out.println("Assignment:" + assignment);
-            log.debug("Elaborazione di JobAssignment: {}", assignment);
+            Schedule schedule = assignment.getSchedule();
+            
             if (assignment.getAssignedMachine() != null && assignment.getStartTimeGrain() != null) {
-                Schedule schedule = assignment.getSchedule();
-                Long scheduleId = schedule.getId();
+                LocalDateTime startTime = LocalDateTime.ofEpochSecond(
+                        assignment.getStartTimeGrain().getStartTimeInSeconds(),
+                        0,
+                        ZoneOffset.UTC
+                );
 
-                if (!finalSchedules.containsKey(scheduleId)) {
-                    LocalDateTime startTime = LocalDateTime.ofEpochSecond(
-                            assignment.getStartTimeGrain().getStartTimeInSeconds(),
-                            0,
-                            ZoneOffset.UTC
-                    );
-
-                    schedule.setStartTime(startTime);
-                    schedule.setMachineType(assignment.getAssignedMachine().getMachine_type_id());
-                    schedule.setMachine(assignment.getAssignedMachine());
-                    schedule.setStatus(ScheduleStatus.SCHEDULED);
-                    finalSchedules.put(scheduleId, schedule);
-                    log.info("Schedule {} assegnata alla macchina {} all'orario {}", scheduleId, assignment.getAssignedMachine().getId(), startTime);
-                }
+                schedule.setStartTime(startTime);
+                schedule.setMachineType(assignment.getAssignedMachine().getMachine_type_id());
+                schedule.setMachine(assignment.getAssignedMachine());
+                schedule.setStatus(ScheduleStatus.SCHEDULED);
+                finalSchedules.add(schedule);
+                log.info("Schedule {} assegnata alla macchina {} all'orario {}", 
+                    schedule.getId(), assignment.getAssignedMachine().getId(), startTime);
             } else {
-                log.warn("Job {} non completamente assegnato (macchina o startTimeGrain null)", assignment.getSchedule().getId());
+                log.warn("Job {} non assegnato completamente", schedule.getId());
             }
         }
 
-        log.debug("Numero totale di schedules elaborate: {}", finalSchedules.size());
-        return new ArrayList<>(finalSchedules.values());
+        return finalSchedules;
     }
 
     private ScheduleConstraintConfiguration configureConstraints(String criterion) {
@@ -254,13 +245,15 @@ public class Scheduler {
                         .withBestScoreFeasible(true)
                         .withSecondsSpentLimit(SECONDS_SPENT_LIMIT))
                 .withPhases(
-                        new ConstructionHeuristicPhaseConfig(),
+                        new ConstructionHeuristicPhaseConfig()
+                            .withConstructionHeuristicType(
+                                ConstructionHeuristicType.FIRST_FIT),
                         new LocalSearchPhaseConfig()
                                 .withAcceptorConfig(new LocalSearchAcceptorConfig()
-                                        .withEntityTabuSize(7)
-                                        .withLateAcceptanceSize(400))
+                                        .withEntityTabuSize(5)
+                                        .withLateAcceptanceSize(200))
                                 .withForagerConfig(new LocalSearchForagerConfig()
-                                        .withAcceptedCountLimit(4))
+                                        .withAcceptedCountLimit(1000))
                 );
     }
 
