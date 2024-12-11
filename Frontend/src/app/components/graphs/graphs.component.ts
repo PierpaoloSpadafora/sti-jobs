@@ -186,15 +186,12 @@ export class GraphsComponent implements OnInit {
 
   loadJobs(): void { 
     this.isLoading = true;
-  
-    // Initialize scheduled job types
     this.scheduledJobTypes = [
       { value: 'dueDate', label: 'Due Date' },
       { value: 'duration', label: 'Duration' },
       { value: 'priority', label: 'Priority' }
     ];
-    this.selectedScheduledJobType = 'dueDate'; // Set a default selection
-  
+    this.selectedScheduledJobType = 'dueDate';
     forkJoin({
       jobs: this.jobService.getAllJobs(),
       types: this.jsonService.exportMachineType(),
@@ -204,7 +201,6 @@ export class GraphsComponent implements OnInit {
       scheduledPriorityJobs: this.jsonService.exportJobScheduledPriority()
     }).subscribe({
       next: async (response) => {
-        // Store original scheduled jobs
         this.originalScheduledDueDateJobs = Array.isArray(response.scheduledDueDateJobs) 
           ? response.scheduledDueDateJobs as ScheduleDTO[] 
           : [];
@@ -272,8 +268,6 @@ export class GraphsComponent implements OnInit {
         this.pieChart.data = this.aggregateMachineTypes(scheduledJobs, types);
         this.barChart.data = this.prepareBarChartData(combinedJobs);
         this.statusChart.data = this.prepareStatusChartData(combinedJobs);
-        
-        // Initially populate machine jobs chart with due date jobs
         this.machineJobsChart.data = this.prepareMachineJobsChartData(
           this.originalScheduledDueDateJobs, 
           this.machines
@@ -288,8 +282,6 @@ export class GraphsComponent implements OnInit {
       }
     });
   }
-
-  // New method to handle job type selection
   onScheduledJobTypeChange(): void {
     let selectedJobs: ScheduleDTO[] = [];
 
