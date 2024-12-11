@@ -16,12 +16,12 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         log.debug("Definizione dei vincoli di schedulazione");
         return new Constraint[]{
-                // Hard constraints - ridotti i pesi per permettere più flessibilità
+                // Hard constraints
                 assignmentRequired(constraintFactory),
                 machineConflict(constraintFactory),
                 machineTypeCompatibility(constraintFactory),
                 
-                // Soft constraints - aumentati i pesi per incoraggiare l'assegnazione
+                // Soft constraints
                 encourageAssignment(constraintFactory),
                 balanceMachineLoad(constraintFactory),
                 prioritizeHighPriorityJobs(constraintFactory),

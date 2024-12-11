@@ -162,7 +162,6 @@ public class Scheduler {
                     schedule.getId(), assignment.getAssignedMachine().getId(), startTime);
             } else {
                 log.warn("Job {} non assegnato, ritento con configurazione più permissiva", schedule.getId());
-                // Qui potresti implementare una logica di fallback per i job non assegnati
             }
         }
 
@@ -243,17 +242,17 @@ public class Scheduler {
                 .withEntityClasses(JobAssignment.class)
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
-                        .withBestScoreLimit("0hard/*soft")  // Modificato per accettare solo soluzioni valide
-                        .withSecondsSpentLimit(120L))       // Aumentato a 2 minuti
+                        .withBestScoreLimit("0hard/*soft")
+                        .withSecondsSpentLimit(120L))
                 .withPhases(
                         new ConstructionHeuristicPhaseConfig()
                                 .withConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT_DECREASING),
                         new LocalSearchPhaseConfig()
                                 .withAcceptorConfig(new LocalSearchAcceptorConfig()
-                                        .withLateAcceptanceSize(1000)    // Aumentato
-                                        .withEntityTabuSize(10))         // Aumentato
+                                        .withLateAcceptanceSize(1000)
+                                        .withEntityTabuSize(10))
                                 .withForagerConfig(new LocalSearchForagerConfig()
-                                        .withAcceptedCountLimit(8))      // Aumentato
+                                        .withAcceptedCountLimit(8))
                 );
     }
 
