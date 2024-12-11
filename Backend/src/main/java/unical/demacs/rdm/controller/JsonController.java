@@ -6,21 +6,15 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import unical.demacs.rdm.config.ModelMapperExtended;
-import unical.demacs.rdm.persistence.dto.JobDTO;
-import unical.demacs.rdm.persistence.dto.MachineDTO;
-import unical.demacs.rdm.persistence.dto.MachineTypeDTO;
-import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
+import unical.demacs.rdm.persistence.dto.*;
 import unical.demacs.rdm.persistence.entities.Job;
 import unical.demacs.rdm.persistence.entities.Machine;
 import unical.demacs.rdm.persistence.entities.MachineType;
-import unical.demacs.rdm.persistence.service.interfaces.IJobService;
-import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
-import unical.demacs.rdm.persistence.service.interfaces.IMachineService;
-import unical.demacs.rdm.persistence.service.interfaces.IMachineTypeService;
+import unical.demacs.rdm.persistence.entities.Schedule;
+import unical.demacs.rdm.persistence.service.interfaces.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/v1/json", produces = "application/json")
@@ -33,6 +27,7 @@ public class JsonController {
     private final IMachineService machineService;
     private final IMachineTypeService machineTypeService;
     private final IJsonService jsonService;
+    private final IScheduleService scheduleService;
     private final ModelMapperExtended modelMapperExtended;
 
     @Operation(summary = "Import Job data from JSON", description = "Import Job data into the system from JSON content.",
@@ -140,15 +135,9 @@ public class JsonController {
     @Operation(summary = "Download all Schedules as JSON", description = "Download all Schedules as a JSON file.",
             tags = {"json-controller"})
     @GetMapping(value = "/download-schedules", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<byte[]> downloadSchedules() {
-        try {
-            byte[] jsonContent = jsonService.exportSchedulesToJson();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentDisposition(ContentDisposition.builder("attachment").filename("schedules.json").build());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            return new ResponseEntity<>(jsonContent, headers, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error exporting schedules: ".getBytes());
-        }
+    public ResponseEntity<List<ScheduleDTO>> downloadSchedules() {
+        List<Schedule> schedules = scheduleService.getAllSchedules();
+        return ResponseEntity.ok(modelMapperExtended.mapList(schedules, ScheduleDTO.class));
     }
+
 }

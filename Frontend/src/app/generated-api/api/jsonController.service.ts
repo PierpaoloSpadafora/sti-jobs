@@ -20,6 +20,7 @@ import { Observable }                                        from 'rxjs';
 import { JobDTO } from '../model/jobDTO';
 import { MachineDTO } from '../model/machineDTO';
 import { MachineTypeDTO } from '../model/machineTypeDTO';
+import { ScheduleDTO } from '../model/scheduleDTO';
 import { ScheduleWithMachineDTO } from '../model/scheduleWithMachineDTO';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -59,6 +60,42 @@ export class JsonControllerService {
 
 
     /**
+     * Download all Schedules as JSON
+     * Download all Schedules as a JSON file.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public downloadSchedules(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleDTO>>;
+    public downloadSchedules(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleDTO>>>;
+    public downloadSchedules(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleDTO>>>;
+    public downloadSchedules(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<ScheduleDTO>>('get',`${this.basePath}/api/v1/json/download-schedules`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Export Job data to JSON
      * Export all Job data to JSON.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -92,36 +129,6 @@ export class JsonControllerService {
                 reportProgress: reportProgress
             }
         );
-    }
-
-    /**
-     * Download schedules as a JSON file
-     * This method triggers the download of the schedules JSON file.
-     * @param observe set whether or not to return the data Observable as the body, response or events.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public downloadSchedules(observe?: 'body', reportProgress?: boolean): Observable<any>;
-    public downloadSchedules(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<any>>;
-    public downloadSchedules(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<any>>;
-    public downloadSchedules(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        return this.httpClient.request('get', `${this.basePath}/api/v1/json/download-schedules`, {
-            withCredentials: this.configuration.withCredentials,
-            headers: headers,
-            observe: observe,
-            responseType: 'blob',
-            reportProgress: reportProgress
-        });
     }
 
     /**
@@ -233,8 +240,8 @@ export class JsonControllerService {
     }
 
     /**
-     * Export Job data to JSON
-     * Export all Job data to JSON.
+     * Export RO scheduled jobs
+     * Export all RO scheduled jobs to JSON.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
@@ -484,6 +491,64 @@ export class JsonControllerService {
         return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/importMachineType`,
             {
                 body: body,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Import Schedules from JSON
+     * Upload and import Schedules from a JSON file.
+     * @param file 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public importSchedulesForm(file?: Blob, observe?: 'body', reportProgress?: boolean): Observable<{ [key: string]: string; }>;
+    public importSchedulesForm(file?: Blob, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<{ [key: string]: string; }>>;
+    public importSchedulesForm(file?: Blob, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<{ [key: string]: string; }>>;
+    public importSchedulesForm(file?: Blob, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'multipart/form-data'
+        ];
+
+        const canConsumeForm = this.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): void; };
+        let useForm = false;
+        let convertFormParamsToString = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        // see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new HttpParams({encoder: new CustomHttpUrlEncodingCodec()});
+        }
+
+        if (file !== undefined) {
+            formParams = formParams.append('file', <any>file) as any || formParams;
+        }
+
+        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/upload-schedules`,
+            {
+                body: convertFormParamsToString ? formParams.toString() : formParams,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
                 observe: observe,

@@ -431,13 +431,22 @@ export class ScheduleComponent implements OnInit {
   protected readonly Number = Number;
 
   downloadSchedules() {
-    this.jsonService.downloadSchedules().subscribe(response => {
-      const blob = new Blob([response], { type: 'application/json' });
+    this.jsonService.downloadSchedules('body').subscribe(response => {
+      const jsonResponse = JSON.stringify(response);
+      const blob = new Blob([jsonResponse], { type: 'application/json' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = 'schedules.json';
       link.click();
     });
-  }  
-  
+    this.jsonService.exportMachine('body').subscribe(machineResponse => {
+      const machineJsonResponse = JSON.stringify(machineResponse);
+      const machineBlob = new Blob([machineJsonResponse], { type: 'application/json' });
+      const machineLink = document.createElement('a');
+      machineLink.href = URL.createObjectURL(machineBlob);
+      machineLink.download = 'machines.json';
+      machineLink.click();
+    });
+  }
+ 
 }
