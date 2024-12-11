@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import unical.demacs.rdm.config.ModelMapperExtended;
 import unical.demacs.rdm.persistence.dto.*;
 import unical.demacs.rdm.persistence.entities.Job;
@@ -142,6 +143,22 @@ public class JsonController {
     public ResponseEntity<List<ScheduleDTO>> downloadSchedules() {
         List<Schedule> schedules = scheduleService.getAllSchedules();
         return ResponseEntity.ok(modelMapperExtended.mapList(schedules, ScheduleDTO.class));
+    }
+
+    @Operation(summary = "Import Schedules from JSON", description = "Upload and import Schedules from a JSON file.",
+            tags = {"json-controller"})
+    @PostMapping(value = "/upload-schedules", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> importSchedules(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "File is empty."));
+            }
+            jsonService.importSchedules(file);
+            return ResponseEntity.ok(Map.of("message", "Schedules imported successfully."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error importing schedules: " + e.getMessage()));
+        }
     }
 
 }

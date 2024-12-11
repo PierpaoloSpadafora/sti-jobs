@@ -9,6 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import unical.demacs.rdm.persistence.dto.ScheduleDTO;
 import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
 import unical.demacs.rdm.persistence.enums.ScheduleStatus;
+import unical.demacs.rdm.persistence.repository.JobRepository;
+import unical.demacs.rdm.persistence.repository.MachineRepository;
+import unical.demacs.rdm.persistence.repository.MachineTypeRepository;
 import unical.demacs.rdm.persistence.repository.ScheduleRepository;
 import unical.demacs.rdm.persistence.service.implementation.JsonServiceImpl;
 import unical.demacs.rdm.persistence.service.interfaces.IJsonService;
@@ -30,12 +33,21 @@ public class JsonServiceImplTest {
     private IJsonService jsonService;
 
     @Mock
+    private MachineRepository machineRepository;
+
+    @Mock
+    private MachineTypeRepository machineTypeRepository;
+
+    @Mock
+    private JobRepository jobRepository;
+
+    @Mock
     private ScheduleRepository scheduleRepository;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        jsonService = new JsonServiceImpl(objectMapper, scheduleRepository);
+        jsonService = new JsonServiceImpl(objectMapper, scheduleRepository, jobRepository, machineRepository, machineTypeRepository);
     }
 
     @Test
