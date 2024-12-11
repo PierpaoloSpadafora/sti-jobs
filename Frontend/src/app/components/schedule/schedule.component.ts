@@ -448,5 +448,39 @@ export class ScheduleComponent implements OnInit {
       machineLink.click();
     });
   }
+
+  triggerFileInput(): void {
+    const fileInput = document.getElementById('hiddenFileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+      fileInput.click();
+    } else {
+      console.error('Elemento file input non trovato.');
+    }
+  }
+
+  importSchedules(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+        console.log('File selezionato:', file);
+        if (file.type === 'application/json' || file.name.endsWith('.json')) {
+          console.log('Il file è un JSON valido.');
+          const formData = new FormData();
+          formData.append('file', file);
+          this.jsonService.importSchedulesForm(file).subscribe({
+              next:() => {
+                Swal.fire('Importato', 'Il file selezionato è stato importato con successo.', 'success');
+              },
+              error:() => {
+                Swal.fire('Errore', 'Errore durante l\'importazione. Riprova.', 'error');
+              }
+          });
+        } else {
+          Swal.fire('Errore', 'Il file selezionato non è un file JSON valido. Riprova.', 'error');
+          console.error('Formato file non valido:', file.type);
+        }
+    }
+  }
  
 }

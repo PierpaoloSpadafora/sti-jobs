@@ -55,6 +55,8 @@
       <div class="schedule-actions">
         <button class="button" (click)="openSchedulingDialog()">Avvia Scheduling</button>
         <button class="button" (click)="downloadSchedules()">Download Scheduling</button>
+        <button class="button" (click)="triggerFileInput()">Import Scheduling</button>
+        <input type="file" style="display: none;" (change)="importSchedules($event)" accept=".json" id="hiddenFileInput"/>
       </div>
     </div>
     <div class="table-responsive">
