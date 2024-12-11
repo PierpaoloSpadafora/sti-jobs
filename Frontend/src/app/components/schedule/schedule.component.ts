@@ -448,5 +448,5 @@ export class ScheduleComponent implements OnInit {
       machineLink.click();
     });
   }
- 
+
 }

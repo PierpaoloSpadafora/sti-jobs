@@ -8,16 +8,18 @@
 /* Tema Chiaro (valori predefiniti) */
 :root {
   --background-color: #ffffff;
+  --different-background-color: #f8f9fa;
   --text-color: #333333;
   --primary-color: #cccccc;
   --header-color: #2c3e50;
   --border-color: #cccccc;
-  --hover-background-color: #f8f9fa;
+  --hover-background-color: #dcdde1;
 }
 
 /* Tema Scuro */
 .dark-mode {
   --background-color: #333333;
+  --different-background-color: #343a40;
   --text-color: #ffffff;
   --primary-color: #444444;
   --header-color: #007bff;
@@ -27,7 +29,6 @@
 
 .theme-background {
   background-color: var(--background-color);
-  background: var(--background-color);
 }
 
 .theme-text {
