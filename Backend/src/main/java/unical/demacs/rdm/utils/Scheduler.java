@@ -36,7 +36,7 @@ public class Scheduler {
     private final ModelMapperExtended modelMapperExtended;
     private final ObjectMapper objectMapper;
 
-    private static final long SECONDS_SPENT_LIMIT = 30L; // Increase time limit
+    private static final long SECONDS_SPENT_LIMIT = 30L;
 
     public void scheduleByEveryType() {
         log.debug("Inizio schedulazione per ogni tipo");

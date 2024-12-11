@@ -17,7 +17,7 @@ public class ScheduleStatusUpdaterService {
 
     private final ScheduleRepository scheduleRepository;
 
-    @Scheduled(fixedRate = 60000) // every minute todo: ragionare su frequenza
+    @Scheduled(fixedRate = 60000) // ILARIA TODO: ragionare su frequenza
     @Transactional
     public void updateScheduleStatuses() {
         LocalDateTime now = LocalDateTime.now();
