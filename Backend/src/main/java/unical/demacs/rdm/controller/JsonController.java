@@ -16,6 +16,12 @@ import unical.demacs.rdm.persistence.service.interfaces.*;
 
 import java.util.List;
 import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping(value = "/api/v1/json", produces = "application/json")
@@ -109,32 +115,72 @@ public class JsonController {
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-priority", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledPriority() {
-        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-priority.json");
-        return ResponseEntity.ok(schedules);
+    public ResponseEntity<?> exportJobScheduledPriority() {
+        try {
+            List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-priority.json");
+            return ResponseEntity.ok(schedules);
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message.startsWith("FILE_NOT_FOUND:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Schedule file not found", "details", message));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error reading schedule file", "details", message));
+        }
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledDueDate() {
-        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-due-date.json");
-        return ResponseEntity.ok(schedules);
+    public ResponseEntity<?> exportJobScheduledDueDate() {
+        try {
+            List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-due-date.json");
+            return ResponseEntity.ok(schedules);
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message.startsWith("FILE_NOT_FOUND:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Schedule file not found", "details", message));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error reading schedule file", "details", message));
+        }
     }
 
     @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
             tags = {"json-controller"})
     @GetMapping(value = "/export-job-scheduled-by-duration", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledDuration() {
-        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
-        return ResponseEntity.ok(schedules);
+    public ResponseEntity<?> exportJobScheduledDuration() {
+        try {
+            List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-duration.json");
+            return ResponseEntity.ok(schedules);
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message.startsWith("FILE_NOT_FOUND:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Schedule file not found", "details", message));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error reading schedule file", "details", message));
+        }
     }
 
     @Operation(summary = "Export RO scheduled jobs", description = "Export all RO scheduled jobs to JSON.")
-    @GetMapping(value = "/export-job-scheduled-ro", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledRO() {
-        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
-        return ResponseEntity.ok(schedules);
+    @GetMapping(value = "/export-job-scheduled-external", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> exportJobScheduledExternal() {
+        try {
+            List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-imported.json");
+            return ResponseEntity.ok(schedules);
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message.startsWith("FILE_NOT_FOUND:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Schedule file not found", "details", message));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error reading schedule file", "details", message));
+        }
     }
 
     @Operation(summary = "Download all Schedules as JSON", description = "Download all Schedules as a JSON file.",
@@ -147,18 +193,29 @@ public class JsonController {
 
     @Operation(summary = "Import Schedules from JSON", description = "Upload and import Schedules from a JSON file.",
             tags = {"json-controller"})
-    @PostMapping(value = "/upload-schedules", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload-schedules-scheduled-externally", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> importSchedules(@RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "File is empty."));
             }
-            jsonService.importSchedules(file);
+            File directory = new File("./data");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            Path filePath = Paths.get("./data/job-scheduled-imported.json");
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             return ResponseEntity.ok(Map.of("message", "Schedules imported successfully."));
-        } catch (RuntimeException e) {
+        } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Error importing schedules: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/export-job-scheduled-ro")
+    public ResponseEntity<List<ScheduleWithMachineDTO>> exportJobScheduledRO() {
+        List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-ro.json");
+        return ResponseEntity.ok(schedules);
     }
 
 }

@@ -28,6 +28,9 @@ public class JsonServiceImpl implements IJsonService {
 
     public List<ScheduleWithMachineDTO> readScheduleFile(String fileName) {
         File file = new File(fileName);
+        if (!file.exists()) {
+            throw new RuntimeException(new IOException("File not found: " + fileName));
+        }
         try {
             return objectMapper.readValue(file,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, ScheduleWithMachineDTO.class));

@@ -3,7 +3,7 @@
     <h1>Scheduled Jobs</h1>
     <div class="schedule-selector">
       <label for="scheduleType">Select scheduling type:</label>
-      <select id="scheduleType" [(ngModel)]="selectedScheduleType" class="theme-background theme-text" (change)="onScheduleTypeChange()">
+      <select id="scheduleType" [(ngModel)]="newSelectedScheduleType" class="theme-background theme-text" (change)="onScheduleTypeChange()">
         <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
       </select>
     </div>
@@ -97,6 +97,9 @@
           </div>
         </div>
       </div>
+    </div>
+    <div *ngIf="errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
     </div>
   </div>
 </div>

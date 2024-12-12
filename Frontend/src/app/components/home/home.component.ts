@@ -3,7 +3,8 @@ import { ScheduleControllerService, JobDTO,
   JsonControllerService } from '../../generated-api';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ScheduleWithMachineDTO } from '../../generated-api/model/scheduleWithMachineDTO';
+import { ScheduleWithMachineDTO } from '../../generated-api';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-home',
@@ -14,16 +15,18 @@ export class HomeComponent implements OnInit {
   scheduleData: ScheduleWithMachineDTO[] = [];
   jobsMap: Map<number, JobDTO> = new Map<number, JobDTO>();
   machinesMap: Map<number, string> = new Map<number, string>();
-  machineNamesMap: Map<number, string> = new Map<number, string>(); // New map for machine names
+  machineNamesMap: Map<number, string> = new Map<number, string>();
 
   scheduleTypes = [
     { label: 'All Jobs', value: 'ALL' },
     { label: 'Scheduled by Due Date', value: 'DUE_DATE' },
     { label: 'Scheduled by Priority', value: 'PRIORITY' },
     { label: 'Scheduled by Duration', value: 'DURATION' },
-    { label: 'Scheduler di RICERCA OPERATIVA', value: 'RO' }
+    { label: 'External Scheduler ', value: 'EXTERNAL' }
   ];
   selectedScheduleType = 'ALL';
+  errorMessage: string = '';
+  newSelectedScheduleType: string = this.selectedScheduleType;
 
   daysPerPageOptions = [1, 3, 5, 7];
   selectedDaysPerPage = 3;
@@ -42,18 +45,18 @@ export class HomeComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.fetchData();
+    this.fetchData(this.selectedScheduleType);
   }
 
   onScheduleTypeChange() {
-    this.fetchData();
+    this.fetchData(this.newSelectedScheduleType);
   }
 
-  fetchData() {
+  fetchData(scheduleType: string) {
     this.loading = true;
 
     let scheduleObservable: Observable<ScheduleWithMachineDTO[]>;
-    switch (this.selectedScheduleType) {
+    switch (scheduleType) {
       case 'PRIORITY':
         scheduleObservable = this.jsonService.exportJobScheduledPriority();
         break;
@@ -63,8 +66,8 @@ export class HomeComponent implements OnInit {
       case 'DURATION':
         scheduleObservable = this.jsonService.exportJobScheduledDuration();
         break;
-      case 'RO':
-        scheduleObservable = this.jsonService.exportJobScheduledRO();
+      case 'EXTERNAL':
+        scheduleObservable = this.jsonService.exportJobScheduledExternal();
         break;
       default:
         scheduleObservable = this.scheduleService.getAllSchedules();
@@ -72,60 +75,75 @@ export class HomeComponent implements OnInit {
 
     scheduleObservable.subscribe({
       next: (scheduleData: ScheduleWithMachineDTO[]) => {
-        this.scheduleData = scheduleData;
+        if (scheduleData.length === 0) {
+          this.errorMessage = 'Nessun job pianificato trovato per il tipo selezionato.';
+          this.loading = false;
+        } else {
+          this.errorMessage = '';
+          this.selectedScheduleType = scheduleType;
+          this.newSelectedScheduleType = scheduleType;
+          this.scheduleData = scheduleData;
 
-        this.jsonService.exportJob().subscribe({
-          next: (jobs: JobDTO[]) => {
-            this.jobsMap.clear();
-            jobs.forEach(job => {
-              if (job.id !== undefined) {
-                this.jobsMap.set(job.id, job);
-              }
-            });
+          this.jsonService.exportJob().subscribe({
+            next: (jobs: JobDTO[]) => {
+              this.jobsMap.clear();
+              jobs.forEach(job => {
+                if (job.id !== undefined) {
+                  this.jobsMap.set(job.id, job);
+                }
+              });
 
-            this.jsonService.exportMachineType().subscribe({
-              next: (machineTypes) => {
-                this.machinesMap.clear();
-                machineTypes.forEach(machineType => {
-                  if (machineType.id !== undefined && machineType.name !== undefined) {
-                    this.machinesMap.set(machineType.id, machineType.name);
-                  }
-                });
+              this.jsonService.exportMachineType().subscribe({
+                next: (machineTypes) => {
+                  this.machinesMap.clear();
+                  machineTypes.forEach(machineType => {
+                    if (machineType.id !== undefined && machineType.name !== undefined) {
+                      this.machinesMap.set(machineType.id, machineType.name);
+                    }
+                  });
 
-                // Fetch machine names
-                this.jsonService.exportMachine().subscribe({
-                  next: (machines) => {
-                    this.machineNamesMap.clear();
-                    machines.forEach(machine => {
-                      if (machine.id !== undefined && machine.name !== undefined) {
-                        this.machineNamesMap.set(machine.id, machine.name);
-                      }
-                    });
-                    
-                    this.processData();
-                    this.loading = false;
-                  },
-                  error: (error: unknown) => {
-                    console.error('Error fetching machines data', error);
-                    this.loading = false;
-                  }
-                });
-              },
-              error: (error: unknown) => {
-                console.error('Error fetching machine types data', error);
-                this.loading = false;
-              }
-            });
-          },
-          error: (error: unknown) => {
-            console.error('Error fetching jobs data', error);
-            this.loading = false;
-          }
-        });
+                  // Fetch machine names
+                  this.jsonService.exportMachine().subscribe({
+                    next: (machines) => {
+                      this.machineNamesMap.clear();
+                      machines.forEach(machine => {
+                        if (machine.id !== undefined && machine.name !== undefined) {
+                          this.machineNamesMap.set(machine.id, machine.name);
+                        }
+                      });
+
+                      this.processData();
+                      this.loading = false;
+                    },
+                    error: (error: unknown) => {
+                      console.error('Error fetching machines data', error);
+                      this.loading = false;
+                    }
+                  });
+                },
+                error: (error: unknown) => {
+                  console.error('Error fetching machine types data', error);
+                  this.loading = false;
+                }
+              });
+            },
+            error: (error: unknown) => {
+              console.error('Error fetching jobs data', error);
+              this.loading = false;
+            }
+          });
+        }
       },
       error: (error: unknown) => {
         console.error('Error fetching schedule data', error);
         this.loading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Errore',
+          text: 'Impossibile caricare i dati. Il file potrebbe non essere presente.',
+        });
+        // Ripristina il valore della select
+        this.newSelectedScheduleType = this.selectedScheduleType;
       }
     });
   }
@@ -179,26 +197,26 @@ export class HomeComponent implements OnInit {
   getUniqueMachineTypes(date: string): string[] {
     const machineTypeIds = Array.from(this.schedulesByDateAndMachine.get(date)?.keys() || []);
     const uniqueTypes = new Set<string>();
-    
+
     machineTypeIds.forEach(id => {
       const machineName = this.machinesMap.get(id) || 'Unknown Machine Type';
       uniqueTypes.add(machineName);
     });
-    
+
     return Array.from(uniqueTypes);
   }
 
   getSchedulesForMachineType(date: string, machineTypeName: string): ScheduleWithMachineDTO[][] {
     const machineTypeId = Array.from(this.machinesMap.entries())
       .find(([_, name]) => name === machineTypeName)?.[0];
-    
+
     if (!machineTypeId) return [];
 
     const schedules = this.schedulesByDateAndMachine.get(date)?.get(machineTypeId) || [];
-    
+
     // Group schedules by machineId
     const groupedSchedules = new Map<number, ScheduleWithMachineDTO[]>();
-    
+
     schedules.forEach(schedule => {
       const machineId = schedule.machineId || 0;
       if (!groupedSchedules.has(machineId)) {

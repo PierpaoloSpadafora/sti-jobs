@@ -204,6 +204,42 @@ export class JsonControllerService {
     }
 
     /**
+     * Export RO scheduled jobs
+     * Export all RO scheduled jobs to JSON.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public exportJobScheduledExternal(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
+    public exportJobScheduledExternal(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledExternal(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
+    public exportJobScheduledExternal(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-external`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Export Job data to JSON
      * Export all Job data to JSON.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -230,42 +266,6 @@ export class JsonControllerService {
         ];
 
         return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-by-priority`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
-    }
-
-    /**
-     * Export RO scheduled jobs
-     * Export all RO scheduled jobs to JSON.
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public exportJobScheduledRO(observe?: 'body', reportProgress?: boolean): Observable<Array<ScheduleWithMachineDTO>>;
-    public exportJobScheduledRO(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Array<ScheduleWithMachineDTO>>>;
-    public exportJobScheduledRO(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Array<ScheduleWithMachineDTO>>>;
-    public exportJobScheduledRO(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected != undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.request<Array<ScheduleWithMachineDTO>>('get',`${this.basePath}/api/v1/json/export-job-scheduled-ro`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -546,7 +546,7 @@ export class JsonControllerService {
             formParams = formParams.append('file', <any>file) as any || formParams;
         }
 
-        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/upload-schedules`,
+        return this.httpClient.request<{ [key: string]: string; }>('post',`${this.basePath}/api/v1/json/upload-schedules-scheduled-externally`,
             {
                 body: convertFormParamsToString ? formParams.toString() : formParams,
                 withCredentials: this.configuration.withCredentials,

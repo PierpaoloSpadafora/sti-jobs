@@ -10,6 +10,6 @@
  * Do not edit the class manually.
  */
 
-export interface JsonUploadschedulesBody { 
+export interface JsonUploadschedulesscheduledexternallyBody { 
     file: Blob;
 }
