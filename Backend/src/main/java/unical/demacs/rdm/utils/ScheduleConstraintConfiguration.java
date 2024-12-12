@@ -19,7 +19,7 @@ public class ScheduleConstraintConfiguration {
     private HardSoftScore jobDueDate = HardSoftScore.ofHard(1);
 
     @ConstraintWeight("High priority jobs first")
-    private HardSoftScore highPriorityJobsFirst = HardSoftScore.ofSoft(1);
+    private HardSoftScore highPriorityJobsFirst = HardSoftScore.ofSoft(2500);
 
     @ConstraintWeight("Short duration jobs first")
     private HardSoftScore shortDurationJobsFirst = HardSoftScore.ofSoft(1);

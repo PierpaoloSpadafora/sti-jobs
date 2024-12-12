@@ -100,7 +100,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .forEach(JobAssignment.class)
                 .groupBy(JobAssignment::getAssignedMachine,
                         sum(ja -> Math.toIntExact(ja.getSchedule().getDuration())))
-                .penalize(HardSoftScore.ONE_SOFT.multiply(100),
+                .penalize(HardSoftScore.ONE_SOFT.multiply(50),  // Reduced weight
                         (machine, totalDuration) -> totalDuration / 3600)
                 .asConstraint("Balance machine load");
     }
@@ -108,8 +108,14 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
     private Constraint prioritizeHighPriorityJobs(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(JobAssignment.class)
-                .reward(HardSoftScore.ONE_SOFT.multiply(3),
-                        ja -> ja.getSchedule().getJob().getPriority().ordinal() * 100)
+                .filter(ja -> ja.getStartTimeGrain() != null)
+                .penalize(HardSoftScore.ONE_SOFT.multiply(2000),
+                        ja -> {
+                            int priorityFactor = (3 - ja.getSchedule().getJob().getPriority().ordinal());
+                            long timeDelay = (ja.getStartTimeInSeconds() - 
+                                ja.getSchedule().getStartTime().toEpochSecond(ZoneOffset.UTC)) / 3600;
+                            return (int)(priorityFactor * timeDelay * timeDelay);
+                        })
                 .asConstraint("High priority jobs first");
     }
 
@@ -127,7 +133,7 @@ public class ScheduleConstraintProvider implements ConstraintProvider {
                 .groupBy(
                     ja -> ja.getSchedule().getMachineType().getId()
                 )
-                .reward(HardSoftScore.ONE_SOFT.multiply(1000))
+                .reward(HardSoftScore.ONE_SOFT.multiply(500))
                 .asConstraint("Distribute jobs across machines");
     }
 
