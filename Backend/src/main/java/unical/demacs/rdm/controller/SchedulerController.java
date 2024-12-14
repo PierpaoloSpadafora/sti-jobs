@@ -41,5 +41,10 @@ public class SchedulerController {
         return new ResponseEntity<>(Map.of("message", "Scheduling completed"), HttpStatus.OK);
     }
 
+    @GetMapping("/schedule-fcfs")
+    public ResponseEntity<Map<String,String>> ScheduleFCFS() {
+        scheduler.scheduleByFCFS();
+        return new ResponseEntity<>(Map.of("message", "Scheduling completed"), HttpStatus.OK);
+    }
 
 }

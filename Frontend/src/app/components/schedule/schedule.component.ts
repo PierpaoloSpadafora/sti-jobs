@@ -394,6 +394,9 @@ export class ScheduleComponent implements OnInit {
       case 'schedulePriority':
         schedulingObservable = this.schedulerEngineService.schedulePriority();
         break;
+      case 'scheduleFCFS':
+        schedulingObservable = this.schedulerEngineService.scheduleFCFS();
+        break;
       default:
         this.loading = false;
         return;
@@ -482,5 +485,5 @@ export class ScheduleComponent implements OnInit {
         }
     }
   }
- 
+
 }

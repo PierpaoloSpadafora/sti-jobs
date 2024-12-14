@@ -43,6 +43,7 @@ public class Scheduler {
         scheduleByPriority();
         scheduleByDueDate();
         scheduleByDuration();
+        scheduleByFCFS();
     }
 
     public void scheduleByPriority() {
@@ -69,6 +70,16 @@ public class Scheduler {
         saveSchedulesToFile(durationResult, "duration");
     }
 
+    public void scheduleByFCFS() {
+        log.debug("Schedulazione basata sul First-Come-First-Served");
+        List<Schedule> schedules = scheduleRepository.findAll();
+        log.debug("Schedules recuperate: {}", schedules.size());
+
+        // Esegui lo scheduling FCFS
+        List<Schedule> fcfsResult = scheduleWithFCFS(schedules);
+        // Salva i risultati
+        saveSchedulesToFile(fcfsResult, "fcfs");
+    }
     // -------------------- SCHEDULE LOGIC 'NAGG RO' CAZZ --------------------
 
     private List<JobAssignment> createPossibleAssignments(List<Schedule> schedules, List<Machine> availableMachines) {
@@ -203,20 +214,13 @@ public class Scheduler {
     private List<Schedule> scheduleWithOptaPlanner(List<Schedule> schedules, String criterion) {
         log.info("Starting scheduling process for criterion: {}", criterion);
 
-        List<Schedule> validSchedules = schedules.stream()
-                .filter(s -> s.getStartTime() != null)
-                .filter(s -> s.getStatus() != ScheduleStatus.COMPLETED)
-                .collect(Collectors.toList());
-
+        List<Schedule> validSchedules = filterValidSchedules(schedules);
         if (validSchedules.isEmpty()) {
             log.warn("No valid schedules to process");
             return Collections.emptyList();
         }
 
-        List<Machine> availableMachines = machineRepository.findAll().stream()
-                .filter(m -> !(m.getStatus().equals(MachineStatus.BUSY)))
-                .collect(Collectors.toList());
-
+        List<Machine> availableMachines = getAvailableMachines();
         if (availableMachines.isEmpty()) {
             log.error("No available machines found");
             return Collections.emptyList();
@@ -234,6 +238,63 @@ public class Scheduler {
                 constraintConfiguration
         );
         return processSolution(solution);
+    }
+
+    private List<Schedule> scheduleWithFCFS(List<Schedule> schedules) {
+        log.info("Starting scheduling process with FCFS");
+
+        List<Schedule> validSchedules = filterValidSchedules(schedules);
+        if (validSchedules.isEmpty()) {
+            log.warn("No valid schedules to process");
+            return Collections.emptyList();
+        }
+
+        List<Machine> availableMachines = getAvailableMachines();
+        if (availableMachines.isEmpty()) {
+            log.error("No available machines found");
+            return Collections.emptyList();
+        }
+
+        // Ordina le schedule in base al tempo di inizio (startTime)
+        validSchedules.sort(Comparator.comparing(Schedule::getStartTime));
+
+        // Assegna i job alle macchine con logica FCFS
+        assignJobsToMachinesFCFS(validSchedules, availableMachines);
+
+        // Restituisce la lista schedulata
+        return validSchedules;
+    }
+
+    private void assignJobsToMachinesFCFS(List<Schedule> schedules, List<Machine> machines) {
+        // Mantiene traccia di quando ogni macchina diventa libera
+        Map<Long, LocalDateTime> machineEndTimes = machines.stream()
+                .collect(Collectors.toMap(Machine::getId, m -> LocalDateTime.MIN));
+
+        for (Schedule schedule : schedules) {
+            // Trova la macchina che diventa libera prima
+            Machine bestMachine = machines.stream()
+                    .min(Comparator.comparing(machine -> machineEndTimes.get(machine.getId())))
+                    .orElseThrow(() -> new IllegalStateException("No available machines found"));
+
+            // Determina l'orario di inizio del job
+            LocalDateTime earliestAvailableTime = machineEndTimes.get(bestMachine.getId());
+            LocalDateTime jobStartTime = earliestAvailableTime.isAfter(schedule.getStartTime())
+                    ? earliestAvailableTime
+                    : schedule.getStartTime();
+
+            // Assegna il job alla macchina
+            schedule.setMachine(bestMachine);
+            schedule.setStartTime(jobStartTime);
+            schedule.setStatus(ScheduleStatus.SCHEDULED);
+
+            // Calcola l'orario di fine job
+            LocalDateTime jobEndTime = jobStartTime.plusSeconds(schedule.getDuration());
+            // Aggiorna l'orario in cui la macchina sarà libera
+            machineEndTimes.put(bestMachine.getId(), jobEndTime);
+
+            log.debug("Schedule {} assegnata alla macchina {}: start at {}, end at {}",
+                    schedule.getId(), bestMachine.getId(), jobStartTime, jobEndTime);
+        }
     }
 
     private SolverConfig createSolverConfig() {
@@ -287,6 +348,28 @@ public class Scheduler {
             log.error("Solver fallito con errore: {}", e.getMessage(), e);
             throw new RuntimeException("Impossibile risolvere il problema di schedulazione", e);
         }
+    }
+
+    /**
+     * Filtra le schedule valide.
+     * - StartTime non nullo.
+     * - Stato non COMPLETED.
+     */
+    private List<Schedule> filterValidSchedules(List<Schedule> schedules) {
+        return schedules.stream()
+                .filter(s -> s.getStartTime() != null)
+                .filter(s -> s.getStatus() != ScheduleStatus.COMPLETED)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Recupera le macchine disponibili.
+     * - Stato diverso da BUSY.
+     */
+    private List<Machine> getAvailableMachines() {
+        return machineRepository.findAll().stream()
+                .filter(m -> !(m.getStatus().equals(MachineStatus.BUSY)))
+                .collect(Collectors.toList());
     }
 
     private void saveSchedulesToFile(List<Schedule> schedules, String type) {

@@ -166,6 +166,24 @@ public class JsonController {
         }
     }
 
+    @Operation(summary = "Export Job data to JSON", description = "Export all Job data to JSON.",
+            tags = {"json-controller"})
+    @GetMapping(value = "/export-job-scheduled-by-fcfs", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> exportJobScheduledFCFS() {
+        try {
+            List<ScheduleWithMachineDTO> schedules = jsonService.readScheduleFile("./data/job-scheduled-by-fcfs.json");
+            return ResponseEntity.ok(schedules);
+        } catch (RuntimeException e) {
+            String message = e.getMessage();
+            if (message.startsWith("FILE_NOT_FOUND:")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Schedule file not found", "details", message));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error reading schedule file", "details", message));
+        }
+    }
+
     @Operation(summary = "Export RO scheduled jobs", description = "Export all RO scheduled jobs to JSON.")
     @GetMapping(value = "/export-job-scheduled-external", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> exportJobScheduledExternal() {
