@@ -119,7 +119,7 @@
 }
 
 .schedule-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: var(--background-color);
 }
 
 .schedule-table tbody tr:hover {
@@ -158,7 +158,7 @@
 }
 
 .machine-type-header {
-  color: #2c3e50;
+  color: var(--header-color);
   font-size: 1.5rem;
   margin: 1.5rem 0 1rem;
   padding-bottom: 0.5rem;
@@ -166,7 +166,7 @@
 }
 
 .machine-header {
-  color: #34495e;
+  color: var(--header-color);
   font-size: 1.2rem;
   margin: 1rem 0;
   padding-left: 1rem;
