@@ -146,8 +146,8 @@ public class SchedulerTest {
     void testScheduleByEveryType() {
         scheduler.scheduleByEveryType();
 
-        verify(scheduleRepository, times(3)).findAll();
-        verify(machineRepository, times(3)).findAll();
+        verify(scheduleRepository, times(5)).findAll();
+        verify(machineRepository, times(5)).findAll();
 
         List<Schedule> finalSchedule = scheduleRepository.findAll();
         verifyValidSchedule(finalSchedule);
@@ -175,6 +175,68 @@ public class SchedulerTest {
         List<Schedule> scheduledJobs = scheduleRepository.findAll();
         boolean allPending = scheduledJobs.stream().allMatch(s -> s.getStatus() == ScheduleStatus.PENDING);
         assertTrue(allPending, "Without available machines, all jobs should remain in their original state");
+    }
+
+    @Test
+    void testScheduleByFCFS() {
+        // Esegui lo scheduling FCFS
+        scheduler.scheduleByFCFS();
+
+        // Recupera tutte le schedule post-schedulazione
+        List<Schedule> scheduledJobs = scheduleRepository.findAll();
+
+        // Verifica che le schedule abbiano macchine assegnate
+        verifyMachineAssignments(scheduledJobs);
+
+        // Verifica l’assenza di conflitti temporali
+        verifyNoTimeConflicts(scheduledJobs);
+
+        // Verifica compatibilità del tipo macchina
+        verifyMachineTypeCompatibility(scheduledJobs);
+
+        // Verifica l’ordinamento FCFS:
+        // Semplicemente controlliamo che i job, una volta schedulati,
+        // rimangano in ordine non decrescente di startTime.
+        List<Schedule> sortedByStartTime = scheduledJobs.stream()
+                .sorted(Comparator.comparing(Schedule::getStartTime))
+                .toList();
+        assertEquals(sortedByStartTime, scheduledJobs,
+                "Schedules should be sorted by start time (FCFS order)");
+
+        // Nessuna dueDate superata
+        verifyDueDatesRespected(scheduledJobs);
+    }
+
+    @Test
+    void testScheduleByRR() {
+        // Esegui lo scheduling RR
+        scheduler.scheduleByRR();
+
+        // Recupera tutte le schedule post-schedulazione
+        List<Schedule> scheduledJobs = scheduleRepository.findAll();
+
+        // Verifica che le schedule abbiano macchine assegnate
+        verifyMachineAssignments(scheduledJobs);
+
+        // Verifica l’assenza di conflitti temporali
+        verifyNoTimeConflicts(scheduledJobs);
+
+        // Verifica compatibilità del tipo macchina
+        verifyMachineTypeCompatibility(scheduledJobs);
+
+        // Verifica se le schedule sono effettivamente "distribuite" tra le macchine
+        // in modo bilanciato (o almeno non tutte sulla stessa macchina).
+        Map<Machine, Long> machineCount = scheduledJobs.stream()
+                .collect(Collectors.groupingBy(Schedule::getMachine, Collectors.counting()));
+        // Nel Round Robin puro, nessuna macchina dovrebbe avere troppi job rispetto alle altre.
+        // Ad esempio, se ci sono 6 macchine e 9 job, ogni macchina dovrebbe avere 1 o 2 job.
+        long maxCount = Collections.max(machineCount.values());
+        long minCount = Collections.min(machineCount.values());
+        assertTrue((maxCount - minCount) <= 1,
+                "Jobs should be fairly distributed among machines in round-robin manner");
+
+        // Nessuna dueDate superata
+        verifyDueDatesRespected(scheduledJobs);
     }
 
     private void verifyMachineAssignments(List<Schedule> schedules) {
