@@ -44,6 +44,7 @@ public class Scheduler {
         scheduleByDueDate();
         scheduleByDuration();
         scheduleByFCFS();
+        scheduleByRR();
     }
 
     public void scheduleByPriority() {
@@ -79,6 +80,17 @@ public class Scheduler {
         List<Schedule> fcfsResult = scheduleWithFCFS(schedules);
         // Salva i risultati
         saveSchedulesToFile(fcfsResult, "fcfs");
+    }
+
+    public void scheduleByRR() {
+        log.debug("Schedulazione basata sul Round-Robin");
+        List<Schedule> schedules = scheduleRepository.findAll();
+        log.debug("Schedules recuperate: {}", schedules.size());
+
+        // Esegui lo scheduling RR
+        List<Schedule> rrResult = scheduleWithRR(schedules);
+        // Salva i risultati
+        saveSchedulesToFile(rrResult, "rr");
     }
     // -------------------- SCHEDULE LOGIC 'NAGG RO' CAZZ --------------------
 
@@ -265,6 +277,28 @@ public class Scheduler {
         return validSchedules;
     }
 
+    private List<Schedule> scheduleWithRR(List<Schedule> schedules) {
+        log.info("Starting scheduling process with RR");
+
+        List<Schedule> validSchedules = filterValidSchedules(schedules);
+        if (validSchedules.isEmpty()) {
+            log.warn("No valid schedules to process");
+            return Collections.emptyList();
+        }
+
+        List<Machine> availableMachines = getAvailableMachines();
+        if (availableMachines.isEmpty()) {
+            log.error("No available machines found");
+            return Collections.emptyList();
+        }
+
+        // Assegna i job alle macchine con logica RR
+        assignJobsToMachinesRR(validSchedules, availableMachines);
+
+        // Restituisce la lista schedulata
+        return validSchedules;
+    }
+
     private void assignJobsToMachinesFCFS(List<Schedule> schedules, List<Machine> machines) {
         // Mantiene traccia di quando ogni macchina diventa libera
         Map<Long, LocalDateTime> machineEndTimes = machines.stream()
@@ -294,6 +328,42 @@ public class Scheduler {
 
             log.debug("Schedule {} assegnata alla macchina {}: start at {}, end at {}",
                     schedule.getId(), bestMachine.getId(), jobStartTime, jobEndTime);
+        }
+    }
+
+    private void assignJobsToMachinesRR(List<Schedule> schedules, List<Machine> machines) {
+        // Mappa che tiene traccia di quando ogni macchina si libera
+        Map<Long, LocalDateTime> machineEndTimes = machines.stream()
+                .collect(Collectors.toMap(Machine::getId, m -> LocalDateTime.MIN));
+
+        // Indice per iterare ciclicamente tra le macchine
+        int machineIndex = 0;
+
+        for (Schedule schedule : schedules) {
+            // Seleziona la macchina in base all'indice, ruotando ciclicamente
+            Machine currentMachine = machines.get(machineIndex);
+
+            // Calcola l'orario di inizio effettivo del job,
+            // confrontando lo startTime richiesto con l'orario di fine corrente della macchina
+            LocalDateTime earliestAvailableTime = machineEndTimes.get(currentMachine.getId());
+            LocalDateTime jobStartTime = earliestAvailableTime.isAfter(schedule.getStartTime())
+                    ? earliestAvailableTime
+                    : schedule.getStartTime();
+
+            // Assegna il job alla macchina
+            schedule.setMachine(currentMachine);
+            schedule.setStartTime(jobStartTime);
+            schedule.setStatus(ScheduleStatus.SCHEDULED);
+
+            // Calcola l'orario di fine job e aggiorna la disponibilità della macchina
+            LocalDateTime jobEndTime = jobStartTime.plusSeconds(schedule.getDuration());
+            machineEndTimes.put(currentMachine.getId(), jobEndTime);
+
+            log.debug("Schedule {} assegnata alla macchina {}: start at {}, end at {}",
+                    schedule.getId(), currentMachine.getId(), jobStartTime, jobEndTime);
+
+            // Passa alla macchina successiva in modo circolare
+            machineIndex = (machineIndex + 1) % machines.size();
         }
     }
 

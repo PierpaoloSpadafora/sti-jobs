@@ -397,6 +397,9 @@ export class ScheduleComponent implements OnInit {
       case 'scheduleFCFS':
         schedulingObservable = this.schedulerEngineService.scheduleFCFS();
         break;
+      case 'scheduleRR':
+        schedulingObservable = this.schedulerEngineService.scheduleRR();
+        break;
       default:
         this.loading = false;
         return;
@@ -412,7 +415,7 @@ export class ScheduleComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         console.error('Errore durante lo scheduling:', error);
-        Swal.fire('Errore', 'Si è verificato un errore durante lo scheduling.', 'error');
+        //Swal.fire('Errore', 'Si è verificato un errore durante lo scheduling.', 'error');
       },
     });
   }

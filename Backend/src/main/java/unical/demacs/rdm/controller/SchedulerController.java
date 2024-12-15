@@ -47,4 +47,10 @@ public class SchedulerController {
         return new ResponseEntity<>(Map.of("message", "Scheduling completed"), HttpStatus.OK);
     }
 
+    @GetMapping("/schedule-rr")
+    public ResponseEntity<Map<String,String>> ScheduleRR() {
+        scheduler.scheduleByRR();
+        return new ResponseEntity<>(Map.of("message", "Scheduling completed"), HttpStatus.OK);
+    }
+
 }

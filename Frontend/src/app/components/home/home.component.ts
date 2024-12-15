@@ -23,6 +23,7 @@ export class HomeComponent implements OnInit {
     { label: 'Scheduled by Priority', value: 'PRIORITY' },
     { label: 'Scheduled by Duration', value: 'DURATION' },
     { label: 'Scheduled by FCFS', value: 'FCFS' },
+    { label: 'Scheduled by RR', value: 'RR' },
     { label: 'External Scheduler ', value: 'EXTERNAL' }
   ];
   selectedScheduleType = 'ALL';
@@ -72,6 +73,9 @@ export class HomeComponent implements OnInit {
         break;
       case 'FCFS':
         scheduleObservable = this.jsonService.exportJobScheduledFCFS();
+        break;
+      case 'RR':
+        scheduleObservable = this.jsonService.exportJobScheduledRR();
         break;
       default:
         scheduleObservable = this.scheduleService.getAllSchedules();
