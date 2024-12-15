@@ -98,14 +98,14 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
     }
 
     Swal.fire({
-      title: 'Sei sicuro?',
-      text: `Vuoi eliminare la macchina "${machine.name}"?`,
+      title: 'Are you sure?',
+      text: `Do you want to delete the machine "${machine.name}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sì, elimina!',
-      cancelButtonText: 'Annulla'
+      confirmButtonText: 'Yes, delete!',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
@@ -113,8 +113,8 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
           next: () => {
             this.machines = this.machines.filter(m => m.id !== id);
             Swal.fire(
-              'Eliminato!',
-              `La macchina "${machine.name}" è stata eliminata.`,
+              'Deleted!',
+              `The machine "${machine.name}" has been deleted.`,
               'success'
             );
             this.isLoading = false;
@@ -124,14 +124,14 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
             this.isLoading = false;
             if (error.status === 404) {
               Swal.fire(
-                'Errore!',
-                'Macchina non trovata. Potrebbe essere già stata eliminata.',
+                'Error!',
+                'Machine not found. It might have already been deleted.',
                 'error'
               );
             } else {
               Swal.fire(
                 'Errore!',
-                'Non è stato possibile eliminare la macchina. Per favore, riprova più tardi.',
+                'Could not delete the machine. Please try again later.',
                 'error'
               );
             }

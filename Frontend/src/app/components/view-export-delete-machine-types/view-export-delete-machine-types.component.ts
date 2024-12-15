@@ -50,14 +50,14 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
     }
 
     Swal.fire({
-      title: 'Sei sicuro?',
-      text: `Vuoi eliminare il tipo di macchina "${machineType.name}"?`,
+      title: 'Are you sure?',
+      text: `Do you want to delete the machine type "${machineType.name}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sì, elimina!',
-      cancelButtonText: 'Annulla'
+      confirmButtonText: 'Yes, delete!',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
@@ -65,8 +65,8 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
           next: () => {
             this.machineTypes = this.machineTypes.filter(type => type.id !== id);
             Swal.fire(
-              'Eliminato!',
-              `Il tipo di macchina "${machineType.name}" è stato eliminato.`,
+              'Deleted!',
+              `The machine type "${machineType.name}" has been deleted.`,
               'success'
             );
             this.isLoading = false;
@@ -76,14 +76,14 @@ export class ViewExportDeleteMachineTypesComponent implements OnInit {
             this.isLoading = false;
             if (error.status === 404) {
               Swal.fire(
-                'Errore!',
-                'Tipo di macchina non trovato. Potrebbe essere già stato eliminato.',
+                'Error!',
+                'Machine type not found. It might have already been deleted.',
                 'error'
               );
             } else {
               Swal.fire(
-                'Errore!',
-                'Non è stato possibile eliminare il tipo di macchina. Per favore, riprova più tardi.',
+                'Error!',
+                'Could not delete the machine type. Please try again later.',
                 'error'
               );
             }

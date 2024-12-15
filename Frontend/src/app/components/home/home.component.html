@@ -9,7 +9,7 @@
     </div>
 
     <div class="days-selector">
-      <label for="daysPerPage">Giorni per pagina:</label>
+      <label for="daysPerPage">Days per page:</label>
       <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" class="theme-background theme-text" (change)="onDaysPerPageChange()">
         <option *ngFor="let option of daysPerPageOptions" [value]="option">{{ option }}</option>
       </select>
@@ -91,9 +91,9 @@
           </div>
 
           <div class="pagination-controls" *ngIf="paginatedDates.length > selectedDaysPerPage">
-            <button (click)="previousPage()" [disabled]="currentPage === 0">Indietro</button>
-            <span>Pagina {{ currentPage + 1 }} di {{ totalPages }}</span>
-            <button (click)="nextPage()" [disabled]="(currentPage + 1) * selectedDaysPerPage >= paginatedDates.length">Avanti</button>
+            <button (click)="previousPage()" [disabled]="currentPage === 0">Previous</button>
+            <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+            <button (click)="nextPage()" [disabled]="(currentPage + 1) * selectedDaysPerPage >= paginatedDates.length">Next</button>
           </div>
         </div>
       </div>
