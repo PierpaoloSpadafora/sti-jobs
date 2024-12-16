@@ -374,7 +374,7 @@ public class Scheduler {
                 .withConstraintProviderClass(ScheduleConstraintProvider.class)
                 .withTerminationConfig(new TerminationConfig()
                         .withBestScoreLimit("0hard/*soft")
-                        .withSecondsSpentLimit(120L))
+                        .withSecondsSpentLimit(SECONDS_SPENT_LIMIT))
                 .withPhases(
                         new ConstructionHeuristicPhaseConfig()
                                 .withConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT_DECREASING),
