@@ -42,3 +42,8 @@ Al primo avvio del backend, JPA provvederà a creare automaticamente le tabelle 
 1. Tutte le task associate alla user story sono state completate e soddisfano la loro DoD.
 2. La user story è stata approvata dal Product Owner ( @ila13-code )
 3. Il codice è stato integrato nel branch `main` tramite una pull request.
+
+---
+
+
+questo readme è inutile, volevo solo fare cifra tonda coi commit :D
