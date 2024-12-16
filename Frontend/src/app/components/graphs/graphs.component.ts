@@ -5,6 +5,11 @@ import { JobControllerService, JsonControllerService} from '../../generated-api'
 import { JobDTO,ScheduleDTO  } from '../../generated-api';
 import { LoginService } from '../../services/login.service';
 
+interface ScheduledJobType {
+  value: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-graphs',
   templateUrl: './graphs.component.html',
@@ -47,7 +52,7 @@ export class GraphsComponent implements OnInit {
     data: [] as [string, number, number][],
     columns: ['Job', 'Completed', 'Scheduled'],
     options: {
-      title: 'Job Overview',
+      title: 'Scheduled jobs overview',
       width: 650,
       height: 450,
       seriesType: 'bars',
@@ -88,7 +93,7 @@ export class GraphsComponent implements OnInit {
     data: [] as [string, number, number, number, number, number][],
     columns: ['Status', 'PENDING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
     options: {
-      title: 'Jobs by Status',
+      title: 'Pending and Scheduled Jobs by Status',
       width: 650,
       height: 450,
       bars: 'horizontal',
@@ -122,9 +127,52 @@ export class GraphsComponent implements OnInit {
     }
   };
 
+  machineJobsChart = {
+    type: ChartType.LineChart,
+    data: [] as [string, number, number, number][],
+    columns: ['Machine', 'Scheduled', 'In progress', 'Completed'],
+    options: {
+      title: 'Jobs on machines by scheduled type',
+      width: 650,
+      height: 450,
+      colors: ['#F39C12', '#3498DB', '#2ECC71'],
+      fontSize: 12,
+      fontName: 'Roboto',
+      titleTextStyle: {
+        fontSize: 18,
+        bold: true,
+        color: '#2C3E50'
+      },
+      backgroundColor: {
+        fill: '#FFFFFF'
+      },
+      hAxis: {
+        title: 'Macchine',
+        titleTextStyle: { color: '#2C3E50', italic: false },
+        textStyle: { color: '#2C3E50' }
+      },
+      vAxis: {
+        title: 'Numero di Job',
+        titleTextStyle: { color: '#2C3E50', italic: false },
+        textStyle: { color: '#2C3E50' }
+      },
+      animation: {
+        startup: true,
+        duration: 1000,
+        easing: 'out'
+      }
+    }
+  };
+
   isLoading = false;
   jobs: any[] = [];
   machineTypes: any[] = [];
+  private originalScheduledDueDateJobs: ScheduleDTO[] = [];
+  private originalScheduledDurationJobs: ScheduleDTO[] = [];
+  private originalScheduledPriorityJobs: ScheduleDTO[] = [];
+  private machines: any[] = [];
+  public selectedScheduledJobType!: string;
+  public scheduledJobTypes!: ScheduledJobType[];
 
   constructor(
     private jobService: JobControllerService,
@@ -136,51 +184,95 @@ export class GraphsComponent implements OnInit {
     this.loadJobs();
   }
 
-  loadJobs(): void {
+  loadJobs(): void { 
     this.isLoading = true;
+    this.scheduledJobTypes = [
+      { value: 'dueDate', label: 'Due Date' },
+      { value: 'duration', label: 'Duration' },
+      { value: 'priority', label: 'Priority' }
+    ];
+    this.selectedScheduledJobType = 'dueDate';
     forkJoin({
       jobs: this.jobService.getAllJobs(),
       types: this.jsonService.exportMachineType(),
-      scheduledJobs: this.jsonService.exportJobScheduledDueDate()
+      machine: this.jsonService.exportMachine(),
+      scheduledDueDateJobs: this.jsonService.exportJobScheduledDueDate(),
+      scheduledDurationJobs: this.jsonService.exportJobScheduledDuration(),
+      scheduledPriorityJobs: this.jsonService.exportJobScheduledPriority()
     }).subscribe({
       next: async (response) => {
+        this.originalScheduledDueDateJobs = Array.isArray(response.scheduledDueDateJobs) 
+          ? response.scheduledDueDateJobs as ScheduleDTO[] 
+          : [];
+        this.originalScheduledDurationJobs = Array.isArray(response.scheduledDurationJobs) 
+          ? response.scheduledDurationJobs as ScheduleDTO[] 
+          : [];
+        this.originalScheduledPriorityJobs = Array.isArray(response.scheduledPriorityJobs) 
+          ? response.scheduledPriorityJobs as ScheduleDTO[] 
+          : [];
+  
         const jobDTOs = Array.isArray(response.jobs) ? (response.jobs as JobDTO[]) : [];
-        const scheduledJobDTOs = Array.isArray(response.scheduledJobs) ? (response.scheduledJobs as ScheduleDTO[]) : [];
-
+        const scheduledDueDateJobs = this.originalScheduledDueDateJobs;
+        const scheduledDurationJobs = this.originalScheduledDurationJobs;
+        const scheduledPriorityJobs = this.originalScheduledPriorityJobs;
+        
+        const allScheduledJobs = [
+          ...scheduledDueDateJobs,
+          ...scheduledDurationJobs,
+          ...scheduledPriorityJobs
+        ];
+        
+        const scheduledJobDTOs = Array.from(
+          new Map(allScheduledJobs.map(job => [job.jobId, job])).values()
+        );
+        
+        const scheduledJobIds = new Set(scheduledJobDTOs.map(scheduleDto => scheduleDto.jobId));
+        
         const combinedJobs = [
-          ...jobDTOs.map(dto => ({
-            id: dto.id!,
-            title: dto.title,
-            description: dto.description,
-            status: dto.status,
-            priority: dto.priority,
-            duration: dto.duration,
-            idMachineType: dto.idMachineType,
-            assigneeEmail: this.loginService.getUserEmail()!
-          })),
+          ...jobDTOs
+            .filter(dto => !scheduledJobIds.has(dto.id))
+            .map(dto => ({
+              id: dto.id!,
+              title: dto.title,
+              description: dto.description,
+              status: dto.status,
+              priority: dto.priority,
+              duration: dto.duration,
+              idMachineType: dto.idMachineType,
+              assigneeEmail: this.loginService.getUserEmail()!
+            })),
           ...scheduledJobDTOs.map(scheduleDto => {
             const matchingJob = jobDTOs.find(job => job.id === scheduleDto.jobId);
-
             return {
               id: scheduleDto.id!,
               title: matchingJob?.title || 'Scheduled Job',
-              status: 'SCHEDULED',
+              status: scheduleDto.status || matchingJob?.status || 'SCHEDULED',
               priority: matchingJob?.priority,
               duration: scheduleDto.duration,
+              machineId: scheduleDto.assignedMachineId, 
+              machineName: scheduleDto.assignedMachineName,
               idMachineType: scheduleDto.machineTypeId,
               dueDate: scheduleDto.dueDate,
               startTime: scheduleDto.startTime
             };
           })
         ];
-
+        
         const types = this.transformMachineTypes(response.types);
+        this.machines = this.transformMachine(response.machine);
+        const machines = this.transformMachine(response.machine);
+        
         this.machineTypes = types;
         const scheduledJobs = combinedJobs.filter(job => job.status === 'SCHEDULED');
+        
         this.pieChart.data = this.aggregateMachineTypes(scheduledJobs, types);
         this.barChart.data = this.prepareBarChartData(combinedJobs);
         this.statusChart.data = this.prepareStatusChartData(combinedJobs);
-
+        this.machineJobsChart.data = this.prepareMachineJobsChartData(
+          this.originalScheduledDueDateJobs, 
+          this.machines
+        );
+        
         this.isLoading = false;
       },
       error: (error) => {
@@ -189,6 +281,25 @@ export class GraphsComponent implements OnInit {
         this.showMessage('Error loading data. Please try again later.');
       }
     });
+  }
+  onScheduledJobTypeChange(): void {
+    let selectedJobs: ScheduleDTO[] = [];
+
+    switch (this.selectedScheduledJobType) {
+      case 'dueDate':
+        selectedJobs = this.originalScheduledDueDateJobs;
+        break;
+      case 'duration':
+        selectedJobs = this.originalScheduledDurationJobs;
+        break;
+      case 'priority':
+        selectedJobs = this.originalScheduledPriorityJobs;
+        break;
+      default:
+        selectedJobs = this.originalScheduledDueDateJobs;
+    }
+
+    this.machineJobsChart.data = this.prepareMachineJobsChartData(selectedJobs, this.machines);
   }
 
   private prepareBarChartData(jobs: any[]): [string, number, number][] {
@@ -220,6 +331,15 @@ export class GraphsComponent implements OnInit {
           id: type.id,
           name: type.name,
           usageCount: typeof type.usageCount === 'number' ? type.usageCount : 0
+        }))
+      : [];
+  }
+
+  private transformMachine(machines: any): any[] {
+    return Array.isArray(machines)
+      ? machines.map(machine => ({
+          id: machine.id,
+          name: machine.name
         }))
       : [];
   }
@@ -270,6 +390,46 @@ export class GraphsComponent implements OnInit {
     return aggregatedData;
   }
 
+  private prepareMachineJobsChartData(scheduledJobs: any[], machines: any[]): [string, number, number, number][] {
+    console.log(scheduledJobs);
+    const machineIdToNameMap: { [key: string]: string } = {};
+    machines.forEach(machine => {
+        machineIdToNameMap[machine.id] = machine.name;
+    });
+
+    const machineJobCounts: { [key: string]: { scheduled: number, inProgress: number, completed: number } } = {};
+
+    scheduledJobs.forEach(job => {
+        const machineName = job.machineName || machineIdToNameMap[job.machineId] || `Machine ${job.machineId}`;
+        
+        if (!machineJobCounts[machineName]) {
+            machineJobCounts[machineName] = { scheduled: 0, inProgress: 0, completed: 0 };
+        }
+        switch (job.status) {
+            case 'SCHEDULED':
+                machineJobCounts[machineName].scheduled++;
+                break;
+            case 'IN_PROGRESS':
+                machineJobCounts[machineName].inProgress++;
+                break;
+            case 'COMPLETED':
+                machineJobCounts[machineName].completed++;
+                break;
+        }
+    });
+    const chartData: [string, number, number, number][] = Object.entries(machineJobCounts)
+        .map(([machineName, counts]) => [
+            machineName,
+            counts.scheduled,
+            counts.inProgress,
+            counts.completed
+        ]);
+    if (chartData.length === 0) {
+        chartData.push(['No Machines', 0, 0, 0]);
+    }
+    return chartData;
+  }
+  
   private showMessage(message: string): void {
     alert(message);
   }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import unical.demacs.rdm.persistence.enums.JobPriority;
 import unical.demacs.rdm.persistence.enums.JobStatus;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "jobs")
@@ -43,4 +44,6 @@ public class Job {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "machine_type_id", nullable = false)
     private MachineType requiredMachineType;
+
+    private LocalDateTime dueDate;
 }

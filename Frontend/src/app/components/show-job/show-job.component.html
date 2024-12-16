@@ -2,14 +2,14 @@
   <thead>
   <tr>
     <th>ID</th>
-    <th>Titolo</th>
-    <th>Descrizione</th>
-    <th>Durata</th>
-    <th>Priorità</th>
-    <th>Stato</th>
-    <th>Assegnatario</th>
-    <th>Tipo di Macchina Richiesta</th>
-    <th>Azioni</th>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Duration</th>
+    <th>Priority</th>
+    <th>Status</th>
+    <th>Assignee</th>
+    <th>Required Machine Type</th>
+    <th>Actions</th>
   </tr>
   </thead>
   <tbody>
@@ -23,9 +23,9 @@
     <td>{{ job.assignee }}</td>
     <td>{{ job.requiredMachineType }}</td>
     <td>
-      <button class="action-button" (click)="deleteJob(job)">Elimina</button>
+      <button class="action-button " (click)="deleteJob(job)">Delete</button>
     </td>
   </tr>
   </tbody>
 </table>
-<p *ngIf="!jobs || jobs.length === 0">Nessun job trovato.</p>
+<p *ngIf="!jobs || jobs.length === 0">No jobs found.</p>

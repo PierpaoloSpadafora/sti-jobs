@@ -1,10 +1,10 @@
-<div class="container mt-5">
-  <h2 class="text-center mb-4">Importa Job</h2>
-  <div class="card">
-    <div class="card-body">
+<div class="container mt-5 theme-background theme-text">
+  <h2 class="text-center mb-4">Import Job</h2>
+  <div class="card theme-background theme-text">
+    <div class="card-body ">
       <div class="d-flex justify-content-between mb-3 align-items-center">
         <button class="btn btn-secondary" routerLink="/create">
-          <i class="bi bi-arrow-left"></i> Indietro
+          <i class="bi bi-arrow-left"></i> Back
         </button>
 
         <button
@@ -12,7 +12,7 @@
           class="btn btn-warning"
           (click)="toggleJsonInput()"
         >
-          <i class="bi bi-code-slash"></i> Compila in JSON
+          <i class="bi bi-code-slash"></i> Compile in JSON
         </button>
 
         <button
@@ -20,13 +20,13 @@
           class="btn btn-warning"
           (click)="toggleJsonInput()"
         >
-          <i class="bi bi-ui-checks-grid"></i> Compila Form
+          <i class="bi bi-ui-checks-grid"></i> Compile Form
         </button>
       </div>
 
       <form *ngIf="!showJsonInput" #jobForm="ngForm" (ngSubmit)="submitJob(jobForm)">
-        <div class="mb-3">
-          <label for="title" class="form-label">Titolo</label>
+        <div class="mb-3 theme-background theme-text">
+          <label for="title" class="form-label">Title</label>
           <input
             id="title"
             class="form-control"
@@ -37,12 +37,12 @@
             [ngClass]="{'is-invalid': title.invalid && (title.dirty || title.touched)}"
           />
           <div class="invalid-feedback" *ngIf="title.invalid && (title.dirty || title.touched)">
-            Il campo Titolo è obbligatorio.
+            The Title field is required.
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="description" class="form-label">Descrizione</label>
+          <label for="description" class="form-label">Description</label>
           <textarea
             id="description"
             class="form-control"
@@ -53,7 +53,7 @@
         </div>
 
         <div class="mb-3">
-          <label for="status" class="form-label">Stato</label>
+          <label for="status" class="form-label">Status</label>
           <select
             id="status"
             class="form-select"
@@ -63,18 +63,18 @@
             #status="ngModel"
             [ngClass]="{'is-invalid': status.invalid && (status.dirty || status.touched)}"
           >
-            <option [ngValue]="undefined">Seleziona Stato</option>
+            <option [ngValue]="undefined">Select Status</option>
             <option *ngFor="let statusOption of statuses" [ngValue]="statusOption">
               {{ statusOption }}
             </option>
           </select>
           <div class="invalid-feedback" *ngIf="status.invalid && (status.dirty || status.touched)">
-            Seleziona uno Stato.
+            Select a Status.
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="priority" class="form-label">Priorità</label>
+          <label for="priority" class="form-label">Priority</label>
           <select
             id="priority"
             class="form-select"
@@ -84,18 +84,18 @@
             #priority="ngModel"
             [ngClass]="{'is-invalid': priority.invalid && (priority.dirty || priority.touched)}"
           >
-            <option [ngValue]="undefined">Seleziona Priorità</option>
+            <option [ngValue]="undefined">Select Priority</option>
             <option *ngFor="let priorityOption of priorities" [ngValue]="priorityOption">
               {{ priorityOption }}
             </option>
           </select>
           <div class="invalid-feedback" *ngIf="priority.invalid && (priority.dirty || priority.touched)">
-            Seleziona una Priorità.
+            Select a Priority.
           </div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Durata (HH:MM:SS)</label>
+          <label class="form-label">Duration (HH:MM:SS)</label>
           <div class="input-group">
             <input
               type="number"
@@ -103,7 +103,7 @@
               [(ngModel)]="durationHours"
               name="durationHours"
               min="0"
-              placeholder="Ore"
+              placeholder="Hours"
               required
               #durationHoursModel="ngModel"
               [ngClass]="{'is-invalid': durationHoursModel.invalid && (durationHoursModel.dirty || durationHoursModel.touched)}"
@@ -115,7 +115,7 @@
               name="durationMinutes"
               min="0"
               max="59"
-              placeholder="Minuti"
+              placeholder="Minutes"
               required
               #durationMinutesModel="ngModel"
               [ngClass]="{'is-invalid': durationMinutesModel.invalid && (durationMinutesModel.dirty || durationMinutesModel.touched)}"
@@ -127,19 +127,19 @@
               name="durationSeconds"
               min="0"
               max="59"
-              placeholder="Secondi"
+              placeholder="Seconds"
               required
               #durationSecondsModel="ngModel"
               [ngClass]="{'is-invalid': durationSecondsModel.invalid && (durationSecondsModel.dirty || durationSecondsModel.touched)}"
             />
           </div>
           <div class="invalid-feedback d-block" *ngIf="(durationHoursModel.invalid || durationMinutesModel.invalid || durationSecondsModel.invalid) && (durationHoursModel.dirty || durationMinutesModel.dirty || durationSecondsModel.dirty)">
-            Inserisci una durata valida.
+            Enter a valid duration.
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="machineType" class="form-label">Tipo Macchina Richiesto</label>
+          <label for="machineType" class="form-label">Required Machine Type</label>
           <select
             id="machineType"
             class="form-select"
@@ -149,7 +149,7 @@
             #machineType="ngModel"
             [ngClass]="{'is-invalid': machineType.invalid && (machineType.dirty || machineType.touched)}"
           >
-            <option [ngValue]="undefined">Seleziona Tipo Macchina</option>
+            <option [ngValue]="undefined">Select Machine Type</option>
             <option
               *ngFor="let type of machineTypes"
               [ngValue]="type.id"
@@ -158,15 +158,15 @@
             </option>
           </select>
           <div class="invalid-feedback" *ngIf="machineType.invalid && (machineType.dirty || machineType.touched)">
-            Seleziona un Tipo Macchina Richiesto.
+            Select a Required Machine Type.
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Invia</button>
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
       </form>
 
       <div *ngIf="showJsonInput">
-        <label for="jsonInput" class="form-label">Inserisci il JSON dei Job</label>
+        <label for="jsonInput" class="form-label">Enter Job JSON</label>
         <textarea
           id="jsonInput"
           class="form-control mb-3"
@@ -180,14 +180,14 @@
         <div *ngIf="jsonError" class="text-danger mb-3">
           {{ jsonError }}
         </div>
-        <small class="text-muted">Esempio di JSON atteso:</small>
+        <small class="text-muted">Expected JSON example:</small>
         <pre class="bg-light p-2">{{ jsonExample }}</pre>
         <button
           (click)="submitJob()"
           class="btn btn-primary w-100"
           [disabled]="jsonError || !jsonInputContent"
         >
-          Invia JSON
+          Submit JSON
         </button>
       </div>
     </div>

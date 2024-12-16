@@ -33,8 +33,8 @@ public class Machine {
     private MachineStatus status;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "type_id", nullable = false)
-    private MachineType type;
+    @JoinColumn(name = "machine_type_id", nullable = false)
+    private MachineType machine_type_id;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -51,5 +51,18 @@ public class Machine {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Machine{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", machine_type_id=" + machine_type_id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

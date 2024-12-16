@@ -119,7 +119,7 @@ public class JsonControllerTest {
                 .id(1L)
                 .name("Test Machine")
                 .description("Test Machine Description")
-                .type(machineType)
+                .machine_type_id(machineType)
                 .status(MachineStatus.AVAILABLE)
                 .build();
     }
@@ -186,7 +186,7 @@ public class JsonControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(machineTypes)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("MachineTypes imported successfully."));
+                .andExpect(jsonPath("$.message").value("MachineTypes importati con successo."));
 
         verify(machineTypeService, times(1)).createMachineType(any(MachineTypeDTO.class));
     }
@@ -202,7 +202,7 @@ public class JsonControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(machineTypes)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Error importing MachineTypes: Error importing MachineTypes"));
+                .andExpect(jsonPath("$.message").value("Errore durante l'importazione dei MachineTypes: Error importing MachineTypes"));
     }
 
     @Test
@@ -272,7 +272,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledPriority() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 
@@ -286,7 +286,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledDueDate() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 
@@ -300,7 +300,7 @@ public class JsonControllerTest {
 
     @Test
     void testExportJobScheduledDuration() throws Exception {
-        List<ScheduleDTO> schedules = Collections.singletonList(scheduleDTO);
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
 
         when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
 
@@ -310,5 +310,19 @@ public class JsonControllerTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(schedules)));
 
         verify(jsonService, times(1)).readScheduleFile("./data/job-scheduled-by-duration.json");
+    }
+
+    @Test
+    void testExportJobScheduledRO() throws Exception {
+        List<ScheduleWithMachineDTO> schedules = Collections.singletonList(new ScheduleWithMachineDTO());
+
+        when(jsonService.readScheduleFile(anyString())).thenReturn(schedules);
+
+        mockMvc.perform(get("/api/v1/json/export-job-scheduled-ro")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(schedules)));
+
+        verify(jsonService, times(1)).readScheduleFile("./data/job-scheduled-ro.json");
     }
 }

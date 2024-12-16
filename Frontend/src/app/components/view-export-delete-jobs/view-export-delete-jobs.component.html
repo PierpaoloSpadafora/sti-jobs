@@ -1,4 +1,4 @@
-<div class="jobs-container">
+<div class="jobs-container theme-background theme-text">
   <div class="table-responsive" *ngIf="jobs && jobs.length > 0">
     <table class="jobs-table">
       <thead>
@@ -31,7 +31,7 @@
         </td>
         <td>{{ getMachineTypeName(job.idMachineType) }}</td>
         <td class="actions-cell">
-          <button class="action-button" title="Export">
+          <button class="action-button" title="Export" (click)="exportJob(job)">
             <i class="fas fa-file-export"></i>
           </button>
           <button class="action-button edit" title="Edit" (click)="openEditDialog(job)">

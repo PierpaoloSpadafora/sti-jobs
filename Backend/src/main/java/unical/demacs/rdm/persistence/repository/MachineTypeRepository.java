@@ -8,6 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface MachineTypeRepository extends JpaRepository<MachineType, Long> {
-    Optional<MachineType> findByName(String name);
-    Optional<MachineType> findById(Long id);
 }

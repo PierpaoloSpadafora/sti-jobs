@@ -21,6 +21,7 @@ export interface Job {
     priority?: Job.PriorityEnum;
     duration?: number;
     requiredMachineType?: MachineType;
+    dueDate?: Date;
 }
 export namespace Job {
     export type StatusEnum = 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';

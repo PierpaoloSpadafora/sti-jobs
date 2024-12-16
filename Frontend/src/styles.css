@@ -5,15 +5,116 @@
 /* Font */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
+/* Tema Chiaro (valori predefiniti) */
+:root {
+  --background-color: #ffffff;
+  --different-background-color: #f8f9fa;
+  --text-color: #333333;
+  --primary-color: #cccccc;
+  --header-color: #2c3e50;
+  --border-color: #cccccc;
+  --hover-background-color: #dcdde1;
+}
+
+/* Tema Scuro */
+.dark-mode {
+  --background-color: #333333;
+  --different-background-color: #343a40;
+  --text-color: #ffffff;
+  --primary-color: #444444;
+  --header-color: #007bff;
+  --border-color: #444444;
+  --hover-background-color: #343a40;
+}
+
+.theme-background {
+  background-color: var(--background-color);
+}
+
+.theme-text {
+  color: var(--text-color);
+}
+
+.theme-primary {
+  color: var(--primary-color);
+}
+
+/* Scrollbar per i browser Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--background-color); /* Sfondo della scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-color); /* Colore del pollice della scrollbar */
+  border-radius: 5px;
+  border: 2px solid var(--background-color); /* Spazio interno tra il pollice e la track */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-color); /* Cambia colore al passaggio del mouse */
+}
+
+/* Scrollbar per Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--background-color);
+}
+
+label.form-label {
+  display: block; /* Etichette in linea verticale */
+  margin-bottom: 0.5rem; /* Spazio tra etichetta e input */
+  color: var(--text-color); /* Adatta al tema */
+}
+
+input.form-control,
+textarea.form-control {
+  background-color: var(--background-color); /* Sfondo basato sul tema */
+  color: var(--text-color); /* Testo basato sul tema */
+  border: 1px solid var(--border-color); /* Bordo basato sul tema */
+  border-radius: 4px; /* Mantieni lo stile standard */
+  padding: 0.5rem;
+  display: block; /* Fa sì che l'input sia sotto l'etichetta */
+  width: 100%; /* Assicura che l'input occupi l'intera larghezza */
+  margin-bottom: 1rem; /* Spazio tra i campi */
+}
+
+input.form-control:focus,
+textarea.form-control:focus {
+  background-color: var(--background-color); /* Mantieni il colore di sfondo */
+  color: var(--text-color); /* Mantieni il colore del testo */
+  border-color: var(--primary-color); /* Colore del bordo al focus */
+  box-shadow: 0 0 4px var(--primary-color); /* Glow per accessibilità */
+}
+
+input.form-control::placeholder,
+textarea.form-control::placeholder {
+  color: rgba(var(--text-color), 0.6); /* Placeholder con opacità */
+  opacity: 0.7; /* Controllo sull'opacità */
+}
+
+input.form-control:disabled,
+textarea.form-control:disabled {
+  background-color: var(--border-color); /* Sfondo disabilitato */
+  color: var(--text-color); /* Mantieni il testo leggibile */
+  opacity: 0.6; /* Indica visivamente che è disabilitato */
+}
+
 body {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+html, body {
+  height: 100%;
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
-  background-color: #fff;
   margin: 0;
   padding: 0;
 }
-
-html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

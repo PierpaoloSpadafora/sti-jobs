@@ -1,8 +1,8 @@
 <div *ngIf="isLoading" class="text-center p-4">
     Caricamento in corso...
 </div>
-  
-<div *ngIf="!isLoading" class="grid-container">  
+
+<div *ngIf="!isLoading" class="grid-container">
     <div class="grid-item">
       <google-chart
         *ngIf="pieChart.data.length > 0"
@@ -24,7 +24,7 @@
       </google-chart>
       <p *ngIf="barChart.data.length === 0">No data available for the bar chart.</p>
     </div>
-  
+
     <div class="grid-item">
       <google-chart
         *ngIf="statusChart.data.length > 0"
@@ -35,6 +35,31 @@
       </google-chart>
       <p *ngIf="statusChart.data.length === 0">No data available for the status chart.</p>
     </div>
-  
+    <div class="grid-item">
+      <div class="chart-controls">
+        <label for="scheduledJobType">Select Scheduled Job Type:</label>
+        <select
+          id="scheduledJobType"
+          [(ngModel)]="selectedScheduledJobType"
+          (change)="onScheduledJobTypeChange()"
+          class="form-control"
+        >
+          <option
+            *ngFor="let type of scheduledJobTypes"
+            [value]="type.value"
+          >
+            {{type.label}}
+          </option>
+        </select>
+      </div>
+      <google-chart
+      *ngIf="machineJobsChart.data.length > 0"
+      [type]="machineJobsChart.type"
+      [data]="machineJobsChart.data"
+      [columns]="machineJobsChart.columns"
+      [options]="machineJobsChart.options"
+      >
+      </google-chart>
+      <p *ngIf="machineJobsChart.data.length === 0">No data available for the machine jobs chart.</p>
+    </div>
   </div>
-  

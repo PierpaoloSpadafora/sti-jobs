@@ -16,7 +16,7 @@ export interface Machine {
     name?: string;
     description?: string;
     status?: Machine.StatusEnum;
-    type?: MachineType;
+    machineTypeId?: MachineType;
     createdAt?: Date;
     updatedAt?: Date;
 }

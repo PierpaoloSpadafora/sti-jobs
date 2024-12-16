@@ -1,4 +1,4 @@
-<div class="machines-container">
+<div class="machines-container theme-background theme-text">
   <div class="table-responsive" *ngIf="machines && machines.length > 0">
     <table class="machines-table">
       <thead>
@@ -27,7 +27,7 @@
         </td>
         <td>{{ getMachineTypeName(machine.typeId) }}</td>
         <td class="actions-cell">
-          <button class="action-button" title="Export">
+          <button class="action-button" title="Export" (click)="exportMachine(machine)">
             <i class="fas fa-file-export"></i>
           </button>
           <button class="action-button edit" title="Edit" (click)="openEditDialog(machine)">

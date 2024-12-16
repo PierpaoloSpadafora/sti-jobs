@@ -50,8 +50,13 @@ import {
   JobControllerService, JsonControllerService, MachineControllerService,
   MachineTypeControllerService,
   ScheduleControllerService,
-  UserControllerService
+  UserControllerService,
+  SchedulerEngineService
 } from "./generated-api";
+import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+import {ThemeService} from "./services/theme.service";
 
 @NgModule({
   declarations: [
@@ -74,6 +79,7 @@ import {
     EditJobDialogComponent,
     EditMachineTypesDialogComponent,
     EditMachineDialogComponent,
+    ThemeToggleComponent,
   ],
   imports: [
     BrowserModule,
@@ -105,14 +111,19 @@ import {
     MatDatepickerModule,
     MatNativeDateModule,
     GoogleChartsModule.forRoot(),
+    MatRadioGroup,
+    MatRadioButton,
+    MatProgressSpinner,
   ],
   providers: [
+    ThemeService,
     MachineTypeControllerService,
     UserControllerService,
     JobControllerService,
     ScheduleControllerService,
     JsonControllerService,
     MachineControllerService,
+    SchedulerEngineService,
     provideAnimationsAsync()],
   bootstrap: [AppComponent]
 })

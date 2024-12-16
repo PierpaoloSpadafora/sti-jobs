@@ -1,23 +1,23 @@
-<div class="page-container">
+<div class="page-container theme-background theme-text">
   <div class="page-header">
     <h1>Scheduled Jobs</h1>
     <div class="schedule-selector">
       <label for="scheduleType">Select scheduling type:</label>
-      <select id="scheduleType" [(ngModel)]="selectedScheduleType" (change)="onScheduleTypeChange()">
+      <select id="scheduleType" [(ngModel)]="newSelectedScheduleType" class="theme-background theme-text" (change)="onScheduleTypeChange()">
         <option *ngFor="let type of scheduleTypes" [value]="type.value">{{ type.label }}</option>
       </select>
     </div>
 
     <div class="days-selector">
-      <label for="daysPerPage">Giorni per pagina:</label>
-      <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" (change)="onDaysPerPageChange()">
+      <label for="daysPerPage">Days per page:</label>
+      <select id="daysPerPage" [(ngModel)]="selectedDaysPerPage" class="theme-background theme-text" (change)="onDaysPerPageChange()">
         <option *ngFor="let option of daysPerPageOptions" [value]="option">{{ option }}</option>
       </select>
     </div>
   </div>
 
-  <div class="content-container">
-    <div class="chart-wrapper">
+  <div class="content-container theme-background theme-text">
+    <div class="chart-wrapper theme-background theme-text">
       <div *ngIf="loading" class="loading-overlay">
         <div class="spinner"></div>
         <p>Loading data...</p>
@@ -32,36 +32,74 @@
         <div *ngIf="hasScheduledJobs">
           <div *ngFor="let date of visibleDates">
             <h2>{{ formatDate(date) }}</h2>
-            <div *ngFor="let machineTypeId of Array.from(schedulesByDateAndMachine.get(date)?.keys() || [])">
-              <h3>{{ machinesMap.get(machineTypeId) || 'Unknown Machine Type' }}</h3>
-              <table class="schedule-table">
-                <thead>
-                <tr>
-                  <th>Job Title</th>
-                  <th>Start Time</th>
-                  <th>Duration</th>
-                  <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr *ngFor="let schedule of schedulesByDateAndMachine.get(date)?.get(machineTypeId)">
-                  <td data-label="Job Title">{{ jobsMap.get(schedule.jobId || 0)?.title || 'Unknown Job' }}</td>
-                  <td data-label="Start Time">{{ schedule.startTime | date: 'shortTime' }}</td>
-                  <td data-label="Duration">{{ schedule.duration ? (schedule.duration / 3600) + ' ore' : 'N/A' }}</td>
-                  <td data-label="Status">{{ schedule.status }}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
+
+            <!-- Different layout based on schedule type -->
+            <ng-container *ngIf="selectedScheduleType === 'ALL'; else groupedView">
+              <div *ngFor="let machineTypeId of Array.from(schedulesByDateAndMachine.get(date)?.keys() || [])">
+                <h3>{{ machinesMap.get(machineTypeId) || 'Unknown Machine Type' }}</h3>
+                <table class="schedule-table">
+                  <thead>
+                    <tr>
+                      <th>Job Title</th>
+                      <th>Start Time</th>
+                      <th>Duration</th>
+                      <th>Due Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let schedule of schedulesByDateAndMachine.get(date)?.get(machineTypeId)">
+                      <td data-label="Job Title">{{ jobsMap.get(schedule.jobId || 0)?.title || 'Unknown Job' }}</td>
+                      <td data-label="Start Time">{{ schedule.startTime | date: 'shortTime' }}</td>
+                      <td data-label="Duration">{{ schedule.duration ? (schedule.duration / 3600) + ' ore' : 'N/A' }}</td>
+                      <td data-label="Due Date">{{ schedule.dueDate | date: 'short' }}</td>
+                      <td data-label="Status">{{ schedule.status }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
+
+            <ng-template #groupedView>
+              <div *ngFor="let machineType of getUniqueMachineTypes(date)">
+                <h3 class="machine-type-header">{{ machineType }}</h3>
+                <div *ngFor="let machineSchedules of getSchedulesForMachineType(date, machineType)">
+                  <h4 class="machine-header">{{ getMachineName(machineSchedules[0].machineId) }}</h4>
+                  <table class="schedule-table">
+                    <thead>
+                      <tr>
+                        <th>Job Title</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let schedule of machineSchedules">
+                        <td data-label="Job Title">{{ jobsMap.get(schedule.jobId || 0)?.title || 'Unknown Job' }}</td>
+                        <td data-label="Start Time">{{ schedule.startTime | date: 'shortTime' }}</td>
+                        <td data-label="Duration">{{ schedule.duration ? (schedule.duration / 3600) + ' ore' : 'N/A' }}</td>
+                        <td data-label="Due Date">{{ schedule.dueDate | date: 'short' }}</td>
+                        <td data-label="Status">{{ schedule.status }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </ng-template>
           </div>
 
           <div class="pagination-controls" *ngIf="paginatedDates.length > selectedDaysPerPage">
-            <button (click)="previousPage()" [disabled]="currentPage === 0">Indietro</button>
-            <span>Pagina {{ currentPage + 1 }} di {{ totalPages }}</span>
-            <button (click)="nextPage()" [disabled]="(currentPage + 1) * selectedDaysPerPage >= paginatedDates.length">Avanti</button>
+            <button (click)="previousPage()" [disabled]="currentPage === 0">Previous</button>
+            <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+            <button (click)="nextPage()" [disabled]="(currentPage + 1) * selectedDaysPerPage >= paginatedDates.length">Next</button>
           </div>
         </div>
       </div>
+    </div>
+    <div *ngIf="errorMessage" class="error-message">
+      <p>{{ errorMessage }}</p>
     </div>
   </div>
 </div>

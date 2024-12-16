@@ -11,16 +11,4 @@ import java.util.Optional;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
-    Optional<Job> findByTitle(String title);
-    List<Job> findByStatus(JobStatus status);
-    List<Job> findByAssignee_Id(String assigneeId);
-    List<Job> findByAssigneeEmail(String email);
-    List<Job> findByPriority(JobPriority priority);
-    List<Job> findByDurationGreaterThan(java.time.Duration duration);
-    List<Job> findByRequiredMachineType_Id(Long machineTypeId);
-    List<Job> findByPriorityAndStatus(JobPriority priority, JobStatus status);
-    List<Job> findByDurationBetween(java.time.Duration minDuration, java.time.Duration maxDuration);
-    List<Job> findByAssignee_IdAndPriority(String assigneeId, JobPriority priority);
-    List<Job> findByStatusAndRequiredMachineType_IdAndAssignee_Id(JobStatus status, Long machineTypeId, String assigneeId);
-    void deleteByRequiredMachineType_Id(Long machineTypeId);
 }

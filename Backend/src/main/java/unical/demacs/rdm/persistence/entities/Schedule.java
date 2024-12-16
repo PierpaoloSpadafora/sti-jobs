@@ -29,6 +29,10 @@ public class Schedule {
     @JoinColumn(name = "machine_type_id", nullable = false)
     private MachineType machineType;
 
+    @ManyToOne
+    @JoinColumn(name = "assigned_machine_id")
+    private Machine machine;
+
     @Column
     private LocalDateTime dueDate;
 
@@ -45,5 +49,19 @@ public class Schedule {
     @PrePersist
     protected void onCreate() {
         status = ScheduleStatus.SCHEDULED;
+    }
+
+    @Override
+    public String toString() {
+        return "Schedule{" +
+                "id=" + id +
+                ", job=" + job +
+                ", machineType=" + machineType +
+                ", machine=" + machine +
+                ", dueDate=" + dueDate +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", status=" + status +
+                '}';
     }
 }

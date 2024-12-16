@@ -26,32 +26,56 @@ public class MachineTypeServiceImpl implements IMachineTypeService {
     @Override
     public MachineType createMachineType(MachineTypeDTO machineTypeDTO) {
         logger.info("++++++START REQUEST++++++");
-        logger.info("Creating machine type with name: {}", machineTypeDTO.getName());
+        logger.info("Creating machine type");
         try {
             if (!rateLimiter.tryAcquire()) {
                 logger.warn("Rate limit exceeded for createMachineType");
                 throw new MachineException("Rate limit exceeded for createMachineType");
             }
-            Optional<MachineType> existingMachineType = machineTypeRepository.findByName(machineTypeDTO.getName());
-            if (existingMachineType.isPresent()) {
-                logger.error("Duplicate machine type name: {}", machineTypeDTO.getName());
-                throw new MachineException("Esiste già un Machine Type con questo nome.");
+            MachineType machineType = new MachineType();
+            machineType.setName(machineTypeDTO.getName());
+            machineType.setDescription(machineTypeDTO.getDescription());
+
+            if (machineTypeDTO.getId() != null) {
+                Optional<MachineType> existing = machineTypeRepository.findById(machineTypeDTO.getId());
+                if (existing.isPresent()) {
+                    return machineTypeRepository.save(machineType);
+                } else {
+                    machineType.setId(machineTypeDTO.getId());
+                    return machineTypeRepository.save(machineType);
+                }
+            } else {
+                return machineTypeRepository.save(machineType);
             }
-            MachineType machineType = MachineType.buildMachineType()
-                    .name(machineTypeDTO.getName())
-                    .description(machineTypeDTO.getDescription())
-                    .build();
-            machineTypeRepository.save(machineType);
-            logger.info("Machine type with name {} created successfully", machineTypeDTO.getName());
-            return machineType;
-        } catch (MachineException e) {
-            throw e;
-        } catch (DataIntegrityViolationException e) {
-            logger.error("Data integrity violation while creating machine type: {}", machineTypeDTO.getName(), e);
-            throw new MachineException("Esiste già un Machine Type con questo nome.");
         } catch (Exception e) {
-            logger.error("Error creating machine type with name: {}", machineTypeDTO.getName(), e);
-            throw new MachineException("Errore nella creazione del Machine Type.");
+            logger.error("Error creating machine type", e);
+            throw new MachineException("Error creating machine type");
+        } finally {
+            logger.info("++++++END REQUEST++++++");
+        }
+    }
+
+    @Override
+    public MachineType updateMachineType(Long id, MachineTypeDTO machineTypeDTO) {
+        logger.info("++++++START REQUEST++++++");
+        logger.info("Updating machine type with id: " + id);
+        try {
+            if (!rateLimiter.tryAcquire()) {
+                logger.warn("Rate limit exceeded for updateMachineType");
+                throw new MachineException("Rate limit exceeded for updateMachineType");
+            }
+            Optional<MachineType> existingOpt = machineTypeRepository.findById(id);
+            if (existingOpt.isEmpty()) {
+                logger.error("Machine type with id {} not found", id);
+                throw new MachineException("Machine type not found");
+            }
+            MachineType existing = existingOpt.get();
+            existing.setName(machineTypeDTO.getName());
+            existing.setDescription(machineTypeDTO.getDescription());
+            return machineTypeRepository.save(existing);
+        } catch (Exception e) {
+            logger.error("Error updating machine type with id: {}", id, e);
+            throw new MachineException("Error updating machine type");
         } finally {
             logger.info("++++++END REQUEST++++++");
         }
@@ -128,31 +152,4 @@ public class MachineTypeServiceImpl implements IMachineTypeService {
         }
     }
 
-    @Override
-    public MachineType updateMachineType(Long id, MachineTypeDTO machineTypeDTO) {
-        logger.info("++++++START REQUEST++++++");
-        logger.info("Updating machine type with id: " + id);
-        try {
-            if (!rateLimiter.tryAcquire()) {
-                logger.warn("Rate limit exceeded for updateMachineType");
-                throw new MachineException("Rate limit exceeded for updateMachineType");
-            }
-            Optional<MachineType> machineType = machineTypeRepository.findById(id);
-            if(machineType.isEmpty()){
-                logger.error("Machine type with id {} not found", id);
-                throw new MachineException("Machine type not found");
-            }
-            machineType.get().setName(machineTypeDTO.getName());
-            machineType.get().setDescription(machineTypeDTO.getDescription());
-            machineTypeRepository.save(machineType.get());
-            logger.info("Machine type with id {} updated successfully", id);
-            return machineType.get();
-        } catch (Exception e) {
-            logger.error("Error updating machine type with id: {}", id, e);
-            throw new MachineException("Error updating machine type");
-        }
-        finally {
-            logger.info("++++++END REQUEST++++++");
-        }
-    }
 }

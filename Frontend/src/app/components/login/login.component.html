@@ -1,34 +1,34 @@
-<div class="login-container">
+<div class="login-container theme-background theme-text">
   <div class="login-card">
-    
-    <h2 class="login-title">Accedi a STI JOBS</h2>
-    
+
+    <h2 class="login-title">Login to STI JOBS</h2>
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <label for="email" class="form-label">Email aziendale</label>
+      <label for="email" class="form-label">Company Email</label>
       <div class="form-group">
         <div class="input-group">
           <span class="input-group-text">
             <i class="bi bi-envelope"></i>
           </span>
-          <input 
-            type="email" 
+          <input
+            type="email"
             class="form-control"
             id="email"
             formControlName="email"
-            placeholder="nome@azienda.com"
+            placeholder="name@company.com"
             [ngClass]="{'is-invalid': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}">
         </div>
         <div class="invalid-feedback" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-          Inserisci un'email valida
+          Please enter a valid email
         </div>
       </div>
-      
-      <button 
-        type="submit" 
-        class="btn btn-primary" 
+
+      <button
+        type="submit"
+        class="btn btn-primary"
         [disabled]="!loginForm.valid || isLoading">
         <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
-        {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
+        {{ isLoading ? 'Logging in...' : 'Login' }}
       </button>
     </form>
   </div>

@@ -1,6 +1,6 @@
 [
   {
-    "name": "Torno Meccanico",
+    "name": "Tornio Meccanico",
     "description": "Macchina utensile utilizzata per la lavorazione di materiali metallici e plastici mediante rotazione dell'opera."
   },
   {
@@ -22,21 +22,5 @@
   {
     "name": "Pialla Automatica",
     "description": "Macchina utilizzata per livellare e rifinire superfici di legno, garantendo uniformità e finitura di alta qualità."
-  },
-  {
-    "name": "Sega a Nastro Industriale",
-    "description": "Sega robusta utilizzata per tagliare grandi quantità di legno, metallo o plastica con precisione e velocità."
-  },
-  {
-    "name": "Macchina per Stampaggio a Iniezione",
-    "description": "Macchina utilizzata per produrre parti in plastica tramite il processo di stampaggio a iniezione ad alta efficienza."
-  },
-  {
-    "name": "Compattatore Vibroassiale",
-    "description": "Macchina utilizzata per compattare materiali granulari e sabbie in modo uniforme e consistente."
-  },
-  {
-    "name": "Miscelatore Industriale",
-    "description": "Macchina utilizzata per mescolare materiali in polvere o liquidi in grandi quantità, garantendo un'omogeneità perfetta."
   }
 ]

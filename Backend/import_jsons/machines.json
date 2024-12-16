@@ -1,7 +1,13 @@
 [
   {
-    "name": "Torno Meccanico TM-400",
+    "name": "Tornio Meccanico TM-400",
     "description": "Torno meccanico di ultima generazione per lavorazioni precise su acciaio e leghe leggere.",
+    "status": "AVAILABLE",
+    "typeId": 1
+  },
+  {
+    "name": "Tornio Meccanico TM-401",
+    "description": "Torno meccanico con maggiore capacità di carico per componenti di grandi dimensioni.",
     "status": "AVAILABLE",
     "typeId": 1
   },
@@ -12,51 +18,57 @@
     "typeId": 2
   },
   {
-    "name": "Sega a Nastro Industriale SN-600",
-    "description": "Sega a nastro robusta con lama ad alta resistenza per tagli rapidi e precisi su legno e metallo.",
+    "name": "Fresatrice CNC FC-501",
+    "description": "Fresatrice CNC con capacità di lavorazione multi-materiale e interfaccia avanzata.",
     "status": "AVAILABLE",
-    "typeId": 3
-  },
-  {
-    "name": "Stampatrice a Iniezione SI-700",
-    "description": "Macchina per stampaggio a iniezione ad alta efficienza con capacità di 700 tonnellate.",
-    "status": "MAINTENANCE",
-    "typeId": 4
+    "typeId": 2
   },
   {
     "name": "Trapano a Colonna TC-800",
     "description": "Trapano a colonna avanzato con sistema di misurazione automatica per forature precise in materiali duri.",
     "status": "AVAILABLE",
-    "typeId": 5
+    "typeId": 3
+  },
+  {
+    "name": "Trapano a Colonna TC-801",
+    "description": "Trapano a colonna con maggiore precisione e capacità di profondità per applicazioni industriali.",
+    "status": "AVAILABLE",
+    "typeId": 3
   },
   {
     "name": "Pressa Idraulica PI-900",
     "description": "Pressa idraulica ad alta capacità per operazioni di stampaggio e piegatura di lamiere metalliche.",
     "status": "BUSY",
-    "typeId": 6
+    "typeId": 4
+  },
+  {
+    "name": "Pressa Idraulica PI-901",
+    "description": "Pressa idraulica con controllo digitale per maggiore precisione nelle operazioni di lavorazione.",
+    "status": "AVAILABLE",
+    "typeId": 4
   },
   {
     "name": "Segatrice Laser SL-1000",
     "description": "Segatrice laser ad alta precisione con interfaccia utente intuitiva e controllo remoto.",
     "status": "AVAILABLE",
-    "typeId": 7
+    "typeId": 5
+  },
+  {
+    "name": "Segatrice Laser SL-1001",
+    "description": "Segatrice laser con capacità di taglio aumentata per materiali di maggior spessore.",
+    "status": "AVAILABLE",
+    "typeId": 5
   },
   {
     "name": "Pialla Automatica PA-1100",
     "description": "Pialla automatica per la rifinitura di superfici in legno, garantendo uniformità e qualità elevata.",
     "status": "BUSY",
-    "typeId": 8
+    "typeId": 6
   },
   {
-    "name": "Compattatore Vibroassiale CV-1200",
-    "description": "Compattatore vibroassiale con controllo elettronico per ottimizzare la densità dei materiali compattati.",
+    "name": "Pialla Automatica PA-1101",
+    "description": "Pialla automatica con capacità di lavorazione multi-dimensionale per progetti complessi.",
     "status": "AVAILABLE",
-    "typeId": 9
-  },
-  {
-    "name": "Miscelatore Industriale MI-1300",
-    "description": "Miscelatore industriale ad alta capacità per la miscelazione omogenea di materiali liquidi e solidi.",
-    "status": "AVAILABLE",
-    "typeId": 10
+    "typeId": 6
   }
 ]

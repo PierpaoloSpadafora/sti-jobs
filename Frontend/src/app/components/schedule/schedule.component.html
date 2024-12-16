@@ -1,14 +1,14 @@
-<div class="schedule-container">
-  <h2>Jobs da schedulare</h2>
+<div class="schedule-container theme-background theme-text">
+  <h2>All Jobs</h2>
   <div class="jobs-container">
     <div class="table-responsive">
       <table class="jobs-table">
         <thead>
         <tr>
-          <th>Titolo</th>
-          <th>Descrizione</th>
-          <th>Durata</th>
-          <th>Azioni</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Duration</th>
+          <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -19,7 +19,7 @@
           <td class="actions-cell">
             <button
               class="action-button edit"
-              title="Schedula"
+              title="Schedule"
               (click)="openScheduleDialog(job)"
             >
               <i class="fas fa-calendar-plus"></i>
@@ -36,32 +36,40 @@
         (click)="previousJobPage()"
         [disabled]="currentJobPage === 1"
       >
-        Precedente
+        Previous
       </button>
-      <span>Pagina {{ currentJobPage }} di {{ totalJobPages }}</span>
+      <span>Page {{ currentJobPage }} of {{ totalJobPages }}</span>
       <button
         class="pagination-button"
         (click)="nextJobPage()"
         [disabled]="currentJobPage === totalJobPages"
       >
-        Successiva
+        Next
       </button>
     </div>
   </div>
 
   <div class="schedules-container">
-    <h2>Elenco dei Job Schedulati</h2>
+    <div class="schedules-header">
+      <h2>Jobs Participating in Scheduling</h2>
+      <div class="schedule-actions">
+        <button class="button" (click)="openSchedulingDialog()">Start Scheduling</button>
+        <button class="button" (click)="downloadSchedules()">Download Scheduling</button>
+        <button class="button" (click)="triggerFileInput()">Import External Scheduling File</button>
+        <input type="file" style="display: none;" (change)="importSchedules($event)" accept=".json" id="hiddenFileInput"/>
+      </div>
+    </div>
     <div class="table-responsive">
       <table class="schedules-table">
         <thead>
         <tr>
           <th>Job ID</th>
-          <th>Tipo Macchina</th>
-          <th>Ora di Inizio</th>
-          <th>Data di Scadenza</th>
-          <th>Durata</th>
-          <th>Stato</th>
-          <th>Azioni</th>
+          <th>Machine Type</th>
+          <th>Start Time</th>
+          <th>Due Date</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -75,14 +83,14 @@
           <td class="actions-cell">
             <button
               class="action-button edit"
-              title="Modifica"
+              title="Edit"
               (click)="openEditScheduleDialog(schedule)"
             >
               <i class="fas fa-edit"></i>
             </button>
             <button
               class="action-button delete"
-              title="Elimina"
+              title="Delete"
               (click)="confirmDeleteSchedule(schedule)"
             >
               <i class="fas fa-trash"></i>
@@ -99,30 +107,55 @@
         (click)="previousSchedulePage()"
         [disabled]="currentSchedulePage === 1"
       >
-        Precedente
+        Previous
       </button>
       <span>
-        Pagina {{ currentSchedulePage }} di {{ totalSchedulePages }}
+        Page {{ currentSchedulePage }} of {{ totalSchedulePages }}
       </span>
       <button
         class="pagination-button"
         (click)="nextSchedulePage()"
         [disabled]="currentSchedulePage === totalSchedulePages"
       >
-        Successiva
+        Next
       </button>
     </div>
   </div>
 </div>
 
+
+<!-- Dialog to Select Scheduling Type -->
+<ng-template #schedulingDialog>
+  <h2 mat-dialog-title>Select Scheduling Type</h2>
+  <mat-dialog-content>
+    <mat-radio-group [(ngModel)]="selectedSchedulingType">
+      <mat-radio-button value="scheduleAll">Schedule All</mat-radio-button><br>
+      <mat-radio-button value="scheduleDueDate">Schedule by Due Date</mat-radio-button><br>
+      <mat-radio-button value="scheduleDuration">Schedule by Duration</mat-radio-button><br>
+      <mat-radio-button value="schedulePriority">Schedule by Priority</mat-radio-button><br>
+      <mat-radio-button value="scheduleFCFS">Schedule by First Come First Served</mat-radio-button>
+      <mat-radio-button value="scheduleRR">Schedule by Round Robin</mat-radio-button>
+    </mat-radio-group>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="schedulingDialogRef.close()">Cancel</button>
+    <button mat-button color="primary" (click)="startScheduling()">Start</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- Loading Indicator -->
+<div *ngIf="loading" class="loading-overlay">
+  <mat-spinner></mat-spinner>
+</div>
+
 <ng-template #scheduleDialog let-data>
-  <h2 mat-dialog-title>Schedula Job: {{ data.job.title }}</h2>
+  <h2 mat-dialog-title>Schedule Job: {{ data.job.title }}</h2>
   <mat-dialog-content [formGroup]="scheduleForm">
     <div class="form-field-row">
-      <!-- Data di inizio-->
+      <!-- Start Date -->
       <div class="form-field">
         <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Data di Inizio</mat-label>
+          <mat-label>Start Date</mat-label>
           <input
             matInput
             [matDatepicker]="startDatePicker"
@@ -136,10 +169,10 @@
           <mat-datepicker #startDatePicker></mat-datepicker>
         </mat-form-field>
       </div>
-      <!-- Data di Scadenza-->
+      <!-- Due Date -->
       <div class="form-field">
         <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Data di Scadenza</mat-label>
+          <mat-label>Due Date</mat-label>
           <input
             matInput
             [matDatepicker]="dueDatePicker"
@@ -156,12 +189,12 @@
     </div>
 
     <div class="form-field-row">
-      <!-- Ora di Inizio -->
+      <!-- Start Time -->
       <div class="form-field-row">
-        <!-- Select per le ore -->
+        <!-- Select Hours -->
         <div class="form-field">
           <mat-form-field appearance="fill" class="full-width hour">
-            <mat-label>Ore</mat-label>
+            <mat-label>Hours</mat-label>
             <mat-select
               formControlName="startHour"
               required
@@ -174,10 +207,10 @@
           </mat-form-field>
         </div>
 
-        <!-- Select per i minuti -->
+        <!-- Select Minutes -->
         <div class="form-field">
           <mat-form-field appearance="fill" class="full-width hour">
-            <mat-label>Minuti</mat-label>
+            <mat-label>Minutes</mat-label>
             <mat-select
               formControlName="startMinute"
               required
@@ -194,10 +227,10 @@
         </div>
       </div>
 
-      <!-- Ora di Fine -->
+      <!-- End Time -->
       <div class="form-field">
         <mat-form-field appearance="fill" class="full-width">
-          <mat-label>Ora di Fine</mat-label>
+          <mat-label>End Time</mat-label>
           <input
             matInput
             [value]="calculatedEndTime | date: 'shortTime'"
@@ -208,14 +241,14 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancella</button>
+    <button mat-button (click)="dialogRef.close()">Cancel</button>
     <button
       mat-button
       color="primary"
       [disabled]="scheduleForm.invalid"
       (click)="scheduleJob()"
     >
-      Schedula
+      Schedule
     </button>
   </mat-dialog-actions>
 </ng-template>

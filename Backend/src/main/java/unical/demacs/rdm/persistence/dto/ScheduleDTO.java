@@ -19,5 +19,7 @@ public class ScheduleDTO {
     private LocalDateTime startTime;
     private Long duration;
     private ScheduleStatus status;
+    private Long assignedMachineId;
+    private String assignedMachineName;
 
 }

@@ -51,12 +51,11 @@ public class MachineTypeServiceImplTest {
         testMachineTypeDTO = new MachineTypeDTO();
         testMachineTypeDTO.setName(TEST_NAME);
         testMachineTypeDTO.setDescription(TEST_DESCRIPTION);
-
-        when(rateLimiter.tryAcquire()).thenReturn(true);
     }
 
     @Test
     void testGetAllMachineTypes_Success() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findAll()).thenReturn(Arrays.asList(testMachineType));
 
         List<MachineType> machineTypes = machineTypeService.getAllMachineTypes();
@@ -77,6 +76,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testGetMachineTypeById_Found() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.of(testMachineType));
 
         Optional<MachineType> machineType = machineTypeService.getMachineTypeById(TEST_ID);
@@ -88,6 +88,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testGetMachineTypeById_NotFound() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.empty());
 
         assertThrows(MachineException.class, () -> machineTypeService.getMachineTypeById(TEST_ID));
@@ -103,6 +104,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testCreateMachineType_Success() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.save(any(MachineType.class))).thenReturn(testMachineType);
 
         MachineType createdMachineType = machineTypeService.createMachineType(testMachineTypeDTO);
@@ -123,6 +125,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testUpdateMachineType_Success() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.of(testMachineType));
         when(machineTypeRepository.save(any(MachineType.class))).thenReturn(testMachineType);
 
@@ -136,6 +139,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testUpdateMachineType_NotFound() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.empty());
 
         assertThrows(MachineException.class, () -> machineTypeService.updateMachineType(TEST_ID, testMachineTypeDTO));
@@ -153,6 +157,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testDeleteMachineType_Success() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.of(testMachineType));
         doNothing().when(machineTypeRepository).deleteById(TEST_ID);
 
@@ -163,6 +168,7 @@ public class MachineTypeServiceImplTest {
 
     @Test
     void testDeleteMachineType_NotFound() {
+        when(rateLimiter.tryAcquire()).thenReturn(true);
         when(machineTypeRepository.findById(eq(TEST_ID))).thenReturn(Optional.empty());
 
         assertThrows(MachineException.class, () -> machineTypeService.deleteMachineType(TEST_ID));

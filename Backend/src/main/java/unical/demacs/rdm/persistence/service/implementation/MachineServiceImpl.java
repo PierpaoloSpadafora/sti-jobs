@@ -51,7 +51,7 @@ public class MachineServiceImpl implements IMachineService {
             Machine machine = Machine.machineBuilder()
                     .name(machineDTO.getName())
                     .description(machineDTO.getDescription() != null ? machineDTO.getDescription() : "")
-                    .type(machineType)
+                    .machine_type_id((machineType))
                     .build();
 
             machine = machineRepository.save(machine);
@@ -112,7 +112,7 @@ public class MachineServiceImpl implements IMachineService {
 
             machine.setName(machineDTO.getName());
             machine.setDescription(machineDTO.getDescription());
-            machine.setType(machineType);
+            machine.setMachine_type_id(machineType);
 
             machine = machineRepository.save(machine);
             logger.info("Machine with id {} updated successfully", id);

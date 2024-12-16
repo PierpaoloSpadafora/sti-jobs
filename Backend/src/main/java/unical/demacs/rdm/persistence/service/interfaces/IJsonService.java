@@ -1,9 +1,13 @@
 package unical.demacs.rdm.persistence.service.interfaces;
 
-import unical.demacs.rdm.persistence.dto.ScheduleDTO;
+
+import org.springframework.web.multipart.MultipartFile;
+import unical.demacs.rdm.persistence.dto.ScheduleWithMachineDTO;
 
 import java.util.List;
 
 public interface IJsonService {
-    public List<ScheduleDTO> readScheduleFile(String fileName);
+    public List<ScheduleWithMachineDTO> readScheduleFile(String fileName);
+    void importSchedules(MultipartFile file);
+
 }

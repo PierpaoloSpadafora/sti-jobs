@@ -51,11 +51,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   private transformMachineTypes(dtos: MachineTypeDTO[]): MachineType[] {
-    return dtos.filter(dto =>
-      dto.id != null &&
-      dto.name != null &&
-      dto.description != null
-    ).map(dto => ({
+    return dtos.map(dto => ({
       id: dto.id as number,
       name: dto.name as string,
       description: dto.description as string
@@ -63,12 +59,7 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   private transformMachines(dtos: MachineDTO[]): Machine[] {
-    return dtos.filter(dto =>
-      dto.id != null &&
-      dto.name != null &&
-      dto.status != null &&
-      dto.typeId != null
-    ).map(dto => ({
+    return dtos.map(dto => ({
       id: dto.id as number,
       name: dto.name as string,
       status: dto.status as string,
@@ -80,6 +71,8 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
   }
 
   getMachineTypeName(typeId: number): string {
+    console.log('typeId:', typeId);
+    console.log(this.machineTypes);
     const machineType = this.machineTypes.find(type => type.id === typeId);
     return machineType ? machineType.name : 'Unknown Type';
   }
@@ -105,14 +98,14 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
     }
 
     Swal.fire({
-      title: 'Sei sicuro?',
-      text: `Vuoi eliminare la macchina "${machine.name}"?`,
+      title: 'Are you sure?',
+      text: `Do you want to delete the machine "${machine.name}"?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Sì, elimina!',
-      cancelButtonText: 'Annulla'
+      confirmButtonText: 'Yes, delete!',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.isLoading = true;
@@ -120,8 +113,8 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
           next: () => {
             this.machines = this.machines.filter(m => m.id !== id);
             Swal.fire(
-              'Eliminato!',
-              `La macchina "${machine.name}" è stata eliminata.`,
+              'Deleted!',
+              `The machine "${machine.name}" has been deleted.`,
               'success'
             );
             this.isLoading = false;
@@ -131,14 +124,14 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
             this.isLoading = false;
             if (error.status === 404) {
               Swal.fire(
-                'Errore!',
-                'Macchina non trovata. Potrebbe essere già stata eliminata.',
+                'Error!',
+                'Machine not found. It might have already been deleted.',
                 'error'
               );
             } else {
               Swal.fire(
                 'Errore!',
-                'Non è stato possibile eliminare la macchina. Per favore, riprova più tardi.',
+                'Could not delete the machine. Please try again later.',
                 'error'
               );
             }
@@ -183,5 +176,21 @@ export class ViewExportDeleteMachinesComponent implements OnInit {
       horizontalPosition: 'right',
       verticalPosition: 'top'
     });
+  }
+
+  exportMachine(machine: Machine): void {
+    const enrichedMachine = {
+      ...machine,
+      machineTypeName: this.getMachineTypeName(machine.typeId)
+    };
+    const jsonContent = JSON.stringify(enrichedMachine, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `machine_${machine.id}_export.json`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+    this.showMessage(`Machine ${machine.id} exported successfully`);
   }
 }

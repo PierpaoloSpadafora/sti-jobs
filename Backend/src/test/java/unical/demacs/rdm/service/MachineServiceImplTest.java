@@ -57,7 +57,7 @@ public class MachineServiceImplTest {
                 .id(TEST_ID)
                 .name(TEST_NAME)
                 .description(TEST_DESCRIPTION)
-                .type(testMachineType)
+                .machine_type_id(testMachineType)
                 .build();
 
         testMachineDTO = new MachineDTO();

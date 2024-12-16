@@ -1,10 +1,10 @@
-<div class="container mt-5">
-  <h2 class="text-center mb-4">Importa Machine Type</h2>
-  <div class="card">
+<div class="container mt-5 theme-background theme-text">
+  <h2 class="text-center mb-4">Import Machine Type</h2>
+  <div class="card theme-background theme-text">
     <div class="card-body">
       <div class="d-flex justify-content-between mb-3 align-items-center">
         <button class="btn btn-secondary" routerLink="/create">
-          <i class="bi bi-arrow-left"></i> Indietro
+          <i class="bi bi-arrow-left"></i> Back
         </button>
 
         <button
@@ -12,7 +12,7 @@
           class="btn btn-warning"
           (click)="toggleJsonInput()"
         >
-          <i class="bi bi-code-slash"></i> Compila in JSON
+          <i class="bi bi-code-slash"></i> Compile in JSON
         </button>
 
         <button
@@ -20,7 +20,7 @@
           class="btn btn-warning"
           (click)="toggleJsonInput()"
         >
-          <i class="bi bi-ui-checks-grid"></i> Compila Form
+          <i class="bi bi-ui-checks-grid"></i> Compile Form
         </button>
       </div>
 
@@ -31,10 +31,10 @@
         novalidate
       >
         <div class="mb-3">
-          <label for="name" class="form-label">Nome</label>
+          <label for="name" class="form-label">Name</label>
           <input
+            class="form control theme-background theme-text rounded"
             id="name"
-            class="form-control"
             [(ngModel)]="machineType.name"
             name="name"
             required
@@ -45,26 +45,26 @@
             class="invalid-feedback"
             *ngIf="name.invalid && (name.dirty || name.touched)"
           >
-            Il campo Nome è obbligatorio.
+            The Name field is required.
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="description" class="form-label">Descrizione</label>
+          <label for="description" class="form-label">Description</label>
           <textarea
             id="description"
-            class="form-control"
+            class="form-control theme-background theme-text"
             [(ngModel)]="machineType.description"
             name="description"
             #description="ngModel"
           ></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Invia</button>
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
       </form>
 
       <div *ngIf="showJsonInput">
-        <label for="jsonInput" class="form-label">Inserisci il JSON dei Machine Types</label>
+        <label for="jsonInput" class="form-label">Enter Machine Types JSON</label>
         <textarea
           id="jsonInput"
           class="form-control mb-3"
@@ -79,16 +79,16 @@
           class="invalid-feedback"
           *ngIf="jsonInput.invalid && (jsonInput.dirty || jsonInput.touched)"
         >
-          Il campo JSON è obbligatorio.
+          The JSON field is required.
         </div>
-        <small class="text-muted">Esempio di JSON atteso:</small>
-        <pre class="bg-light p-2">{{ jsonExample }}</pre>
+        <small id="json-example-label" class="text-muted">Expected JSON example:</small>
+        <pre id="json-example" class="bg-light p-2">{{ jsonExample }}</pre>
         <button
           (click)="submitMachineType()"
           class="btn btn-primary w-100"
           [disabled]="!jsonInputContent || jsonError"
         >
-          Invia JSON
+          Submit JSON
         </button>
       </div>
     </div>
