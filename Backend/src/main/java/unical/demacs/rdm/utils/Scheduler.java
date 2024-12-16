@@ -460,4 +460,20 @@ public class Scheduler {
                 })
                 .collect(Collectors.toList());
 
-        String fileName = "./data/job-scheduled-by-" + type + ".json";        File dataDir = new File("./data");        if (!dataDir.exists() && !dataDir.mkdirs()) {            log.error("Failed to create directory: {}", dataDir.getAbsolutePath());            throw new RuntimeException("Unable to create data directory");        }        try {            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), scheduleDTOs);            log.info("Successfully saved {} schedules to {}", schedules.size(), fileName);        } catch (IOException e) {            log.error("Failed to write schedule to file: {}", fileName, e);            throw new RuntimeException("Failed to save schedule to file", e);        }    }}
+        String fileName = "./data/job-scheduled-by-" + type + ".json";
+        File dataDir = new File("./data");
+
+        if (!dataDir.exists() && !dataDir.mkdirs()) {
+            log.error("Failed to create directory: {}", dataDir.getAbsolutePath());
+            throw new RuntimeException("Unable to create data directory");
+        }
+
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(fileName), scheduleDTOs);
+            log.info("Successfully saved {} schedules to {}", schedules.size(), fileName);
+        } catch (IOException e) {
+            log.error("Failed to write schedule to file: {}", fileName, e);
+            throw new RuntimeException("Failed to save schedule to file", e);
+        }
+    }
+}
