@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface MachineTypeRepository extends JpaRepository<MachineType, Long> {
-    Optional<MachineType> findById(Long id);
 }
